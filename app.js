@@ -12,7 +12,7 @@ const message = $("message");
 
 const REFRESH_MS = 120000;
 
-const state = { matches: [], status: "all", league: "all", query: "", req: 0 };
+const state = { matches: [], status: "all", league: "all", leagueKey: "all", query: "", req: 0 };
 
 /* ---------- Statuts ---------- */
 const LIVE = ["1H", "2H", "HT", "ET", "BT", "P", "LIVE", "INT", "SUSP"];
@@ -251,13 +251,16 @@ function renderHero() {
     </div>`;
 }
 
-/* ---------- Liste complète ---------- */
+/* ---------- Données affichées ---------- */
+const byRankThenTime = (a, b) => (leagueRank(a) - leagueRank(b)) || ((a.timestamp || 0) - (b.timestamp || 0));
+
 function visibleMatches() {
   const lg = LEAGUES.find(l => l.id === state.league);
   const q = state.query.trim().toLowerCase();
   return state.matches
     .filter(m => state.status === "all" || categoryOf(m) === state.status)
     .filter(m => state.league === "all" || (lg && lg.test(m)))
+    .filter(m => state.leagueKey === "all" || `${m.league}|${m.country}` === state.leagueKey)
     .filter(m => !q || `${m.home} ${m.away} ${m.league} ${m.country}`.toLowerCase().includes(q))
     .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 }
@@ -275,15 +278,64 @@ function leagueSection(key, list) {
     </section>`;
 }
 
-function render() {
-  const list = visibleMatches();
-  $("matchCount").textContent = `${list.length} match${list.length === 1 ? "" : "es"}`;
+/* ---------- Pages ---------- */
+const currentView = () => {
+  const v = (location.hash || "#home").slice(1);
+  return ["home", "live", "matches"].includes(v) ? v : "home";
+};
+
+/* Liste déroulante : TOUS les championnats présents ce jour-là */
+function renderSelect() {
+  const sel = $("leagueSelect");
+  const counts = new Map();
+  state.matches.forEach(m => {
+    const k = `${m.league}|${m.country}`;
+    counts.set(k, (counts.get(k) || 0) + 1);
+  });
+  const items = [...counts.entries()].map(([k, n]) => {
+    const [l, c] = k.split("|");
+    return { k, l, c, n };
+  }).sort((a, b) => (a.c || "").localeCompare(b.c || "") || a.l.localeCompare(b.l));
+
+  sel.innerHTML = `<option value="all">All competitions (${items.length})</option>` +
+    items.map(i => `<option value="${esc(i.k)}">${esc(i.c || "World")} — ${esc(i.l)} (${i.n})</option>`).join("");
+
+  if (counts.has(state.leagueKey)) sel.value = state.leagueKey;
+  else { state.leagueKey = "all"; sel.value = "all"; }
+}
+
+function renderHome() {
+  const all = state.matches;
+  const live = all.filter(m => categoryOf(m) === "live").sort(byRankThenTime);
+  const done = all.filter(m => categoryOf(m) === "finished")
+    .sort((a, b) => (leagueRank(a) - leagueRank(b)) || ((b.timestamp || 0) - (a.timestamp || 0)));
+  const soon = all.filter(m => categoryOf(m) === "upcoming").sort(byRankThenTime);
 
   renderHero();
+  $("homeEmpty").hidden = all.length > 0;
 
-  const live = list.filter(m => categoryOf(m) === "live");
-  $("live").hidden = live.length === 0;
+  $("homeLive").hidden = !live.length;
+  $("homeLiveGrid").innerHTML = live.slice(0, 12).map(card).join("");
+
+  $("resultsBlock").hidden = !done.length;
+  $("resultsGrid").innerHTML = done.slice(0, 12).map(card).join("");
+
+  $("soonBlock").hidden = !soon.length;
+  $("soonGrid").innerHTML = soon.slice(0, 12).map(card).join("");
+
+  $("matchCount").textContent = `${all.length} match${all.length === 1 ? "" : "es"} on this day`;
+}
+
+function renderLiveView() {
+  const live = state.matches.filter(m => categoryOf(m) === "live").sort(byRankThenTime);
   $("liveGrid").innerHTML = live.map(card).join("");
+  $("liveEmpty").hidden = live.length > 0;
+  $("matchCount").textContent = `${live.length} live match${live.length === 1 ? "" : "es"}`;
+}
+
+function renderMatchesView() {
+  const list = visibleMatches();
+  $("matchCount").textContent = `${list.length} match${list.length === 1 ? "" : "es"}`;
 
   if (!list.length) {
     $("leagues").innerHTML = `<div class="empty">No match found. Try another day or another filter.</div>`;
@@ -305,7 +357,8 @@ function render() {
 
   let html = major.map(([k, l]) => leagueSection(k, l)).join("");
 
-  if (state.league !== "all" || state.query) {
+  const filtering = state.league !== "all" || state.leagueKey !== "all" || state.query;
+  if (filtering) {
     html += others.map(([k, l]) => leagueSection(k, l)).join("");
   } else if (others.length) {
     const total = others.reduce((n, [, l]) => n + l.length, 0);
@@ -313,6 +366,22 @@ function render() {
       ${others.map(([k, l]) => leagueSection(k, l)).join("")}</details>`;
   }
   $("leagues").innerHTML = html;
+}
+
+function render() {
+  renderSelect();
+  const v = currentView();
+  if (v === "home") renderHome();
+  else if (v === "live") renderLiveView();
+  else renderMatchesView();
+}
+
+function setView() {
+  const v = currentView();
+  document.body.dataset.view = v;
+  document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("is-active", a.dataset.nav === v));
+  render();
+  window.scrollTo({ top: 0 });
 }
 
 /* ---------- Fenêtre de détails + « Où regarder » ---------- */
@@ -372,7 +441,6 @@ async function load(silent = false) {
   if (!silent) {
     message.innerHTML = `<span class="loader"></span>Loading matches…`;
     $("leagues").innerHTML = "";
-    $("live").hidden = true;
   }
 
   try {
@@ -388,7 +456,8 @@ async function load(silent = false) {
     state.matches = data.matches;
     message.textContent = "";
     render();
-    $("lastUpdated").textContent = "Updated " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const left = data.quota != null && data.quota !== "" ? ` · API calls left today: ${data.quota}` : "";
+    $("lastUpdated").textContent = "Updated " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) + left;
   } catch (err) {
     if (id !== state.req) return;
     if (silent && state.matches.length) {
@@ -397,6 +466,7 @@ async function load(silent = false) {
       state.matches = [];
       $("leagues").innerHTML = "";
       $("hero").hidden = true;
+      $("homeEmpty").hidden = true;
       $("matchCount").textContent = "0 matches";
       message.textContent = `Unable to load matches: ${err.message}`;
     }
@@ -419,7 +489,7 @@ document.addEventListener("click", e => {
     return;
   }
   const lg = e.target.closest("[data-league]");
-  if (lg) { state.league = lg.dataset.league; renderLeaguePills(); render(); return; }
+  if (lg) { state.league = lg.dataset.league; state.leagueKey = "all"; renderLeaguePills(); render(); return; }
 
   if (e.target.closest("[data-close]") || e.target === $("modal")) $("modal").close();
 });
@@ -427,7 +497,19 @@ document.addEventListener("click", e => {
 $("modal").addEventListener("close", () => { $("modalBody").innerHTML = ""; });
 
 searchInput.addEventListener("input", () => { state.query = searchInput.value; render(); });
-$("searchToggle").addEventListener("click", () => { searchInput.focus(); searchInput.scrollIntoView({ block: "center", behavior: "smooth" }); });
+$("searchToggle").addEventListener("click", () => {
+  if (currentView() !== "matches") location.hash = "#matches";
+  setTimeout(() => searchInput.focus(), 50);
+});
+
+$("leagueSelect").addEventListener("change", e => {
+  state.leagueKey = e.target.value;
+  state.league = "all";
+  renderLeaguePills();
+  render();
+});
+
+window.addEventListener("hashchange", setView);
 
 dateInput.addEventListener("change", () => load(false));
 $("prevDay").addEventListener("click", () => { dateInput.value = shiftDate(dateInput.value, -1); load(false); });
@@ -442,6 +524,7 @@ document.addEventListener("error", e => {
 /* ---------- Démarrage ---------- */
 dateInput.value = todayTunis();
 renderLeaguePills();
+setView();
 load(false);
 
 /* Actualisation automatique : seulement pour aujourd'hui, onglet visible */
