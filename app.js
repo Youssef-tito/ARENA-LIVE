@@ -14,7 +14,8 @@ const state = {
   isLoading: false,
   errorMessage: "",
   lastUpdated: "",
-  activeMatch: null
+  activeMatch: null,
+  activeMediaUrl: ""
 };
 
 const els = {
@@ -47,12 +48,15 @@ const els = {
   modalAwayName: document.getElementById("modalAwayName"),
   modalScore: document.getElementById("modalScore"),
   modalStatusBadge: document.getElementById("modalStatusBadge"),
+  playerModeBadge: document.getElementById("playerModeBadge"),
   playerPlaceholder: document.getElementById("playerPlaceholder"),
   playerPlaceholderTitle: document.getElementById("playerPlaceholderTitle"),
   playerPlaceholderDesc: document.getElementById("playerPlaceholderDesc"),
   modalActions: document.getElementById("modalActions"),
   matchStreamFrame: document.getElementById("matchStreamFrame"),
   matchReplayVideo: document.getElementById("matchReplayVideo"),
+  customMediaUrlInput: document.getElementById("customMediaUrlInput"),
+  loadCustomUrlBtn: document.getElementById("loadCustomUrlBtn"),
   modalExtraInfo: document.getElementById("modalExtraInfo"),
   toggleSourceBtn: document.getElementById("toggleSourceBtn")
 };
@@ -182,6 +186,34 @@ function isDirectVideoFile(url) {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
 }
 
+function getPrioritizedChannels(match) {
+  const channels = Array.isArray(window.ARENA_OFFICIAL_CHANNELS)
+    ? [...window.ARENA_OFFICIAL_CHANNELS]
+    : [];
+
+  const league = String(match?.league || "").toLowerCase();
+  const country = String(match?.country || "").toLowerCase();
+
+  let preferredName = "";
+  if (country.includes("tunisia") || league.includes("tunisia")) {
+    preferredName = "Diwan Sport Official";
+  } else if (league.includes("champions league") || league.includes("europa league") || league.includes("uefa")) {
+    preferredName = "UEFA Official";
+  } else if (league.includes("world cup") || league.includes("fifa")) {
+    preferredName = "FIFA Official";
+  } else if (league.includes("ligue 1") || league.includes("premier league") || league.includes("la liga")) {
+    preferredName = "beIN SPORTS Official";
+  }
+
+  if (!preferredName) return channels;
+
+  return channels.sort((a, b) => {
+    if (a.name === preferredName) return -1;
+    if (b.name === preferredName) return 1;
+    return 0;
+  });
+}
+
 function getFilteredMatches(excludeCompetition = false) {
   const q = state.searchQuery.trim().toLowerCase();
 
@@ -279,10 +311,53 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function playMediaUrl(rawUrl, sourceLabel = "Media") {
+  const url = String(rawUrl || "").trim();
+  const match = state.activeMatch;
+  const isFinished = match && getStatusCategory(match.status) === "finished";
+  const replayVideoEl = els.matchReplayVideo;
+
+  state.activeMediaUrl = url;
+
+  els.matchStreamFrame.classList.add("hidden");
+  els.matchStreamFrame.src = "";
+  if (replayVideoEl) {
+    replayVideoEl.pause();
+    replayVideoEl.removeAttribute("src");
+    replayVideoEl.classList.add("hidden");
+  }
+
+  if (!url) {
+    els.playerPlaceholder.classList.remove("hidden");
+    els.playerPlaceholderTitle.textContent = isFinished
+      ? "No recorded match video attached yet"
+      : "No video source attached to this fixture";
+    els.playerPlaceholderDesc.textContent = isFinished
+      ? "This match has finished. Attach a recorded video/embed URL in window.ARENA_REPLAYS, paste a video URL below to play it, or open full match replay / highlights search."
+      : "Attach a stream or replay URL in config.js, paste a URL below to test in player, or use external/official sources.";
+    els.modalExtraInfo.textContent = `Match ID: ${match?.id ?? "-"} • Date: ${state.selectedDate}`;
+    return;
+  }
+
+  if (isDirectVideoFile(url) && replayVideoEl) {
+    els.playerPlaceholder.classList.add("hidden");
+    replayVideoEl.classList.remove("hidden");
+    replayVideoEl.src = url;
+    replayVideoEl.load();
+    els.modalExtraInfo.textContent = `${sourceLabel} video loaded • Match ID: ${match?.id ?? "-"}`;
+  } else {
+    els.playerPlaceholder.classList.add("hidden");
+    els.matchStreamFrame.classList.remove("hidden");
+    els.matchStreamFrame.src = url;
+    els.modalExtraInfo.textContent = `${sourceLabel} embed loaded • Match ID: ${match?.id ?? "-"}`;
+  }
+}
+
 function openWatchModal(match) {
   state.activeMatch = match;
 
   const cat = getStatusCategory(match.status);
+  const isFinished = cat === "finished";
   const hasScore =
     match.homeGoals !== null &&
     match.homeGoals !== undefined &&
@@ -318,27 +393,44 @@ function openWatchModal(match) {
 
   els.modalScore.textContent = hasScore ? `${match.homeGoals} : ${match.awayGoals}` : "- : -";
   els.modalStatusBadge.className = `status-badge ${
-    cat === "live" ? "is-live" : cat === "finished" ? "is-finished" : "is-upcoming"
+    cat === "live" ? "is-live" : isFinished ? "is-finished" : "is-upcoming"
   }`;
   els.modalStatusBadge.textContent =
     cat === "live" && match.elapsed ? `${match.status} • ${match.elapsed}'` : (match.statusText || match.status || "NS");
 
+  els.playerModeBadge.textContent = isFinished ? "FINISHED MATCH • RECORDED REPLAY" : "LIVE & REPLAY CENTER";
+
   const replayUrl = resolveReplayUrl(match);
   const streamUrl = resolveStreamUrl(match);
-  const mediaUrl = replayUrl || streamUrl;
+  const initialMediaUrl = isFinished ? (replayUrl || streamUrl) : (streamUrl || replayUrl);
+  const initialLabel = isFinished ? "Recorded Replay" : "Live Stream";
+
+  if (els.customMediaUrlInput) {
+    els.customMediaUrlInput.value = initialMediaUrl || "";
+  }
 
   const searchQuery = encodeURIComponent(`${match.home || ""} vs ${match.away || ""} ${match.league || ""}`);
-  const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}+highlights`;
-  const webSearchUrl = `https://www.google.com/search?q=${searchQuery}+watch+live+broadcast`;
+  const replaySearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}+full+match+replay+highlights`;
+  const webSearchUrl = `https://www.google.com/search?q=${searchQuery}+watch+broadcast`;
 
   els.toggleSourceBtn.textContent = "Open in New Tab";
   els.toggleSourceBtn.onclick = () => {
-    window.open(mediaUrl || webSearchUrl, "_blank", "noopener,noreferrer");
+    const currentInput = els.customMediaUrlInput?.value.trim();
+    window.open(currentInput || state.activeMediaUrl || (isFinished ? replaySearchUrl : webSearchUrl), "_blank", "noopener,noreferrer");
   };
 
-  const officialChannels = Array.isArray(window.ARENA_OFFICIAL_CHANNELS)
-    ? window.ARENA_OFFICIAL_CHANNELS
+  const externalSources = Array.isArray(window.ARENA_EXTERNAL_SOURCES)
+    ? window.ARENA_EXTERNAL_SOURCES
     : [];
+  const officialChannels = getPrioritizedChannels(match);
+
+  const externalButtonsHtml = externalSources
+    .filter((src) => src && src.name && src.url)
+    .map(
+      (src) =>
+        `<a class="btn-secondary" href="${escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(src.name)}</a>`
+    )
+    .join("");
 
   const channelButtonsHtml = officialChannels
     .filter((ch) => ch && ch.name && ch.url)
@@ -349,37 +441,13 @@ function openWatchModal(match) {
     .join("");
 
   els.modalActions.innerHTML = `
-    <a class="btn-secondary" href="${youtubeSearchUrl}" target="_blank" rel="noopener noreferrer">YouTube Highlights</a>
-    <a class="btn-secondary" href="${webSearchUrl}" target="_blank" rel="noopener noreferrer">Official Coverage</a>
+    <a class="btn-secondary" href="${replaySearchUrl}" target="_blank" rel="noopener noreferrer">${isFinished ? "Recorded Replay & Highlights" : "YouTube Highlights"}</a>
+    <a class="btn-secondary" href="${webSearchUrl}" target="_blank" rel="noopener noreferrer">External & Official Sources</a>
+    ${externalButtonsHtml}
     ${channelButtonsHtml}
   `;
 
-  els.matchStreamFrame.classList.add("hidden");
-  els.matchStreamFrame.src = "";
-  if (els.matchReplayVideo) {
-    els.matchReplayVideo.pause();
-    els.matchReplayVideo.removeAttribute("src");
-    els.matchReplayVideo.classList.add("hidden");
-  }
-
-  if (mediaUrl && isDirectVideoFile(mediaUrl) && els.matchReplayVideo) {
-    els.playerPlaceholder.classList.add("hidden");
-    els.matchReplayVideo.classList.remove("hidden");
-    els.matchReplayVideo.src = mediaUrl;
-    els.matchReplayVideo.load();
-    els.modalExtraInfo.textContent = `Recorded video loaded • Match ID: ${match.id ?? "-"}`;
-  } else if (mediaUrl) {
-    els.playerPlaceholder.classList.add("hidden");
-    els.matchStreamFrame.classList.remove("hidden");
-    els.matchStreamFrame.src = mediaUrl;
-    els.modalExtraInfo.textContent = `${replayUrl ? "Replay" : "Stream"} embed loaded • Match ID: ${match.id ?? "-"}`;
-  } else {
-    els.playerPlaceholder.classList.remove("hidden");
-    els.playerPlaceholderTitle.textContent = "No video source attached for this match";
-    els.playerPlaceholderDesc.textContent =
-      "Add a stream or replay URL in config.js (window.ARENA_STREAMS / window.ARENA_REPLAYS) or use official links below.";
-    els.modalExtraInfo.textContent = `Match ID: ${match.id ?? "-"} • Date: ${state.selectedDate}`;
-  }
+  playMediaUrl(initialMediaUrl, initialLabel);
 
   els.watchModal.classList.remove("hidden");
   document.body.classList.add("modal-open");
@@ -387,6 +455,7 @@ function openWatchModal(match) {
 
 function closeWatchModal() {
   state.activeMatch = null;
+  state.activeMediaUrl = "";
   els.matchStreamFrame.src = "";
   els.matchStreamFrame.classList.add("hidden");
   if (els.matchReplayVideo) {
@@ -673,6 +742,18 @@ function bindEvents() {
     state.competitionFilter = e.target.value;
     renderMatches();
   });
+
+  if (els.loadCustomUrlBtn && els.customMediaUrlInput) {
+    els.loadCustomUrlBtn.addEventListener("click", () => {
+      playMediaUrl(els.customMediaUrlInput.value, "Custom URL");
+    });
+    els.customMediaUrlInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        playMediaUrl(els.customMediaUrlInput.value, "Custom URL");
+      }
+    });
+  }
 
   els.closeModalBtn.addEventListener("click", closeWatchModal);
   els.watchModal.addEventListener("click", (e) => {
