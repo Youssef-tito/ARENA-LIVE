@@ -144,33 +144,53 @@ function getCompetitionKey(match) {
   return `${country} — ${league}`;
 }
 
+function pickChannelUrl(match) {
+  const query = encodeURIComponent(
+    `${match?.home || ""} ${match?.away || ""} ${match?.league || ""}`.trim()
+  );
+  const league = String(match?.league || "").toLowerCase();
+  const country = String(match?.country || "").toLowerCase();
+
+  if (country.includes("england") || country.includes("uk") || country.includes("scotland")) {
+    return `https://www.bbc.co.uk/search?q=${query}`;
+  }
+  if (league.includes("champions league") || league.includes("europa league") || league.includes("uefa")) {
+    return `https://www.uefa.com/search/?q=${query}`;
+  }
+  if (league.includes("world cup") || league.includes("fifa")) {
+    return `https://www.fifa.com/en/search?q=${query}`;
+  }
+  return `https://www.youtube.com/results?search_query=${query}`;
+}
+
 function resolveAutomaticMedia(match) {
-  if (!match) return { url: "", label: "Stream" };
+  if (!match) return { url: "", label: "Stream", channelUrl: "" };
 
   const isFinished = getStatusCategory(match.status) === "finished";
   const pairKey = `${String(match.home || "").toLowerCase()} vs ${String(match.away || "").toLowerCase()}`;
   const idKey = match.id !== undefined && match.id !== null ? String(match.id) : "";
+  const channelUrl = pickChannelUrl(match);
 
   const directField = isFinished
     ? (match.replayUrl || match.streamUrl || match.embedUrl || "")
     : (match.streamUrl || match.embedUrl || match.replayUrl || "");
   if (typeof directField === "string" && directField.trim()) {
-    return { url: directField.trim(), label: isFinished ? "Replay" : "Live Stream" };
+    return { url: directField.trim(), label: isFinished ? "Replay" : "Live Stream", channelUrl };
   }
 
   const replayMap = window.ARENA_REPLAYS || {};
   const streamMap = window.ARENA_STREAMS || {};
 
   if (isFinished) {
-    if (idKey && replayMap[idKey]) return { url: String(replayMap[idKey]).trim(), label: "Replay" };
-    if (replayMap[pairKey]) return { url: String(replayMap[pairKey]).trim(), label: "Replay" };
-    if (idKey && streamMap[idKey]) return { url: String(streamMap[idKey]).trim(), label: "Stream" };
-    if (streamMap[pairKey]) return { url: String(streamMap[pairKey]).trim(), label: "Stream" };
+    if (idKey && replayMap[idKey]) return { url: String(replayMap[idKey]).trim(), label: "Replay", channelUrl };
+    if (replayMap[pairKey]) return { url: String(replayMap[pairKey]).trim(), label: "Replay", channelUrl };
+    if (idKey && streamMap[idKey]) return { url: String(streamMap[idKey]).trim(), label: "Stream", channelUrl };
+    if (streamMap[pairKey]) return { url: String(streamMap[pairKey]).trim(), label: "Stream", channelUrl };
   } else {
-    if (idKey && streamMap[idKey]) return { url: String(streamMap[idKey]).trim(), label: "Live Stream" };
-    if (streamMap[pairKey]) return { url: String(streamMap[pairKey]).trim(), label: "Live Stream" };
-    if (idKey && replayMap[idKey]) return { url: String(replayMap[idKey]).trim(), label: "Replay" };
-    if (replayMap[pairKey]) return { url: String(replayMap[pairKey]).trim(), label: "Replay" };
+    if (idKey && streamMap[idKey]) return { url: String(streamMap[idKey]).trim(), label: "Live Stream", channelUrl };
+    if (streamMap[pairKey]) return { url: String(streamMap[pairKey]).trim(), label: "Live Stream", channelUrl };
+    if (idKey && replayMap[idKey]) return { url: String(replayMap[idKey]).trim(), label: "Replay", channelUrl };
+    if (replayMap[pairKey]) return { url: String(replayMap[pairKey]).trim(), label: "Replay", channelUrl };
   }
 
   const rules = Array.isArray(window.ARENA_SOURCE_RULES) ? window.ARENA_SOURCE_RULES : [];
@@ -179,11 +199,11 @@ function resolveAutomaticMedia(match) {
   for (const rule of rules) {
     if (!rule || !rule.match || !rule.url) continue;
     if (haystack.includes(String(rule.match).toLowerCase())) {
-      return { url: String(rule.url).trim(), label: "Auto Source" };
+      return { url: String(rule.url).trim(), label: "Rule Source", channelUrl };
     }
   }
 
-  return { url: "", label: "Stream" };
+  return { url: "", label: "Stream", channelUrl };
 }
 
 function isDirectVideoFile(url) {
@@ -306,7 +326,7 @@ function playMediaUrl(rawUrl, sourceLabel = "Stream") {
     els.playerPlaceholder.classList.remove("hidden");
     els.playerPlaceholderTitle.textContent = "No stream available for this match yet";
     els.playerPlaceholderDesc.textContent =
-      "A stream or replay link has not been assigned to this fixture yet.";
+      "No direct video or embed URL is assigned to this fixture yet. Use Open Channel below to check global channels.";
     els.modalExtraInfo.textContent = `Match ID: ${match?.id ?? "-"} • Date: ${state.selectedDate}`;
     return;
   }
@@ -378,12 +398,13 @@ function openWatchModal(match) {
   els.playerModeBadge.textContent = isFinished ? "REPLAY" : "LIVE";
 
   const picked = resolveAutomaticMedia(match);
+  const targetUrl = picked.url || picked.channelUrl;
 
-  els.toggleSourceBtn.classList.toggle("hidden", !picked.url);
-  els.toggleSourceBtn.textContent = "Open in New Tab";
+  els.toggleSourceBtn.classList.toggle("hidden", !targetUrl);
+  els.toggleSourceBtn.textContent = picked.url ? "Open in New Tab" : "Open Channel";
   els.toggleSourceBtn.onclick = () => {
-    if (state.activeMediaUrl) {
-      window.open(state.activeMediaUrl, "_blank", "noopener,noreferrer");
+    if (targetUrl) {
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
     }
   };
 
