@@ -694,7 +694,7 @@ body.modal-open {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .modal-header {
@@ -812,7 +812,7 @@ body.modal-open {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  max-width: 520px;
+  max-width: 560px;
 }
 
 .player-badge {
@@ -844,6 +844,31 @@ body.modal-open {
   justify-content: center;
   gap: 10px;
   margin-top: 6px;
+}
+
+.custom-url-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-url-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+.custom-url-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .modal-footer-bar {
@@ -940,5 +965,10 @@ body.modal-open {
     width: 24px;
     height: 24px;
     font-size: 0.75rem;
+  }
+
+  .custom-url-bar {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
