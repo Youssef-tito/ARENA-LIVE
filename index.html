@@ -3,190 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080b12">
-  <meta name="description" content="ARENA LIVE - Your global football destination.">
-  <title>ARENA LIVE | Football Platform</title>
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="ARENA LIVE - Live scores and fixtures from every football league in the world.">
+  <title>ARENA LIVE | Football Matches</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<header class="topbar">
-  <a href="#home" class="brand">
-    <span class="brand-icon">A</span>
-    <span>ARENA<span class="brand-accent">LIVE</span></span>
-  </a>
-
-  <nav class="navigation">
-    <a href="#home" class="nav-link active">Home</a>
-    <a href="#tv" class="nav-link">Live TV</a>
-    <a href="#scores" class="nav-link">Scores</a>
+<header class="nav-wrap">
+  <nav class="nav" aria-label="Main">
+    <a href="#top" class="logo">ARENA<span>LIVE</span></a>
+    <span class="nav__sep"></span>
+    <a href="#top" class="nav__link is-active">Home</a>
+    <a href="#live" class="nav__link">Live <i class="dot"></i></a>
+    <a href="#matches" class="nav__link">Matches</a>
+    <span class="nav__sep"></span>
+    <button class="nav__icon" id="searchToggle" type="button" aria-label="Search">⌕</button>
   </nav>
-
-  <div class="world-label"><i class="pulse"></i> WORLD FOOTBALL</div>
 </header>
 
-<main>
+<main id="top">
 
-  <section class="hero" id="home">
-    <div class="hero-content">
-      <div class="eyebrow"><span class="eyebrow-line"></span> THE WORLD OF FOOTBALL</div>
+  <section class="hero" id="hero" aria-live="polite"></section>
 
-      <h1>FEEL THE<br><span>GAME.</span></h1>
+  <h1 class="page-title" id="matches"><span></span>Matches</h1>
 
-      <p>Your ultimate destination for football. Follow live scores, discover competitions and enjoy football coverage worldwide.</p>
-
-      <div class="hero-actions">
-        <a href="#tv" class="hero-button">WATCH LIVE <span>↗</span></a>
-        <a href="#scores" class="secondary-button">EXPLORE SCORES</a>
-      </div>
-
-      <div class="hero-stats">
-        <div><strong>GLOBAL</strong><small>Coverage</small></div>
-        <div><strong>LIVE</strong><small>Match center</small></div>
-        <div><strong>24/7</strong><small>Football world</small></div>
-      </div>
+  <div class="toolbar">
+    <div class="search" id="searchBox">
+      <input id="searchInput" type="search" placeholder="Search a team or a league…" autocomplete="off">
     </div>
 
-    <div class="hero-visual">
-      <div class="visual-glow"></div>
-      <div class="stadium-card">
-        <div class="stadium-top">
-          <span>ARENA LIVE</span>
-          <span class="stadium-live"><i></i> FOOTBALL</span>
-        </div>
-        <div class="stadium-ball">⚽</div>
-        <div class="stadium-bottom">
-          <span>THE GAME NEVER STOPS.</span>
-          <span>EST. 2026</span>
-        </div>
-      </div>
-      <div class="floating-tag">THE GLOBAL GAME</div>
+    <div class="datebar">
+      <button id="prevDay" class="round" type="button" aria-label="Previous day">‹</button>
+      <input type="date" id="matchDate" aria-label="Match date">
+      <button id="nextDay" class="round" type="button" aria-label="Next day">›</button>
+      <button id="todayBtn" class="pill" type="button">Today</button>
     </div>
+  </div>
+
+  <div class="pills" id="statusPills" role="group" aria-label="Status">
+    <button class="pill is-on" data-status="all" type="button">All</button>
+    <button class="pill" data-status="live" type="button">Live now</button>
+    <button class="pill" data-status="upcoming" type="button">Upcoming</button>
+    <button class="pill" data-status="finished" type="button">Finished</button>
+  </div>
+
+  <div class="pills pills--scroll" id="leaguePills" role="group" aria-label="Competitions"></div>
+
+  <div class="status-line">
+    <span id="matchCount">Loading…</span>
+    <span id="lastUpdated"></span>
+  </div>
+
+  <div id="message" class="message"></div>
+
+  <section id="live" class="block" hidden>
+    <h2 class="block__title">Live Now</h2>
+    <div class="grid" id="liveGrid"></div>
   </section>
 
-  <section class="tv-section" id="tv">
-    <div class="section-heading">
-      <div>
-        <div class="eyebrow"><span class="eyebrow-line"></span> ARENA BROADCAST</div>
-        <h2>LIVE <span>TV</span></h2>
-        <p class="section-description">Watch football through official broadcast sources.</p>
-      </div>
-      <div class="live-badge"><i></i> LIVE PLAYER</div>
-    </div>
-
-    <div class="tv-layout">
-      <div class="video-panel">
-        <div class="video-screen" id="videoScreen">
-          <div class="video-placeholder" id="videoPlaceholder">
-            <div class="play-symbol">▶</div>
-            <h3>ARENA LIVE TV</h3>
-            <p>Select an official broadcast source to start watching.</p>
-          </div>
-          <iframe
-            id="livePlayer"
-            title="ARENA LIVE video player"
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            allowfullscreen
-            referrerpolicy="strict-origin-when-cross-origin"
-            hidden>
-          </iframe>
-        </div>
-        <div class="video-footer">
-          <div>
-            <strong>ARENA BROADCAST</strong>
-            <small>Official video player</small>
-          </div>
-          <span class="secure-label">● SOURCE-BASED PLAYER</span>
-        </div>
-      </div>
-
-      <aside class="tv-sidebar">
-        <div class="sidebar-heading">BROADCAST SOURCE</div>
-        <p class="sidebar-description">Paste an official provider's embed link below.</p>
-        <label for="streamUrl">EMBED URL</label>
-        <input id="streamUrl" type="url" placeholder="https://provider.com/embed/..." autocomplete="url">
-        <button id="loadStream" class="watch-button">LOAD PLAYER ↗</button>
-        <div class="source-note">
-          <strong>Important</strong>
-          <p>Only use streams that you are authorized to watch or embed. Some providers block playback on external websites.</p>
-        </div>
-        <button id="clearStream" class="clear-button">Clear player</button>
-      </aside>
-    </div>
-  </section>
-
-  <section class="scores-section" id="scores">
-    <div class="section-heading">
-      <div>
-        <div class="eyebrow"><span class="eyebrow-line"></span> MATCH CENTER</div>
-        <h2>Football <span>Fixtures</span></h2>
-        <p class="section-description">Discover football matches from leagues around the world.</p>
-      </div>
-      <div class="match-counter">
-        <span class="counter-dot"></span>
-        <span id="matchCount">Loading...</span>
-      </div>
-    </div>
-
-    <div class="control-panel">
-      <div class="date-control">
-        <label for="matchDate">MATCH DATE</label>
-        <input type="date" id="matchDate">
-      </div>
-
-      <div class="filter-control">
-        <label for="matchFilter">MATCH STATUS</label>
-        <select id="matchFilter">
-          <option value="all">All matches</option>
-          <option value="live">Live now</option>
-          <option value="upcoming">Upcoming</option>
-          <option value="finished">Finished</option>
-        </select>
-      </div>
-
-      <button id="refreshButton" class="refresh-button">
-        ↻ Refresh scores
-      </button>
-    </div>
-
-    <div class="results-toolbar">
-      <span id="resultsTitle">ALL FIXTURES</span>
-      <span id="lastUpdated">Waiting for data...</span>
-    </div>
-
-    <div id="message" class="message">
-      <div class="loader"></div>
-      <span>Loading football fixtures...</span>
-    </div>
-
-    <div id="matchesContainer" class="matches-container"></div>
-  </section>
-
-  <section class="bottom-banner">
-    <div>
-      <span class="eyebrow">THE GLOBAL GAME</span>
-      <h2>Football connects <span>the world.</span></h2>
-    </div>
-    <div class="banner-mark">A<span>L</span></div>
-  </section>
+  <div id="leagues"></div>
 
 </main>
 
 <footer class="footer">
-  <a href="#home" class="brand footer-brand">
-    <span class="brand-icon">A</span>
-    <span>ARENA<span class="brand-accent">LIVE</span></span>
-  </a>
-  <p>© 2026 ARENA LIVE. ALL RIGHTS RESERVED.</p>
-  <span class="footer-status"><i></i> FOOTBALL NEVER STOPS</span>
+  <p>© 2026 ARENA LIVE. Scores and fixtures only. We do not host or stream any match: for viewing, we point you to the official broadcasters.</p>
 </footer>
 
+<dialog class="modal" id="modal" aria-labelledby="mTitle">
+  <div id="modalBody"></div>
+</dialog>
+
 <script src="./config.js"></script>
+<script src="./sources.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>
