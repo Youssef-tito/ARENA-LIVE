@@ -10,17 +10,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=2">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
-<body>
+<body data-view="home">
 
 <header class="nav-wrap">
   <nav class="nav" aria-label="Main">
-    <a href="#top" class="logo">ARENA<span>LIVE</span></a>
+    <a href="#home" class="logo">ARENA<span>LIVE</span></a>
     <span class="nav__sep"></span>
-    <a href="#top" class="nav__link is-active">Home</a>
-    <a href="#live" class="nav__link">Live <i class="dot"></i></a>
-    <a href="#matches" class="nav__link">Matches</a>
+    <a href="#home" class="nav__link" data-nav="home">Home</a>
+    <a href="#live" class="nav__link" data-nav="live">Live <i class="dot"></i></a>
+    <a href="#matches" class="nav__link" data-nav="matches">Matches</a>
     <span class="nav__sep"></span>
     <button class="nav__icon" id="searchToggle" type="button" aria-label="Search">⌕</button>
   </nav>
@@ -28,12 +28,18 @@
 
 <main id="top">
 
-  <section class="hero" id="hero" aria-live="polite"></section>
+  <!-- ===== HOME ===== -->
+  <section class="hero v-home" id="hero" aria-live="polite"></section>
 
-  <h1 class="page-title" id="matches"><span></span>Matches</h1>
+  <!-- ===== LIVE ===== -->
+  <h1 class="page-title v-live"><span></span>Live</h1>
 
+  <!-- ===== MATCHES ===== -->
+  <h1 class="page-title v-matches"><span></span>Matches</h1>
+
+  <!-- Barre de date (toutes les pages) -->
   <div class="toolbar">
-    <div class="search" id="searchBox">
+    <div class="search v-matches" id="searchBox">
       <input id="searchInput" type="search" placeholder="Search a team or a league…" autocomplete="off">
     </div>
 
@@ -45,14 +51,20 @@
     </div>
   </div>
 
-  <div class="pills" id="statusPills" role="group" aria-label="Status">
-    <button class="pill is-on" data-status="all" type="button">All</button>
-    <button class="pill" data-status="live" type="button">Live now</button>
-    <button class="pill" data-status="upcoming" type="button">Upcoming</button>
-    <button class="pill" data-status="finished" type="button">Finished</button>
-  </div>
+  <div class="v-matches">
+    <div class="pills" id="statusPills" role="group" aria-label="Status">
+      <button class="pill is-on" data-status="all" type="button">All</button>
+      <button class="pill" data-status="live" type="button">Live now</button>
+      <button class="pill" data-status="upcoming" type="button">Upcoming</button>
+      <button class="pill" data-status="finished" type="button">Finished</button>
+    </div>
 
-  <div class="pills pills--scroll" id="leaguePills" role="group" aria-label="Competitions"></div>
+    <div class="pills pills--scroll" id="leaguePills" role="group" aria-label="Competitions"></div>
+
+    <select id="leagueSelect" class="select" aria-label="All competitions of the day">
+      <option value="all">All competitions</option>
+    </select>
+  </div>
 
   <div class="status-line">
     <span id="matchCount">Loading…</span>
@@ -61,12 +73,35 @@
 
   <div id="message" class="message"></div>
 
-  <section id="live" class="block" hidden>
-    <h2 class="block__title">Live Now</h2>
-    <div class="grid" id="liveGrid"></div>
+  <!-- HOME : blocs -->
+  <div class="empty v-home" id="homeEmpty" hidden>No match found for this day. Try another date.</div>
+
+  <section class="block v-home" id="homeLive" hidden>
+    <h2 class="block__title"><i class="dot"></i> Live now</h2>
+    <div class="grid" id="homeLiveGrid"></div>
   </section>
 
-  <div id="leagues"></div>
+  <section class="block v-home" id="resultsBlock" hidden>
+    <h2 class="block__title">Results &amp; highlights</h2>
+    <div class="grid" id="resultsGrid"></div>
+  </section>
+
+  <section class="block v-home" id="soonBlock" hidden>
+    <h2 class="block__title">Coming up</h2>
+    <div class="grid" id="soonGrid"></div>
+  </section>
+
+  <!-- LIVE : grille -->
+  <section class="block v-live">
+    <div class="grid" id="liveGrid"></div>
+    <div class="empty" id="liveEmpty" hidden>
+      No match is live right now.<br>
+      <a class="btn" href="#matches" style="margin-top:16px">See today's matches</a>
+    </div>
+  </section>
+
+  <!-- MATCHES : liste par championnat -->
+  <div class="v-matches" id="leagues"></div>
 
 </main>
 
@@ -78,8 +113,8 @@
   <div id="modalBody"></div>
 </dialog>
 
-<script src="./config.js?v=2"></script>
-<script src="./sources.js?v=2"></script>
-<script src="./app.js?v=2"></script>
+<script src="./config.js?v=3"></script>
+<script src="./sources.js?v=3"></script>
+<script src="./app.js?v=3"></script>
 </body>
 </html>
