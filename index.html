@@ -111,7 +111,6 @@
     <div id="matchesList" class="matches-list"></div>
   </main>
 
-  <!-- Watch & Match Center Modal -->
   <div id="watchModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalMatchTitle">
     <div class="modal-card">
       <div class="modal-header">
@@ -144,13 +143,14 @@
 
       <div class="modal-player-box" id="modalPlayerBox">
         <div class="player-placeholder" id="playerPlaceholder">
-          <div class="player-badge">LIVE / MATCH CENTER</div>
-          <h3 id="playerPlaceholderTitle" class="player-placeholder-title">No direct stream feed attached to this fixture</h3>
+          <div class="player-badge">LIVE & REPLAY CENTER</div>
+          <h3 id="playerPlaceholderTitle" class="player-placeholder-title">No media source attached to this fixture</h3>
           <p id="playerPlaceholderDesc" class="player-placeholder-desc">
-            Your match data API provides live scores and fixtures. Attach a stream/embed URL in your config or search official coverage & highlights below.
+            Attach a stream or replay URL in config.js (window.ARENA_STREAMS / window.ARENA_REPLAYS) or open official coverage & highlights below.
           </p>
           <div class="modal-actions" id="modalActions"></div>
         </div>
+
         <iframe
           id="matchStreamFrame"
           class="match-stream-frame hidden"
@@ -160,11 +160,19 @@
           allowfullscreen
           referrerpolicy="no-referrer"
         ></iframe>
+
+        <video
+          id="matchReplayVideo"
+          class="match-replay-video hidden"
+          controls
+          playsinline
+          preload="metadata"
+        ></video>
       </div>
 
       <div class="modal-footer-bar">
         <span id="modalExtraInfo" class="modal-extra-info"></span>
-        <button type="button" class="btn-secondary" id="toggleSourceBtn">Open Official Search</button>
+        <button type="button" class="btn-secondary" id="toggleSourceBtn">Open in New Tab</button>
       </div>
     </div>
   </div>
