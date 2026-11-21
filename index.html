@@ -1,120 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#050505">
-  <meta name="description" content="ARENA LIVE - Live scores and fixtures from every football league in the world.">
-  <title>ARENA LIVE | Football Matches</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=3">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARENA LIVE — Live Scores & Fixtures</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
-<body data-view="home">
+<body>
+  <div class="bg-orb bg-orb-crimson" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-amber" aria-hidden="true"></div>
 
-<header class="nav-wrap">
-  <nav class="nav" aria-label="Main">
-    <a href="#home" class="logo">ARENA<span>LIVE</span></a>
-    <span class="nav__sep"></span>
-    <a href="#home" class="nav__link" data-nav="home">Home</a>
-    <a href="#live" class="nav__link" data-nav="live">Live <i class="dot"></i></a>
-    <a href="#matches" class="nav__link" data-nav="matches">Matches</a>
-    <span class="nav__sep"></span>
-    <button class="nav__icon" id="searchToggle" type="button" aria-label="Search">⌕</button>
-  </nav>
-</header>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="#matches" class="brand" id="brandLink">
+        <span class="brand-mark">ARENA</span>
+        <span class="brand-accent">LIVE</span>
+      </a>
 
-<main id="top">
+      <nav class="nav-links" aria-label="Primary Navigation">
+        <a href="#home" class="nav-link" data-route="home">Home</a>
+        <a href="#live" class="nav-link" data-route="live">
+          <span class="live-dot"></span>
+          Live
+        </a>
+        <a href="#matches" class="nav-link active" data-route="matches">Matches</a>
+      </nav>
 
-  <!-- ===== HOME ===== -->
-  <section class="hero v-home" id="hero" aria-live="polite"></section>
+      <div class="topbar-meta">
+        <span class="quota-pill" id="quotaBadge">Quota: --</span>
+      </div>
+    </div>
+  </header>
 
-  <!-- ===== LIVE ===== -->
-  <h1 class="page-title v-live"><span></span>Live</h1>
+  <main class="container main-content">
+    <section class="page-header">
+      <div class="title-group">
+        <span class="title-bar" aria-hidden="true"></span>
+        <div>
+          <h1 class="page-title" id="viewTitle">Matches</h1>
+          <p class="page-subtitle" id="viewSubtitle">Real-time fixtures, live scores, and competition filters</p>
+        </div>
+      </div>
 
-  <!-- ===== MATCHES ===== -->
-  <h1 class="page-title v-matches"><span></span>Matches</h1>
+      <div class="date-controls">
+        <button type="button" class="icon-btn" id="prevDayBtn" title="Previous day" aria-label="Previous day">&lt;</button>
+        <div class="date-input-wrap">
+          <input type="date" id="datePicker" class="date-input" aria-label="Select date" />
+          <span class="date-display" id="dateDisplay">--/--/----</span>
+        </div>
+        <button type="button" class="icon-btn" id="nextDayBtn" title="Next day" aria-label="Next day">&gt;</button>
+        <button type="button" class="btn-secondary" id="todayBtn">Today</button>
+      </div>
+    </section>
 
-  <!-- Barre de date (toutes les pages) -->
-  <div class="toolbar">
-    <div class="search v-matches" id="searchBox">
-      <input id="searchInput" type="search" placeholder="Search a team or a league…" autocomplete="off">
+    <section class="filters-panel" aria-label="Match Filters">
+      <div class="search-row">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search a team, league, or country..."
+            autocomplete="off"
+          />
+          <button type="button" class="clear-btn hidden" id="clearSearchBtn" aria-label="Clear search">✕</button>
+        </div>
+      </div>
+
+      <div class="chips-row" id="statusChips" role="group" aria-label="Match status filter">
+        <button type="button" class="chip active" data-status="all">All</button>
+        <button type="button" class="chip" data-status="live">
+          <span class="chip-live-dot"></span>
+          Live now
+        </button>
+        <button type="button" class="chip" data-status="upcoming">Upcoming</button>
+        <button type="button" class="chip" data-status="finished">Finished</button>
+      </div>
+
+      <div class="chips-row" id="featuredLeagueChips" role="group" aria-label="Featured leagues filter">
+        <button type="button" class="chip active" data-featured="all">All</button>
+        <button type="button" class="chip" data-featured="tunisia">🇹🇳 Tunisia</button>
+        <button type="button" class="chip" data-featured="ucl">Champions League</button>
+        <button type="button" class="chip" data-featured="uel">Europa League</button>
+        <button type="button" class="chip" data-featured="epl">Premier League</button>
+        <button type="button" class="chip" data-featured="laliga">La Liga</button>
+        <button type="button" class="chip" data-featured="seriea">Serie A</button>
+        <button type="button" class="chip" data-featured="bundesliga">Bundesliga</button>
+        <button type="button" class="chip" data-featured="ligue1">Ligue 1</button>
+        <button type="button" class="chip" data-featured="africa">Africa</button>
+      </div>
+
+      <div class="comp-select-row">
+        <label for="competitionSelect" class="sr-only">Competition</label>
+        <select id="competitionSelect" class="comp-select">
+          <option value="__ALL__">All competitions (0)</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="status-bar">
+      <div class="matches-count" id="matchesCount">0 matches</div>
+      <div class="updated-time" id="updatedTime">Updated --:--</div>
     </div>
 
-    <div class="datebar">
-      <button id="prevDay" class="round" type="button" aria-label="Previous day">‹</button>
-      <input type="date" id="matchDate" aria-label="Match date">
-      <button id="nextDay" class="round" type="button" aria-label="Next day">›</button>
-      <button id="todayBtn" class="pill" type="button">Today</button>
+    <div id="stateContainer" class="state-container hidden"></div>
+    <div id="matchesList" class="matches-list"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>© 2026 ARENA LIVE. Scores and fixtures only. We do not host or stream any match: for viewing, we point you to the official broadcasters.</span>
     </div>
-  </div>
+  </footer>
 
-  <div class="v-matches">
-    <div class="pills" id="statusPills" role="group" aria-label="Status">
-      <button class="pill is-on" data-status="all" type="button">All</button>
-      <button class="pill" data-status="live" type="button">Live now</button>
-      <button class="pill" data-status="upcoming" type="button">Upcoming</button>
-      <button class="pill" data-status="finished" type="button">Finished</button>
-    </div>
-
-    <div class="pills pills--scroll" id="leaguePills" role="group" aria-label="Competitions"></div>
-
-    <select id="leagueSelect" class="select" aria-label="All competitions of the day">
-      <option value="all">All competitions</option>
-    </select>
-  </div>
-
-  <div class="status-line">
-    <span id="matchCount">Loading…</span>
-    <span id="lastUpdated"></span>
-  </div>
-
-  <div id="message" class="message"></div>
-
-  <!-- HOME : blocs -->
-  <div class="empty v-home" id="homeEmpty" hidden>No match found for this day. Try another date.</div>
-
-  <section class="block v-home" id="homeLive" hidden>
-    <h2 class="block__title"><i class="dot"></i> Live now</h2>
-    <div class="grid" id="homeLiveGrid"></div>
-  </section>
-
-  <section class="block v-home" id="resultsBlock" hidden>
-    <h2 class="block__title">Results &amp; highlights</h2>
-    <div class="grid" id="resultsGrid"></div>
-  </section>
-
-  <section class="block v-home" id="soonBlock" hidden>
-    <h2 class="block__title">Coming up</h2>
-    <div class="grid" id="soonGrid"></div>
-  </section>
-
-  <!-- LIVE : grille -->
-  <section class="block v-live">
-    <div class="grid" id="liveGrid"></div>
-    <div class="empty" id="liveEmpty" hidden>
-      No match is live right now.<br>
-      <a class="btn" href="#matches" style="margin-top:16px">See today's matches</a>
-    </div>
-  </section>
-
-  <!-- MATCHES : liste par championnat -->
-  <div class="v-matches" id="leagues"></div>
-
-</main>
-
-<footer class="footer">
-  <p>© 2026 ARENA LIVE. Scores and fixtures only. We do not host or stream any match: for viewing, we point you to the official broadcasters.</p>
-</footer>
-
-<dialog class="modal" id="modal" aria-labelledby="mTitle">
-  <div id="modalBody"></div>
-</dialog>
-
-<script src="./config.js?v=3"></script>
-<script src="./sources.js?v=3"></script>
-<script src="./app.js?v=3"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
