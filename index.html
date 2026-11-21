@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="bg-orb bg-orb-crimson" aria-hidden="true"></div>
@@ -111,12 +111,71 @@
     <div id="matchesList" class="matches-list"></div>
   </main>
 
+  <!-- Watch & Match Center Modal -->
+  <div id="watchModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalMatchTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-league-wrap">
+          <img id="modalLeagueLogo" class="league-logo hidden" src="" alt="" />
+          <div>
+            <div id="modalMatchTitle" class="modal-title">Match Center</div>
+            <div id="modalMatchMeta" class="modal-subtitle">Competition • Status</div>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="modal-scoreboard">
+        <div class="modal-team">
+          <img id="modalHomeLogo" class="modal-team-logo hidden" src="" alt="" />
+          <span id="modalHomeName" class="modal-team-name">Home</span>
+        </div>
+
+        <div class="modal-score-block">
+          <div id="modalScore" class="modal-score">- : -</div>
+          <div id="modalStatusBadge" class="status-badge is-upcoming">NS</div>
+        </div>
+
+        <div class="modal-team">
+          <img id="modalAwayLogo" class="modal-team-logo hidden" src="" alt="" />
+          <span id="modalAwayName" class="modal-team-name">Away</span>
+        </div>
+      </div>
+
+      <div class="modal-player-box" id="modalPlayerBox">
+        <div class="player-placeholder" id="playerPlaceholder">
+          <div class="player-badge">LIVE / MATCH CENTER</div>
+          <h3 id="playerPlaceholderTitle" class="player-placeholder-title">No direct stream feed attached to this fixture</h3>
+          <p id="playerPlaceholderDesc" class="player-placeholder-desc">
+            Your match data API provides live scores and fixtures. Attach a stream/embed URL in your config or search official coverage & highlights below.
+          </p>
+          <div class="modal-actions" id="modalActions"></div>
+        </div>
+        <iframe
+          id="matchStreamFrame"
+          class="match-stream-frame hidden"
+          src=""
+          title="Match Stream Player"
+          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+          allowfullscreen
+          referrerpolicy="no-referrer"
+        ></iframe>
+      </div>
+
+      <div class="modal-footer-bar">
+        <span id="modalExtraInfo" class="modal-extra-info"></span>
+        <button type="button" class="btn-secondary" id="toggleSourceBtn">Open Official Search</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="container footer-inner">
       <span>© 2026 ARENA LIVE. Scores and fixtures only. We do not host or stream any match: for viewing, we point you to the official broadcasters.</span>
     </div>
   </footer>
 
+  <script src="./config.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
