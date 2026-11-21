@@ -1,56 +1,213 @@
-```html
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080c18">
-  <title>ARENA LIVE — Scores en direct</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="theme-color" content="#080b12">
+
+  <title>ARENA LIVE | World Football Center</title>
+
+  <meta name="description"
+    content="ARENA LIVE - Follow worldwide football fixtures, live scores and results.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
 
-<header class="navbar">
-  <a href="#" class="logo">ARENA <span>LIVE</span></a>
-  <div class="live-label"><i></i> SPORT EN DIRECT</div>
+<header class="topbar">
+
+  <a href="#" class="brand">
+    <span class="brand-icon">A</span>
+    <span>ARENA<span class="brand-accent">LIVE</span></span>
+  </a>
+
+  <nav class="navigation">
+    <a href="#home" class="nav-link active">Home</a>
+    <a href="#scores" class="nav-link">Live Scores</a>
+    <a href="#about" class="nav-link">About</a>
+  </nav>
+
+  <div class="world-label">
+    <span class="pulse"></span>
+    WORLD FOOTBALL
+  </div>
+
 </header>
 
 <main>
-  <section class="hero">
-    <p class="tag">CENTRE SPORTIF MONDIAL</p>
-    <h1>Le sport <span>en direct.</span></h1>
-    <p class="description">Suivez les matchs, les scores et les résultats du monde entier.</p>
 
-    <div class="filters">
-      <input type="date" id="matchDate">
-      <select id="matchFilter">
-        <option value="all">Tous les matchs</option>
-        <option value="live">En direct</option>
-        <option value="finished">Terminés</option>
-        <option value="upcoming">À venir</option>
-      </select>
-      <button id="refreshButton">Actualiser ↻</button>
+  <section class="hero" id="home">
+
+    <div class="hero-content">
+
+      <div class="eyebrow">
+        <span class="eyebrow-line"></span>
+        THE WORLD OF FOOTBALL
+      </div>
+
+      <h1>
+        EVERY MATCH.<br>
+        <span>EVERY MOMENT.</span>
+      </h1>
+
+      <p>
+        One destination for worldwide football.
+        Follow fixtures, live scores and results in real time.
+      </p>
+
+      <a href="#scores" class="hero-button">
+        Explore matches <span>↗</span>
+      </a>
+
+      <div class="hero-stats">
+
+        <div>
+          <strong>GLOBAL</strong>
+          <small>Coverage</small>
+        </div>
+
+        <div>
+          <strong>LIVE</strong>
+          <small>Match center</small>
+        </div>
+
+        <div>
+          <strong>24/7</strong>
+          <small>Football world</small>
+        </div>
+
+      </div>
+
     </div>
+
+    <div class="hero-visual">
+
+      <div class="visual-glow"></div>
+
+      <div class="stadium-card">
+
+        <div class="stadium-top">
+          <span>ARENA LIVE</span>
+          <span class="stadium-live"><i></i> FOOTBALL</span>
+        </div>
+
+        <div class="stadium-ball">⚽</div>
+
+        <div class="stadium-bottom">
+          <span>THE GAME NEVER STOPS.</span>
+          <span>EST. 2026</span>
+        </div>
+
+      </div>
+
+      <div class="floating-tag">WORLDWIDE COVERAGE</div>
+
+    </div>
+
   </section>
 
-  <section class="matches-section">
-    <div class="section-header">
-      <h2>⚽ Matchs du jour</h2>
-      <span id="matchCount">Chargement...</span>
+  <section class="scores-section" id="scores">
+
+    <div class="section-heading">
+
+      <div>
+
+        <div class="eyebrow">
+          <span class="eyebrow-line"></span>
+          MATCH CENTER
+        </div>
+
+        <h2>Football <span>Fixtures</span></h2>
+
+        <p class="section-description">
+          Discover matches from leagues around the world.
+        </p>
+
+      </div>
+
+      <div class="match-counter">
+        <span class="counter-dot"></span>
+        <span id="matchCount">Loading...</span>
+      </div>
+
     </div>
 
-    <div id="message">Chargement des matchs...</div>
-    <div id="matchesContainer" class="matches-grid"></div>
+    <div class="control-panel">
+
+      <div class="date-control">
+        <label for="matchDate">MATCH DATE</label>
+        <input type="date" id="matchDate">
+      </div>
+
+      <div class="filter-control">
+        <label for="matchFilter">MATCH STATUS</label>
+
+        <select id="matchFilter">
+          <option value="all">All matches</option>
+          <option value="live">Live now</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="finished">Finished</option>
+        </select>
+
+      </div>
+
+      <button id="refreshButton" class="refresh-button">
+        <span>↻</span> Refresh scores
+      </button>
+
+    </div>
+
+    <div class="results-toolbar">
+      <span id="resultsTitle">ALL FIXTURES</span>
+      <span id="lastUpdated">Waiting for data...</span>
+    </div>
+
+    <div id="message" class="message">
+      <div class="loader"></div>
+      <span>Loading football fixtures...</span>
+    </div>
+
+    <div id="matchesContainer" class="matches-container"></div>
+
   </section>
+
+  <section class="bottom-banner" id="about">
+
+    <div>
+      <span class="eyebrow">THE GLOBAL GAME</span>
+      <h2>Football connects <span>the world.</span></h2>
+    </div>
+
+    <div class="banner-mark">A<span>L</span></div>
+
+  </section>
+
 </main>
 
-<footer>
-  <strong>ARENA LIVE</strong>
-  <p>© 2026 ARENA LIVE — All rights reserved.</p>
+<footer class="footer">
+
+  <a href="#" class="brand footer-brand">
+    <span class="brand-icon">A</span>
+    <span>ARENA<span class="brand-accent">LIVE</span></span>
+  </a>
+
+  <p>© 2026 ARENA LIVE. ALL RIGHTS RESERVED.</p>
+
+  <span class="footer-status">
+    <i></i> FOOTBALL NEVER STOPS
+  </span>
+
 </footer>
 
-<script src="js/config.js"></script>
-<script src="js/app.js"></script>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+
 </body>
 </html>
-```
