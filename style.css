@@ -175,3 +175,13 @@ details.more summary:hover{color:var(--text)}
 .nosignal__bars i:nth-child(1){height:30%}.nosignal__bars i:nth-child(2){height:50%}
 .nosignal__bars i:nth-child(3){height:75%}.nosignal__bars i:nth-child(4){height:100%}
 .src{position:absolute;bottom:10px;inset-inline-start:10px;padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:800;background:var(--red);color:#fff}
+
+/* ---------- Vues (Home / Live / Matches) ---------- */
+[hidden]{display:none!important}
+body:not([data-view="home"]) .v-home{display:none}
+body:not([data-view="live"]) .v-live{display:none}
+body:not([data-view="matches"]) .v-matches{display:none}
+.nav__link.is-active{background:rgba(255,255,255,.1);color:var(--text)}
+.select{width:100%;max-width:520px;height:46px;padding:0 16px;margin:2px 0 6px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--text);outline:none;color-scheme:dark}
+.select:focus{border-color:var(--red)}
+.block__title .dot{margin:0}
