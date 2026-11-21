@@ -1,0 +1,56 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080c18">
+  <title>ARENA LIVE — Scores en direct</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <a href="#" class="logo">ARENA <span>LIVE</span></a>
+  <div class="live-label"><i></i> SPORT EN DIRECT</div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="tag">CENTRE SPORTIF MONDIAL</p>
+    <h1>Le sport <span>en direct.</span></h1>
+    <p class="description">Suivez les matchs, les scores et les résultats du monde entier.</p>
+
+    <div class="filters">
+      <input type="date" id="matchDate">
+      <select id="matchFilter">
+        <option value="all">Tous les matchs</option>
+        <option value="live">En direct</option>
+        <option value="finished">Terminés</option>
+        <option value="upcoming">À venir</option>
+      </select>
+      <button id="refreshButton">Actualiser ↻</button>
+    </div>
+  </section>
+
+  <section class="matches-section">
+    <div class="section-header">
+      <h2>⚽ Matchs du jour</h2>
+      <span id="matchCount">Chargement...</span>
+    </div>
+
+    <div id="message">Chargement des matchs...</div>
+    <div id="matchesContainer" class="matches-grid"></div>
+  </section>
+</main>
+
+<footer>
+  <strong>ARENA LIVE</strong>
+  <p>© 2026 ARENA LIVE — All rights reserved.</p>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
+```
