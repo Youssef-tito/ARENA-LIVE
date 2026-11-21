@@ -143,10 +143,10 @@
 
       <div class="modal-player-box" id="modalPlayerBox">
         <div class="player-placeholder" id="playerPlaceholder">
-          <div class="player-badge">LIVE & REPLAY CENTER</div>
+          <div class="player-badge" id="playerModeBadge">LIVE & REPLAY CENTER</div>
           <h3 id="playerPlaceholderTitle" class="player-placeholder-title">No media source attached to this fixture</h3>
           <p id="playerPlaceholderDesc" class="player-placeholder-desc">
-            Attach a stream or replay URL in config.js (window.ARENA_STREAMS / window.ARENA_REPLAYS) or open official coverage & highlights below.
+            Attach a stream or replay URL in config.js, paste a URL below to load it in the player, or open channels and external sources below.
           </p>
           <div class="modal-actions" id="modalActions"></div>
         </div>
@@ -170,6 +170,17 @@
         ></video>
       </div>
 
+      <div class="custom-url-bar">
+        <input
+          type="url"
+          id="customMediaUrlInput"
+          class="custom-url-input"
+          placeholder="Paste external embed or recorded .mp4 / .webm URL to play..."
+          autocomplete="off"
+        />
+        <button type="button" class="btn-primary" id="loadCustomUrlBtn">Play URL</button>
+      </div>
+
       <div class="modal-footer-bar">
         <span id="modalExtraInfo" class="modal-extra-info"></span>
         <button type="button" class="btn-secondary" id="toggleSourceBtn">Open in New Tab</button>
@@ -179,7 +190,7 @@
 
   <footer class="footer">
     <div class="container footer-inner">
-      <span>© 2026 ARENA LIVE. Scores and fixtures only. We do not host or stream any match: for viewing, we point you to the official broadcasters.</span>
+      <span>© 2026 ARENA LIVE. Scores, fixtures, and external/official links only. We do not host media files on our servers; third-party sources and official broadcasters remain responsible for their content.</span>
     </div>
   </footer>
 
