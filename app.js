@@ -1,8 +1,10 @@
 const dateInput = document.getElementById("matchDate");
 const filterInput = document.getElementById("matchFilter");
 const refreshButton = document.getElementById("refreshButton");
+
 const matchesContainer = document.getElementById("matchesContainer");
 const message = document.getElementById("message");
+
 const matchCount = document.getElementById("matchCount");
 const resultsTitle = document.getElementById("resultsTitle");
 const lastUpdated = document.getElementById("lastUpdated");
@@ -19,14 +21,12 @@ const finishedStatuses = [
 ];
 
 function localDate() {
-  const parts = new Intl.DateTimeFormat("en-CA", {
+  return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Africa/Tunis",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
   }).format(new Date());
-
-  return parts;
 }
 
 function escapeHTML(value) {
@@ -42,9 +42,11 @@ function escapeHTML(value) {
 function safeImage(url) {
   try {
     const parsed = new URL(url);
+
     return ["https:", "http:"].includes(parsed.protocol)
       ? parsed.href
       : "";
+
   } catch {
     return "";
   }
@@ -57,14 +59,21 @@ function teamLogo(url, name) {
     return `<span class="team-fallback">${escapeHTML(name.slice(0,1))}</span>`;
   }
 
-  return `<img src="${escapeHTML(safeURL)}" alt="" loading="lazy"
-    onerror="this.style.display='none'">`;
+  return `
+    <img
+      src="${escapeHTML(safeURL)}"
+      alt=""
+      loading="lazy"
+      onerror="this.style.display='none'"
+    >
+  `;
 }
 
 function getStatus(match) {
   const status = String(match.status || "NS").toUpperCase();
 
   if (liveStatuses.includes(status)) return "live";
+
   if (finishedStatuses.includes(status)) return "finished";
 
   return "upcoming";
@@ -80,14 +89,20 @@ function statusLabel(match) {
   }
 
   if (getStatus(match) === "finished") {
-    return status === "AET" ? "AFTER EXTRA TIME" :
-      status === "PEN" ? "PENALTIES" : "FULL TIME";
+    if (status === "AET") return "AFTER EXTRA TIME";
+
+    if (status === "PEN") return "PENALTIES";
+
+    return "FULL TIME";
   }
 
-  return status === "PST" ? "POSTPONED" :
-    status === "CANC" ? "CANCELLED" :
-    status === "TBD" ? "TIME TBC" :
-    "UPCOMING";
+  if (status === "PST") return "POSTPONED";
+
+  if (status === "CANC") return "CANCELLED";
+
+  if (status === "TBD") return "TIME TBC";
+
+  return "UPCOMING";
 }
 
 function renderMatch(match) {
@@ -107,16 +122,20 @@ function renderMatch(match) {
   const category = getStatus(match);
 
   const time = escapeHTML(match.time || "--:--");
+
   const round = escapeHTML(match.round || "");
 
   return `
     <article class="match-card">
 
       <div class="match-meta">
+
         <span class="match-time">${time}</span>
+
         <span class="match-status ${category}">
           ${escapeHTML(statusLabel(match))}
         </span>
+
       </div>
 
       <div class="match-teams">
@@ -148,8 +167,9 @@ function renderMatch(match) {
 function renderMatches() {
   const filter = filterInput.value;
 
-  let filtered = allMatches.filter(match => {
+  const filtered = allMatches.filter(match => {
     if (filter === "all") return true;
+
     return getStatus(match) === filter;
   });
 
@@ -168,13 +188,15 @@ function renderMatches() {
         No matches found for this selection.
       </div>
     `;
+
     return;
   }
 
   const groups = new Map();
 
   filtered.forEach(match => {
-    const key = `${match.league || "Other competitions"}|${match.country || ""}`;
+    const key =
+      `${match.league || "Other competitions"}|${match.country || ""}`;
 
     if (!groups.has(key)) {
       groups.set(key, []);
@@ -183,29 +205,42 @@ function renderMatches() {
     groups.get(key).push(match);
   });
 
-  matchesContainer.innerHTML = [...groups.entries()].map(([key, matches]) => {
-    const [league, country] = key.split("|");
+  matchesContainer.innerHTML = [...groups.entries()]
+    .map(([key, matches]) => {
 
-    const logo = safeImage(matches[0].leagueLogo);
+      const [league, country] = key.split("|");
 
-    return `
-      <section class="league-group">
+      const logo = safeImage(matches[0].leagueLogo);
 
-        <div class="league-heading">
-          ${logo ? `<img src="${escapeHTML(logo)}" alt="" loading="lazy">` : ""}
-          <div>
-            <strong>${escapeHTML(league)}</strong>
-            <small>${escapeHTML(country || "International")}</small>
+      return `
+        <section class="league-group">
+
+          <div class="league-heading">
+
+            ${
+              logo
+                ? `<img src="${escapeHTML(logo)}" alt="" loading="lazy">`
+                : ""
+            }
+
+            <div>
+              <strong>${escapeHTML(league)}</strong>
+
+              <small>
+                ${escapeHTML(country || "International")}
+              </small>
+            </div>
+
           </div>
-        </div>
 
-        <div class="league-matches">
-          ${matches.map(renderMatch).join("")}
-        </div>
+          <div class="league-matches">
+            ${matches.map(renderMatch).join("")}
+          </div>
 
-      </section>
-    `;
-  }).join("");
+        </section>
+      `;
+
+    }).join("");
 }
 
 async function loadMatches() {
@@ -214,7 +249,9 @@ async function loadMatches() {
   if (!date) return;
 
   refreshButton.disabled = true;
+
   message.hidden = false;
+
   message.innerHTML = `
     <div class="loader"></div>
     <span>Loading football fixtures...</span>
@@ -223,6 +260,7 @@ async function loadMatches() {
   matchesContainer.innerHTML = "";
 
   try {
+
     const url = new URL(window.ARENA_API_URL);
 
     url.searchParams.set("date", date);
@@ -252,17 +290,22 @@ async function loadMatches() {
       })}`;
 
   } catch (error) {
+
     allMatches = [];
 
     matchCount.textContent = "0 MATCHES";
 
     message.hidden = false;
+
     message.textContent =
       `Unable to load fixtures: ${error.message}`;
 
     matchesContainer.innerHTML = "";
+
   } finally {
+
     refreshButton.disabled = false;
+
   }
 }
 
