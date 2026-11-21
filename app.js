@@ -13,7 +13,8 @@ const state = {
   searchQuery: "",
   isLoading: false,
   errorMessage: "",
-  lastUpdated: ""
+  lastUpdated: "",
+  activeMatch: null
 };
 
 const els = {
@@ -34,7 +35,25 @@ const els = {
   quotaBadge: document.getElementById("quotaBadge"),
   stateContainer: document.getElementById("stateContainer"),
   matchesList: document.getElementById("matchesList"),
-  navLinks: Array.from(document.querySelectorAll(".nav-link"))
+  navLinks: Array.from(document.querySelectorAll(".nav-link")),
+  watchModal: document.getElementById("watchModal"),
+  closeModalBtn: document.getElementById("closeModalBtn"),
+  modalLeagueLogo: document.getElementById("modalLeagueLogo"),
+  modalMatchTitle: document.getElementById("modalMatchTitle"),
+  modalMatchMeta: document.getElementById("modalMatchMeta"),
+  modalHomeLogo: document.getElementById("modalHomeLogo"),
+  modalHomeName: document.getElementById("modalHomeName"),
+  modalAwayLogo: document.getElementById("modalAwayLogo"),
+  modalAwayName: document.getElementById("modalAwayName"),
+  modalScore: document.getElementById("modalScore"),
+  modalStatusBadge: document.getElementById("modalStatusBadge"),
+  playerPlaceholder: document.getElementById("playerPlaceholder"),
+  playerPlaceholderTitle: document.getElementById("playerPlaceholderTitle"),
+  playerPlaceholderDesc: document.getElementById("playerPlaceholderDesc"),
+  modalActions: document.getElementById("modalActions"),
+  matchStreamFrame: document.getElementById("matchStreamFrame"),
+  modalExtraInfo: document.getElementById("modalExtraInfo"),
+  toggleSourceBtn: document.getElementById("toggleSourceBtn")
 };
 
 function getTodayIsoDate() {
@@ -83,7 +102,7 @@ function matchesFeaturedFilter(match, filterKey) {
 
   switch (filterKey) {
     case "tunisia":
-      return country.includes("tunisia") || league.includes("tunisia") || league.includes("ligue 1") && country.includes("tunisia");
+      return country.includes("tunisia") || league.includes("tunisia") || (league.includes("ligue 1") && country.includes("tunisia"));
     case "ucl":
       return league.includes("champions league") && !league.includes("afc") && !league.includes("concacaf");
     case "uel":
@@ -91,7 +110,7 @@ function matchesFeaturedFilter(match, filterKey) {
     case "epl":
       return league.includes("premier league") && (country.includes("england") || country.includes("uk"));
     case "laliga":
-      return league.includes("la liga") || league.includes("primera division") && country.includes("spain");
+      return league.includes("la liga") || (league.includes("primera division") && country.includes("spain"));
     case "seriea":
       return league.includes("serie a") && country.includes("italy");
     case "bundesliga":
@@ -117,6 +136,25 @@ function getCompetitionKey(match) {
   const league = String(match.league || "Unknown League").trim();
   const country = String(match.country || "").trim();
   return `${country} — ${league}`;
+}
+
+function resolveStreamUrl(match) {
+  if (!match) return "";
+  if (typeof match.streamUrl === "string" && match.streamUrl.trim()) {
+    return match.streamUrl.trim();
+  }
+  if (typeof match.embedUrl === "string" && match.embedUrl.trim()) {
+    return match.embedUrl.trim();
+  }
+  const customMap = window.ARENA_STREAMS || {};
+  if (match.id !== undefined && customMap[String(match.id)]) {
+    return String(customMap[String(match.id)]).trim();
+  }
+  const pairKey = `${String(match.home || "").toLowerCase()} vs ${String(match.away || "").toLowerCase()}`;
+  if (customMap[pairKey]) {
+    return String(customMap[pairKey]).trim();
+  }
+  return "";
 }
 
 function getFilteredMatches(excludeCompetition = false) {
@@ -214,6 +252,91 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function openWatchModal(match) {
+  state.activeMatch = match;
+
+  const cat = getStatusCategory(match.status);
+  const hasScore =
+    match.homeGoals !== null &&
+    match.homeGoals !== undefined &&
+    match.awayGoals !== null &&
+    match.awayGoals !== undefined;
+
+  els.modalMatchTitle.textContent = `${match.home || "Home"} vs ${match.away || "Away"}`;
+  els.modalMatchMeta.textContent = [match.country, match.league, match.round].filter(Boolean).join(" • ");
+
+  if (match.leagueLogo) {
+    els.modalLeagueLogo.src = match.leagueLogo;
+    els.modalLeagueLogo.classList.remove("hidden");
+  } else {
+    els.modalLeagueLogo.classList.add("hidden");
+  }
+
+  els.modalHomeName.textContent = match.home || "Home";
+  els.modalAwayName.textContent = match.away || "Away";
+
+  if (match.homeLogo) {
+    els.modalHomeLogo.src = match.homeLogo;
+    els.modalHomeLogo.classList.remove("hidden");
+  } else {
+    els.modalHomeLogo.classList.add("hidden");
+  }
+
+  if (match.awayLogo) {
+    els.modalAwayLogo.src = match.awayLogo;
+    els.modalAwayLogo.classList.remove("hidden");
+  } else {
+    els.modalAwayLogo.classList.add("hidden");
+  }
+
+  els.modalScore.textContent = hasScore ? `${match.homeGoals} : ${match.awayGoals}` : "- : -";
+  els.modalStatusBadge.className = `status-badge ${
+    cat === "live" ? "is-live" : cat === "finished" ? "is-finished" : "is-upcoming"
+  }`;
+  els.modalStatusBadge.textContent =
+    cat === "live" && match.elapsed ? `${match.status} • ${match.elapsed}'` : (match.statusText || match.status || "NS");
+
+  const searchQuery = encodeURIComponent(`${match.home || ""} vs ${match.away || ""} ${match.league || ""}`);
+  const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}+highlights`;
+  const webSearchUrl = `https://www.google.com/search?q=${searchQuery}+watch+live+broadcast`;
+
+  els.toggleSourceBtn.onclick = () => {
+    window.open(webSearchUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const streamUrl = resolveStreamUrl(match);
+  els.modalActions.innerHTML = `
+    <a class="btn-secondary" href="${youtubeSearchUrl}" target="_blank" rel="noopener noreferrer">YouTube Highlights</a>
+    <a class="btn-secondary" href="${webSearchUrl}" target="_blank" rel="noopener noreferrer">Official Coverage</a>
+  `;
+
+  if (streamUrl) {
+    els.playerPlaceholder.classList.add("hidden");
+    els.matchStreamFrame.classList.remove("hidden");
+    els.matchStreamFrame.src = streamUrl;
+    els.modalExtraInfo.textContent = `Stream source connected • Match ID: ${match.id ?? "-"}`;
+  } else {
+    els.matchStreamFrame.classList.add("hidden");
+    els.matchStreamFrame.src = "";
+    els.playerPlaceholder.classList.remove("hidden");
+    els.playerPlaceholderTitle.textContent = "No video stream attached for this match";
+    els.playerPlaceholderDesc.textContent =
+      "Your current API returns match scores and fixtures. Add a stream URL in config.js (window.ARENA_STREAMS) to embed a player here, or use official links below.";
+    els.modalExtraInfo.textContent = `Match ID: ${match.id ?? "-"} • Date: ${state.selectedDate}`;
+  }
+
+  els.watchModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+}
+
+function closeWatchModal() {
+  state.activeMatch = null;
+  els.matchStreamFrame.src = "";
+  els.matchStreamFrame.classList.add("hidden");
+  els.watchModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
 }
 
 function renderStateBox(type, title, description, showRetry = false) {
@@ -348,6 +471,8 @@ function renderMatches() {
 
       const row = document.createElement("div");
       row.className = "match-row";
+      row.setAttribute("role", "button");
+      row.setAttribute("tabindex", "0");
       row.innerHTML = `
         <div class="match-status-box">
           <span class="${badgeClass}">${escapeHtml(badgeText)}</span>
@@ -369,7 +494,17 @@ function renderMatches() {
           ${awayLogoHtml}
           <span class="team-name" title="${escapeHtml(m.away)}">${escapeHtml(m.away || "Away")}</span>
         </div>
+
+        <span class="match-open-hint" aria-hidden="true">▶</span>
       `;
+
+      row.addEventListener("click", () => openWatchModal(m));
+      row.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openWatchModal(m);
+        }
+      });
 
       listContainer.appendChild(row);
     }
@@ -478,6 +613,18 @@ function bindEvents() {
   els.competitionSelect.addEventListener("change", (e) => {
     state.competitionFilter = e.target.value;
     renderMatches();
+  });
+
+  els.closeModalBtn.addEventListener("click", closeWatchModal);
+  els.watchModal.addEventListener("click", (e) => {
+    if (e.target === els.watchModal) {
+      closeWatchModal();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !els.watchModal.classList.contains("hidden")) {
+      closeWatchModal();
+    }
   });
 }
 
