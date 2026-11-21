@@ -52,11 +52,8 @@ const els = {
   playerPlaceholder: document.getElementById("playerPlaceholder"),
   playerPlaceholderTitle: document.getElementById("playerPlaceholderTitle"),
   playerPlaceholderDesc: document.getElementById("playerPlaceholderDesc"),
-  modalActions: document.getElementById("modalActions"),
   matchStreamFrame: document.getElementById("matchStreamFrame"),
   matchReplayVideo: document.getElementById("matchReplayVideo"),
-  customMediaUrlInput: document.getElementById("customMediaUrlInput"),
-  loadCustomUrlBtn: document.getElementById("loadCustomUrlBtn"),
   modalExtraInfo: document.getElementById("modalExtraInfo"),
   toggleSourceBtn: document.getElementById("toggleSourceBtn")
 };
@@ -147,71 +144,50 @@ function getCompetitionKey(match) {
   return `${country} — ${league}`;
 }
 
-function resolveStreamUrl(match) {
-  if (!match) return "";
-  if (typeof match.streamUrl === "string" && match.streamUrl.trim()) {
-    return match.streamUrl.trim();
-  }
-  if (typeof match.embedUrl === "string" && match.embedUrl.trim()) {
-    return match.embedUrl.trim();
-  }
-  const customMap = window.ARENA_STREAMS || {};
-  if (match.id !== undefined && customMap[String(match.id)]) {
-    return String(customMap[String(match.id)]).trim();
-  }
-  const pairKey = `${String(match.home || "").toLowerCase()} vs ${String(match.away || "").toLowerCase()}`;
-  if (customMap[pairKey]) {
-    return String(customMap[pairKey]).trim();
-  }
-  return "";
-}
+function resolveAutomaticMedia(match) {
+  if (!match) return { url: "", label: "Stream" };
 
-function resolveReplayUrl(match) {
-  if (!match) return "";
-  if (typeof match.replayUrl === "string" && match.replayUrl.trim()) {
-    return match.replayUrl.trim();
-  }
-  const replayMap = window.ARENA_REPLAYS || {};
-  if (match.id !== undefined && replayMap[String(match.id)]) {
-    return String(replayMap[String(match.id)]).trim();
-  }
+  const isFinished = getStatusCategory(match.status) === "finished";
   const pairKey = `${String(match.home || "").toLowerCase()} vs ${String(match.away || "").toLowerCase()}`;
-  if (replayMap[pairKey]) {
-    return String(replayMap[pairKey]).trim();
+  const idKey = match.id !== undefined && match.id !== null ? String(match.id) : "";
+
+  const directField = isFinished
+    ? (match.replayUrl || match.streamUrl || match.embedUrl || "")
+    : (match.streamUrl || match.embedUrl || match.replayUrl || "");
+  if (typeof directField === "string" && directField.trim()) {
+    return { url: directField.trim(), label: isFinished ? "Replay" : "Live Stream" };
   }
-  return "";
+
+  const replayMap = window.ARENA_REPLAYS || {};
+  const streamMap = window.ARENA_STREAMS || {};
+
+  if (isFinished) {
+    if (idKey && replayMap[idKey]) return { url: String(replayMap[idKey]).trim(), label: "Replay" };
+    if (replayMap[pairKey]) return { url: String(replayMap[pairKey]).trim(), label: "Replay" };
+    if (idKey && streamMap[idKey]) return { url: String(streamMap[idKey]).trim(), label: "Stream" };
+    if (streamMap[pairKey]) return { url: String(streamMap[pairKey]).trim(), label: "Stream" };
+  } else {
+    if (idKey && streamMap[idKey]) return { url: String(streamMap[idKey]).trim(), label: "Live Stream" };
+    if (streamMap[pairKey]) return { url: String(streamMap[pairKey]).trim(), label: "Live Stream" };
+    if (idKey && replayMap[idKey]) return { url: String(replayMap[idKey]).trim(), label: "Replay" };
+    if (replayMap[pairKey]) return { url: String(replayMap[pairKey]).trim(), label: "Replay" };
+  }
+
+  const rules = Array.isArray(window.ARENA_SOURCE_RULES) ? window.ARENA_SOURCE_RULES : [];
+  const haystack = `${match.home || ""} ${match.away || ""} ${match.league || ""} ${match.country || ""}`.toLowerCase();
+
+  for (const rule of rules) {
+    if (!rule || !rule.match || !rule.url) continue;
+    if (haystack.includes(String(rule.match).toLowerCase())) {
+      return { url: String(rule.url).trim(), label: "Auto Source" };
+    }
+  }
+
+  return { url: "", label: "Stream" };
 }
 
 function isDirectVideoFile(url) {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
-}
-
-function getPrioritizedChannels(match) {
-  const channels = Array.isArray(window.ARENA_OFFICIAL_CHANNELS)
-    ? [...window.ARENA_OFFICIAL_CHANNELS]
-    : [];
-
-  const league = String(match?.league || "").toLowerCase();
-  const country = String(match?.country || "").toLowerCase();
-
-  let preferredName = "";
-  if (country.includes("tunisia") || league.includes("tunisia")) {
-    preferredName = "Diwan Sport Official";
-  } else if (league.includes("champions league") || league.includes("europa league") || league.includes("uefa")) {
-    preferredName = "UEFA Official";
-  } else if (league.includes("world cup") || league.includes("fifa")) {
-    preferredName = "FIFA Official";
-  } else if (league.includes("ligue 1") || league.includes("premier league") || league.includes("la liga")) {
-    preferredName = "beIN SPORTS Official";
-  }
-
-  if (!preferredName) return channels;
-
-  return channels.sort((a, b) => {
-    if (a.name === preferredName) return -1;
-    if (b.name === preferredName) return 1;
-    return 0;
-  });
 }
 
 function getFilteredMatches(excludeCompetition = false) {
@@ -311,10 +287,9 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-function playMediaUrl(rawUrl, sourceLabel = "Media") {
+function playMediaUrl(rawUrl, sourceLabel = "Stream") {
   const url = String(rawUrl || "").trim();
   const match = state.activeMatch;
-  const isFinished = match && getStatusCategory(match.status) === "finished";
   const replayVideoEl = els.matchReplayVideo;
 
   state.activeMediaUrl = url;
@@ -329,27 +304,29 @@ function playMediaUrl(rawUrl, sourceLabel = "Media") {
 
   if (!url) {
     els.playerPlaceholder.classList.remove("hidden");
-    els.playerPlaceholderTitle.textContent = isFinished
-      ? "No recorded match video attached yet"
-      : "No video source attached to this fixture";
-    els.playerPlaceholderDesc.textContent = isFinished
-      ? "This match has finished. Attach a recorded video/embed URL in window.ARENA_REPLAYS, paste a video URL below to play it, or open full match replay / highlights search."
-      : "Attach a stream or replay URL in config.js, paste a URL below to test in player, or use external/official sources.";
+    els.playerPlaceholderTitle.textContent = "No stream available for this match yet";
+    els.playerPlaceholderDesc.textContent =
+      "A stream or replay link has not been assigned to this fixture yet.";
     els.modalExtraInfo.textContent = `Match ID: ${match?.id ?? "-"} • Date: ${state.selectedDate}`;
     return;
   }
 
+  els.playerPlaceholder.classList.add("hidden");
+
   if (isDirectVideoFile(url) && replayVideoEl) {
-    els.playerPlaceholder.classList.add("hidden");
     replayVideoEl.classList.remove("hidden");
     replayVideoEl.src = url;
+    replayVideoEl.autoplay = true;
+    replayVideoEl.muted = true;
     replayVideoEl.load();
-    els.modalExtraInfo.textContent = `${sourceLabel} video loaded • Match ID: ${match?.id ?? "-"}`;
+    replayVideoEl.play().catch(() => {
+      replayVideoEl.muted = false;
+    });
+    els.modalExtraInfo.textContent = `${sourceLabel} playing • Match ID: ${match?.id ?? "-"}`;
   } else {
-    els.playerPlaceholder.classList.add("hidden");
     els.matchStreamFrame.classList.remove("hidden");
     els.matchStreamFrame.src = url;
-    els.modalExtraInfo.textContent = `${sourceLabel} embed loaded • Match ID: ${match?.id ?? "-"}`;
+    els.modalExtraInfo.textContent = `${sourceLabel} active • Match ID: ${match?.id ?? "-"}`;
   }
 }
 
@@ -398,56 +375,19 @@ function openWatchModal(match) {
   els.modalStatusBadge.textContent =
     cat === "live" && match.elapsed ? `${match.status} • ${match.elapsed}'` : (match.statusText || match.status || "NS");
 
-  els.playerModeBadge.textContent = isFinished ? "FINISHED MATCH • RECORDED REPLAY" : "LIVE & REPLAY CENTER";
+  els.playerModeBadge.textContent = isFinished ? "REPLAY" : "LIVE";
 
-  const replayUrl = resolveReplayUrl(match);
-  const streamUrl = resolveStreamUrl(match);
-  const initialMediaUrl = isFinished ? (replayUrl || streamUrl) : (streamUrl || replayUrl);
-  const initialLabel = isFinished ? "Recorded Replay" : "Live Stream";
+  const picked = resolveAutomaticMedia(match);
 
-  if (els.customMediaUrlInput) {
-    els.customMediaUrlInput.value = initialMediaUrl || "";
-  }
-
-  const searchQuery = encodeURIComponent(`${match.home || ""} vs ${match.away || ""} ${match.league || ""}`);
-  const replaySearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}+full+match+replay+highlights`;
-  const webSearchUrl = `https://www.google.com/search?q=${searchQuery}+watch+broadcast`;
-
+  els.toggleSourceBtn.classList.toggle("hidden", !picked.url);
   els.toggleSourceBtn.textContent = "Open in New Tab";
   els.toggleSourceBtn.onclick = () => {
-    const currentInput = els.customMediaUrlInput?.value.trim();
-    window.open(currentInput || state.activeMediaUrl || (isFinished ? replaySearchUrl : webSearchUrl), "_blank", "noopener,noreferrer");
+    if (state.activeMediaUrl) {
+      window.open(state.activeMediaUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
-  const externalSources = Array.isArray(window.ARENA_EXTERNAL_SOURCES)
-    ? window.ARENA_EXTERNAL_SOURCES
-    : [];
-  const officialChannels = getPrioritizedChannels(match);
-
-  const externalButtonsHtml = externalSources
-    .filter((src) => src && src.name && src.url)
-    .map(
-      (src) =>
-        `<a class="btn-secondary" href="${escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(src.name)}</a>`
-    )
-    .join("");
-
-  const channelButtonsHtml = officialChannels
-    .filter((ch) => ch && ch.name && ch.url)
-    .map(
-      (ch) =>
-        `<a class="btn-secondary" href="${escapeHtml(ch.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(ch.name)}</a>`
-    )
-    .join("");
-
-  els.modalActions.innerHTML = `
-    <a class="btn-secondary" href="${replaySearchUrl}" target="_blank" rel="noopener noreferrer">${isFinished ? "Recorded Replay & Highlights" : "YouTube Highlights"}</a>
-    <a class="btn-secondary" href="${webSearchUrl}" target="_blank" rel="noopener noreferrer">External & Official Sources</a>
-    ${externalButtonsHtml}
-    ${channelButtonsHtml}
-  `;
-
-  playMediaUrl(initialMediaUrl, initialLabel);
+  playMediaUrl(picked.url, picked.label);
 
   els.watchModal.classList.remove("hidden");
   document.body.classList.add("modal-open");
@@ -742,18 +682,6 @@ function bindEvents() {
     state.competitionFilter = e.target.value;
     renderMatches();
   });
-
-  if (els.loadCustomUrlBtn && els.customMediaUrlInput) {
-    els.loadCustomUrlBtn.addEventListener("click", () => {
-      playMediaUrl(els.customMediaUrlInput.value, "Custom URL");
-    });
-    els.customMediaUrlInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        playMediaUrl(els.customMediaUrlInput.value, "Custom URL");
-      }
-    });
-  }
 
   els.closeModalBtn.addEventListener("click", closeWatchModal);
   els.watchModal.addEventListener("click", (e) => {
