@@ -550,6 +550,11 @@
     }
 
     .info-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
       background: rgba(16, 185, 129, 0.08);
       border: 1px solid rgba(16, 185, 129, 0.25);
       border-radius: var(--radius-md);
@@ -669,6 +674,19 @@
     const IPTV_BASE = 'https://iptv-org.github.io/api';
     const SPORTSDB_BASE = 'https://www.thesportsdb.com/api/v1/json/3';
 
+    const TEAM_ALIASES = {
+      taraji: ['esperance', 'es tunis', 'taraji'],
+      esperance: ['esperance', 'es tunis', 'taraji'],
+      lifri9i: ['club africain', 'africain', 'ca'],
+      africain: ['club africain', 'africain', 'ca'],
+      etoile: ['etoile', 'sahel', 'ess'],
+      sahel: ['etoile', 'sahel', 'ess'],
+      sfaxien: ['sfaxien', 'cs sfaxien', 'css'],
+      monastir: ['monastir', 'us monastir', 'usmo'],
+      bizerte: ['bizerte', 'ca bizertin', 'cab'],
+      tunisia: ['tunisia', 'tunisian', 'carthage']
+    };
+
     const STATE = {
       tab: 'matches',
       sportFilter: 'Football',
@@ -708,6 +726,14 @@
       el.classList.add('show');
       clearTimeout(showToast._t);
       showToast._t = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function matchesSearchQuery(item, rawQ) {
+      const q = (rawQ || '').trim().toLowerCase();
+      if (!q) return true;
+      const hay = `${item.title || ''} ${item.league || ''} ${item.category || ''}`.toLowerCase();
+      const terms = [q, ...(TEAM_ALIASES[q] || [])];
+      return terms.some(t => hay.includes(t));
     }
 
     function saveFavs() {
@@ -817,37 +843,56 @@
     async function loadTunisiaLeague(force = false) {
       if (!force && STATE.tunisiaEvents.length) { render(); return; }
       try {
-        // Tunisian Ligue Professionnelle 1 ID on TheSportsDB is commonly 4445; fallback to league search
-        const res = await fetch(`${SPORTSDB_BASE}/eventsnextleague.php?id=4445`);
-        const pastRes = await fetch(`${SPORTSDB_BASE}/eventspastleague.php?id=4445`);
-        const nextData = res.ok ? await res.json() : {};
-        const pastData = pastRes.ok ? await pastRes.json() : {};
+        const [nextRes, pastRes, teamRes] = await Promise.all([
+          fetch(`${SPORTSDB_BASE}/eventsnextleague.php?id=4445`).catch(() => null),
+          fetch(`${SPORTSDB_BASE}/eventspastleague.php?id=4445`).catch(() => null),
+          fetch(`${SPORTSDB_BASE}/searchteams.php?t=Esperance`).catch(() => null)
+        ]);
+        const nextData = nextRes && nextRes.ok ? await nextRes.json() : {};
+        const pastData = pastRes && pastRes.ok ? await pastRes.json() : {};
+        const teamData = teamRes && teamRes.ok ? await teamRes.json() : {};
 
-        const combined = [
-          ...(nextData.events || []).map(ev => ({
-            id: 'tn_' + ev.idEvent,
-            title: ev.strEvent || 'Tunisian Ligue 1 Match',
-            league: ev.strLeague || 'Tunisian Ligue 1',
-            category: 'Football',
-            poster: ev.strThumb || '',
-            starts_at: ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : 0,
-            score: (ev.intHomeScore != null && ev.intAwayScore != null) ? `${ev.intHomeScore} - ${ev.intAwayScore}` : '',
-            videoUrl: ev.strVideo || '',
-            isLeagueMeta: true
-          })),
-          ...(pastData.events || []).map(ev => ({
-            id: 'tn_past_' + ev.idEvent,
-            title: ev.strEvent || 'Tunisian Ligue 1 Match',
-            league: ev.strLeague || 'Tunisian Ligue 1',
-            category: 'Football',
-            poster: ev.strThumb || '',
-            starts_at: ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : 0,
-            ends_at: ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) + 7200 : 1,
-            score: (ev.intHomeScore != null && ev.intAwayScore != null) ? `${ev.intHomeScore} - ${ev.intAwayScore}` : '',
-            videoUrl: ev.strVideo || '',
-            isLeagueMeta: true
-          }))
+        let extraTeamEvents = [];
+        const firstTeam = (teamData.teams || [])[0];
+        if (firstTeam?.idTeam) {
+          const [tNext, tLast] = await Promise.all([
+            fetch(`${SPORTSDB_BASE}/eventsnext.php?id=${firstTeam.idTeam}`).catch(() => null),
+            fetch(`${SPORTSDB_BASE}/eventslast.php?id=${firstTeam.idTeam}`).catch(() => null)
+          ]);
+          const tNextJson = tNext && tNext.ok ? await tNext.json() : {};
+          const tLastJson = tLast && tLast.ok ? await tLast.json() : {};
+          extraTeamEvents = [
+            ...(tNextJson.events || []),
+            ...(tLastJson.results || [])
+          ];
+        }
+
+        const rawAll = [
+          ...(nextData.events || []),
+          ...(pastData.events || []),
+          ...extraTeamEvents
         ];
+
+        const seen = new Set();
+        const combined = [];
+        for (const ev of rawAll) {
+          if (!ev || !ev.idEvent || seen.has(ev.idEvent)) continue;
+          seen.add(ev.idEvent);
+          const ts = ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : 0;
+          const isPast = ev.intHomeScore != null && ev.intAwayScore != null;
+          combined.push({
+            id: 'tn_' + ev.idEvent,
+            title: ev.strEvent || 'Tunisian Match',
+            league: ev.strLeague || 'Tunisian Ligue 1',
+            category: 'Football',
+            poster: ev.strThumb || '',
+            starts_at: ts,
+            ends_at: isPast && ts ? ts + 7200 : 0,
+            score: isPast ? `${ev.intHomeScore} - ${ev.intAwayScore}` : '',
+            videoUrl: ev.strVideo || '',
+            isLeagueMeta: true
+          });
+        }
         STATE.tunisiaEvents = combined;
         render();
       } catch (e) {
@@ -1071,7 +1116,7 @@
     }
 
     function renderMatchesView() {
-      const q = STATE.search.trim().toLowerCase();
+      const q = STATE.search.trim();
       const now = Date.now();
       const isTunisia = STATE.sportFilter === 'tunisia';
 
@@ -1079,12 +1124,11 @@
         ? STATE.tunisiaEvents
         : STATE.matches.filter(m => STATE.sportFilter === 'all' || (m.category || '').toLowerCase() === STATE.sportFilter.toLowerCase());
 
-      const filtered = sourceList.filter(m =>
-        !q || (m.title || '').toLowerCase().includes(q) || (m.league || '').toLowerCase().includes(q) || (m.category || '').toLowerCase().includes(q)
-      );
+      const filtered = sourceList.filter(m => matchesSearchQuery(m, q));
 
       const live = filtered.filter(m => getMatchStatus(m, now) === 'live');
       const upcoming = filtered.filter(m => getMatchStatus(m, now) === 'upcoming');
+      const ended = filtered.filter(m => getMatchStatus(m, now) === 'ended');
       const featured = live[0] || upcoming[0] || filtered[0] || null;
       const featEncoded = featured ? encodeURIComponent(JSON.stringify(featured)) : '';
       const featStatus = featured ? getMatchStatus(featured, now) : 'upcoming';
@@ -1114,33 +1158,42 @@
           `).join('')}
         </div>
 
-        ${isTunisia ? `<div class="info-banner">🇹🇳 Tunisian League fixtures & results feed active.</div>` : ''}
+        ${isTunisia ? `
+          <div class="info-banner">
+            <span>🇹🇳 Tunisian League fixtures & results feed active.</span>
+            ${q ? `<button class="src-chip active" id="clearSearchInline">Clear Search ("${escapeHtml(q)}")</button>` : ''}
+          </div>` : ''}
 
         <h2 class="section-title"><span class="accent-bar"></span> Live Now (${live.length})</h2>
         <div class="matches-grid">
-          ${live.length ? live.map(m => renderMatchCard(m, 'live')).join('') : `<div class="empty-box">No live matches for "${escapeHtml(STATE.sportFilter)}" right now. Check Upcoming or Replays & Highlights.</div>`}
+          ${live.length ? live.map(m => renderMatchCard(m, 'live')).join('') : `<div class="empty-box">No live matches for "${escapeHtml(STATE.sportFilter)}" right now.${q ? ` (Search: "${escapeHtml(q)}")` : ''}</div>`}
         </div>
 
         <h2 class="section-title"><span class="accent-bar"></span> Upcoming (${upcoming.length})</h2>
         <div class="matches-grid">
           ${upcoming.length ? upcoming.slice(0, 24).map(m => renderMatchCard(m, 'upcoming')).join('') : `<div class="empty-box">No upcoming matches in this filter right now.</div>`}
         </div>
+
+        ${isTunisia ? `
+          <h2 class="section-title"><span class="accent-bar"></span> Recent & Results (${ended.length})</h2>
+          <div class="matches-grid">
+            ${ended.length ? ended.slice(0, 24).map(m => renderMatchCard(m, 'ended')).join('') : `<div class="empty-box">No recent league results returned by the feed right now.</div>`}
+          </div>` : ''}
       `;
     }
 
     function renderReplaysView() {
-      const q = STATE.search.trim().toLowerCase();
+      const q = STATE.search.trim();
       const now = Date.now();
       const pool = [...STATE.matches, ...STATE.tunisiaEvents];
       const ended = pool.filter(m => {
         const st = getMatchStatus(m, now);
-        const qOk = !q || (m.title || '').toLowerCase().includes(q) || (m.league || '').toLowerCase().includes(q);
-        return (st === 'ended' || Boolean(m.videoUrl) || Boolean(m.score)) && qOk;
+        return (st === 'ended' || Boolean(m.videoUrl) || Boolean(m.score)) && matchesSearchQuery(m, q);
       });
 
       return `
         <h2 class="section-title"><span class="accent-bar"></span> Replays & Match Highlights (${ended.length})</h2>
-        <div class="info-banner">Finished matches & highlights. If a match does not have a direct embedded replay URL, clicking opens a quick highlights search option.</div>
+        <div class="info-banner"><span>Finished matches & highlights. If a match does not have a direct embedded replay URL, clicking opens a quick highlights search option.</span></div>
         <div class="matches-grid">
           ${ended.length
             ? ended.slice(0, 30).map(m => renderMatchCard(m, 'ended')).join('')
@@ -1234,6 +1287,13 @@
           if (STATE.sportFilter === 'tunisia') loadTunisiaLeague();
           render();
         };
+      });
+
+      document.getElementById('clearSearchInline')?.addEventListener('click', () => {
+        STATE.search = '';
+        const inp = document.getElementById('searchInput');
+        if (inp) inp.value = '';
+        render();
       });
 
       document.getElementById('countrySelect')?.addEventListener('change', e => {
