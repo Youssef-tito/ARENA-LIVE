@@ -45,7 +45,7 @@
     button, input, select { font-family: inherit; color: inherit; }
     button { cursor: pointer; background: none; border: none; }
 
-    /* Topbar & Brand Logo */
+    /* Topbar & AI Pro Brand Logo */
     .topbar {
       position: sticky;
       top: 0;
@@ -55,7 +55,7 @@
       justify-content: space-between;
       gap: 16px;
       padding: 8px 24px;
-      background: rgba(7, 11, 10, 0.82);
+      background: rgba(7, 11, 10, 0.84);
       backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--glass-border);
     }
@@ -75,12 +75,12 @@
       object-fit: contain;
       display: block;
       transition: transform .3s ease, filter .3s ease;
-      filter: drop-shadow(0 0 10px rgba(0, 255, 100, .25));
+      filter: drop-shadow(0 0 10px rgba(0, 255, 100, .28));
     }
 
     .arena-brand:hover .arena-logo {
       transform: scale(1.05);
-      filter: drop-shadow(0 0 18px rgba(0, 255, 100, .55));
+      filter: drop-shadow(0 0 18px rgba(0, 255, 100, .6));
     }
 
     @media (max-width: 600px) {
@@ -576,12 +576,43 @@
 </head>
 <body>
   <header class="topbar">
-    <a href="#matches" class="arena-brand" id="brandHome">
-      <img
-        src="assets/arena-live-logo.png"
-        alt="ARENA LIVE"
-        class="arena-logo"
-      >
+    <a href="#matches" class="arena-brand" id="brandHome" aria-label="ARENA LIVE — Footime">
+      <svg class="arena-logo" viewBox="0 0 260 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ARENA LIVE">
+        <defs>
+          <linearGradient id="arenaEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#34d399" />
+            <stop offset="55%" stop-color="#10b981" />
+            <stop offset="100%" stop-color="#047857" />
+          </linearGradient>
+          <linearGradient id="arenaGold" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fbbf24" />
+            <stop offset="100%" stop-color="#f59e0b" />
+          </linearGradient>
+          <linearGradient id="arenaBadgeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0f261e" />
+            <stop offset="100%" stop-color="#08120e" />
+          </linearGradient>
+        </defs>
+
+        <!-- Crest & Pitch Ring -->
+        <g transform="translate(10, 13)">
+          <rect x="2" y="2" width="80" height="80" rx="22" fill="url(#arenaBadgeBg)" stroke="url(#arenaEmerald)" stroke-width="2.5" />
+          <circle cx="42" cy="42" r="24" fill="none" stroke="rgba(52, 211, 153, 0.25)" stroke-width="1.5" stroke-dasharray="4 3" />
+          <!-- Stylized A / Stadium Arch + Play Signal -->
+          <path d="M25 58 L42 22 L59 58" fill="none" stroke="url(#arenaEmerald)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M31 46 H53" stroke="url(#arenaGold)" stroke-width="3.5" stroke-linecap="round" />
+          <circle cx="67" cy="21" r="6" fill="#ef4444" />
+          <circle cx="67" cy="21" r="9.5" fill="none" stroke="rgba(239, 68, 68, 0.35)" stroke-width="1.5" />
+        </g>
+
+        <!-- Brand Typography -->
+        <text x="102" y="54" fill="#f4f8f6" font-family="Outfit, sans-serif" font-size="25" font-weight="800" letter-spacing="0.8">
+          ARENA <tspan fill="url(#arenaEmerald)">LIVE</tspan>
+        </text>
+        <text x="103" y="76" fill="url(#arenaGold)" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" letter-spacing="2.4">
+          FOOTIME SPORTS
+        </text>
+      </svg>
     </a>
 
     <nav class="nav-pills" id="navPills">
