@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Footime — Live Football & Sports</title>
+  <title>Footime — Live Football, Replays & Sports</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -39,13 +39,10 @@
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
-    h1, h2, h3, h4 {
-      font-family: 'Outfit', sans-serif;
-    }
+    h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
     button, input, select { font-family: inherit; color: inherit; }
     button { cursor: pointer; background: none; border: none; }
 
-    /* Topbar & AI Pro Brand Logo */
     .topbar {
       position: sticky;
       top: 0;
@@ -84,10 +81,7 @@
     }
 
     @media (max-width: 600px) {
-      .arena-logo {
-        width: 145px;
-        height: 65px;
-      }
+      .arena-logo { width: 145px; height: 65px; }
     }
 
     .nav-pills {
@@ -103,7 +97,7 @@
     .nav-btn {
       position: relative;
       z-index: 2;
-      padding: 8px 16px;
+      padding: 8px 15px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
@@ -132,13 +126,10 @@
       border: 1px solid var(--glass-border);
       border-radius: 999px;
       padding: 8px 14px;
-      width: 240px;
+      width: 230px;
       transition: border-color var(--dur), width var(--dur);
     }
-    .search-box:focus-within {
-      border-color: var(--accent);
-      width: 290px;
-    }
+    .search-box:focus-within { border-color: var(--accent); width: 280px; }
     .search-box input {
       background: transparent;
       border: none;
@@ -161,10 +152,8 @@
     }
     .icon-btn:hover { border-color: var(--accent); color: var(--fg-primary); }
 
-    /* Container */
     .container { max-width: 1360px; margin: 0 auto; padding: 24px; }
 
-    /* Featured Hero */
     .hero-card {
       position: relative;
       overflow: hidden;
@@ -173,7 +162,7 @@
       border: 1px solid rgba(16, 185, 129, 0.22);
       padding: 32px;
       margin-bottom: 24px;
-      min-height: 250px;
+      min-height: 230px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -208,6 +197,18 @@
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.04em;
+    }
+    .badge-upcoming {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fcd34d;
+      font-size: 11px;
+      font-weight: 700;
     }
     .live-dot {
       width: 7px;
@@ -257,7 +258,6 @@
       box-shadow: 0 10px 24px rgba(16, 185, 129, 0.3);
     }
 
-    /* Filters */
     .filter-bar {
       display: flex;
       align-items: center;
@@ -285,8 +285,12 @@
       border-color: var(--accent);
       color: var(--accent-bright);
     }
+    .filter-chip.tunisia-chip.active {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: var(--accent-gold);
+      color: #fcd34d;
+    }
 
-    /* Sections & Grids */
     .section-title {
       display: flex;
       align-items: center;
@@ -397,10 +401,10 @@
       color: var(--fg-tertiary);
     }
 
-    /* Channels toolbar */
     .tv-toolbar {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       gap: 12px;
       margin-bottom: 18px;
     }
@@ -439,7 +443,6 @@
     }
     .ch-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-    /* Player Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -530,17 +533,36 @@
       font-size: 12px;
       font-weight: 600;
       color: var(--fg-secondary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
     .src-chip.active {
       background: var(--accent-soft);
       border-color: var(--accent);
       color: var(--accent-bright);
     }
+    .ext-link {
+      margin-left: auto;
+      color: var(--accent-gold);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .info-banner {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 12.5px;
+      color: var(--fg-secondary);
+      margin-bottom: 18px;
+    }
 
     .empty-box {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 44px 20px;
+      padding: 40px 20px;
       background: var(--bg-card);
       border: 1px dashed var(--glass-border);
       border-radius: var(--radius-md);
@@ -593,19 +615,14 @@
             <stop offset="100%" stop-color="#08120e" />
           </linearGradient>
         </defs>
-
-        <!-- Crest & Pitch Ring -->
         <g transform="translate(10, 13)">
           <rect x="2" y="2" width="80" height="80" rx="22" fill="url(#arenaBadgeBg)" stroke="url(#arenaEmerald)" stroke-width="2.5" />
           <circle cx="42" cy="42" r="24" fill="none" stroke="rgba(52, 211, 153, 0.25)" stroke-width="1.5" stroke-dasharray="4 3" />
-          <!-- Stylized A / Stadium Arch + Play Signal -->
           <path d="M25 58 L42 22 L59 58" fill="none" stroke="url(#arenaEmerald)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M31 46 H53" stroke="url(#arenaGold)" stroke-width="3.5" stroke-linecap="round" />
           <circle cx="67" cy="21" r="6" fill="#ef4444" />
           <circle cx="67" cy="21" r="9.5" fill="none" stroke="rgba(239, 68, 68, 0.35)" stroke-width="1.5" />
         </g>
-
-        <!-- Brand Typography -->
         <text x="102" y="54" fill="#f4f8f6" font-family="Outfit, sans-serif" font-size="25" font-weight="800" letter-spacing="0.8">
           ARENA <tspan fill="url(#arenaEmerald)">LIVE</tspan>
         </text>
@@ -617,7 +634,8 @@
 
     <nav class="nav-pills" id="navPills">
       <div class="nav-indicator" id="navIndicator"></div>
-      <button class="nav-btn active" data-tab="matches">Matches & Sports</button>
+      <button class="nav-btn active" data-tab="matches">Matches & Live</button>
+      <button class="nav-btn" data-tab="replays">Replays & Highlights</button>
       <button class="nav-btn" data-tab="channels">Live Channels</button>
       <button class="nav-btn" data-tab="favorites">Favorites (<span id="favCount">0</span>)</button>
     </nav>
@@ -649,12 +667,14 @@
   <script>
     const PPV_API = 'https://api.ppv.st/api/streams';
     const IPTV_BASE = 'https://iptv-org.github.io/api';
+    const SPORTSDB_BASE = 'https://www.thesportsdb.com/api/v1/json/3';
 
     const STATE = {
       tab: 'matches',
       sportFilter: 'Football',
       search: '',
       matches: [],
+      tunisiaEvents: [],
       channels: [],
       countryFilter: 'all',
       catFilter: 'all',
@@ -662,16 +682,16 @@
       hls: null
     };
 
-    const SPORT_CATEGORIES = [
-      'Football',
-      'all',
-      'Basketball',
-      'Combat Sports',
-      'American Football',
-      'Tennis',
-      'Cricket',
-      'Ice Hockey',
-      'Motorsport'
+    const SPORT_FILTERS = [
+      { id: 'Football', label: 'Football' },
+      { id: 'tunisia', label: '🇹🇳 Tunisian League', special: true },
+      { id: 'all', label: 'All Sports' },
+      { id: 'Basketball', label: 'Basketball' },
+      { id: 'Combat Sports', label: 'Combat Sports' },
+      { id: 'American Football', label: 'American Football' },
+      { id: 'Tennis', label: 'Tennis' },
+      { id: 'Cricket', label: 'Cricket' },
+      { id: 'Motorsport', label: 'Motorsport' }
     ];
 
     function escapeHtml(str) {
@@ -705,10 +725,10 @@
       const idx = STATE.favorites.matches.findIndex(m => String(m.id ?? m.title) === key);
       if (idx > -1) {
         STATE.favorites.matches.splice(idx, 1);
-        showToast('Removed match from favorites');
+        showToast('Removed from favorites');
       } else {
         STATE.favorites.matches.push(match);
-        showToast('Saved match to favorites');
+        showToast('Saved to favorites');
       }
       saveFavs();
       render();
@@ -749,19 +769,24 @@
       if (tab === 'channels' && STATE.channels.length === 0) {
         loadChannels();
       }
+      if (STATE.sportFilter === 'tunisia' && STATE.tunisiaEvents.length === 0) {
+        loadTunisiaLeague();
+      }
     }
 
-    function isLiveStream(s, now = Date.now()) {
-      if (s.always_live) return true;
+    function getMatchStatus(s, now = Date.now()) {
+      if (s.always_live) return 'live';
       const st = (s.starts_at || 0) * 1000;
       const en = (s.ends_at || 0) * 1000;
-      if (!st) return true;
-      return now >= st && (!en || now <= en);
+      if (!st) return 'live';
+      if (now < st) return 'upcoming';
+      if (en && now > en) return 'ended';
+      return 'live';
     }
 
     async function loadMatches(force = false) {
       if (!force && STATE.matches.length) { render(); return; }
-      document.getElementById('appContent').innerHTML = `<div class="empty-box">Loading live football & sports streams...</div>`;
+      document.getElementById('appContent').innerHTML = `<div class="empty-box">Loading football & sports streams...</div>`;
       try {
         const res = await fetch(PPV_API);
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -783,9 +808,50 @@
       } catch (err) {
         document.getElementById('appContent').innerHTML = `
           <div class="empty-box">
-            <p style="margin-bottom:12px;">Could not load live sports right now.</p>
+            <p style="margin-bottom:12px;">Could not load sports streams right now.</p>
             <button class="btn-primary" onclick="loadMatches(true)">Try Again</button>
           </div>`;
+      }
+    }
+
+    async function loadTunisiaLeague(force = false) {
+      if (!force && STATE.tunisiaEvents.length) { render(); return; }
+      try {
+        // Tunisian Ligue Professionnelle 1 ID on TheSportsDB is commonly 4445; fallback to league search
+        const res = await fetch(`${SPORTSDB_BASE}/eventsnextleague.php?id=4445`);
+        const pastRes = await fetch(`${SPORTSDB_BASE}/eventspastleague.php?id=4445`);
+        const nextData = res.ok ? await res.json() : {};
+        const pastData = pastRes.ok ? await pastRes.json() : {};
+
+        const combined = [
+          ...(nextData.events || []).map(ev => ({
+            id: 'tn_' + ev.idEvent,
+            title: ev.strEvent || 'Tunisian Ligue 1 Match',
+            league: ev.strLeague || 'Tunisian Ligue 1',
+            category: 'Football',
+            poster: ev.strThumb || '',
+            starts_at: ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : 0,
+            score: (ev.intHomeScore != null && ev.intAwayScore != null) ? `${ev.intHomeScore} - ${ev.intAwayScore}` : '',
+            videoUrl: ev.strVideo || '',
+            isLeagueMeta: true
+          })),
+          ...(pastData.events || []).map(ev => ({
+            id: 'tn_past_' + ev.idEvent,
+            title: ev.strEvent || 'Tunisian Ligue 1 Match',
+            league: ev.strLeague || 'Tunisian Ligue 1',
+            category: 'Football',
+            poster: ev.strThumb || '',
+            starts_at: ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : 0,
+            ends_at: ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) + 7200 : 1,
+            score: (ev.intHomeScore != null && ev.intAwayScore != null) ? `${ev.intHomeScore} - ${ev.intAwayScore}` : '',
+            videoUrl: ev.strVideo || '',
+            isLeagueMeta: true
+          }))
+        ];
+        STATE.tunisiaEvents = combined;
+        render();
+      } catch (e) {
+        STATE.tunisiaEvents = [];
       }
     }
 
@@ -852,6 +918,12 @@
           });
         }
       });
+      if (match.videoUrl) {
+        out.push({
+          label: 'Match Video / Highlight',
+          url: match.videoUrl
+        });
+      }
       return out;
     }
 
@@ -860,13 +932,20 @@
       const modal = document.getElementById('playerModal');
       const body = document.getElementById('playerBody');
       const bar = document.getElementById('playerBar');
-      document.getElementById('playerTitle').textContent = match.title || 'Live Match';
+      document.getElementById('playerTitle').textContent = match.title + (match.score ? ` (${match.score})` : '');
       destroyHls();
       modal.classList.add('open');
 
       if (!streams.length) {
         bar.style.display = 'none';
-        body.innerHTML = `<div class="stream-list-wrap"><div class="empty-box">No active stream available for this match yet.</div></div>`;
+        const ytQuery = encodeURIComponent(`${match.title} highlights`);
+        body.innerHTML = `
+          <div class="stream-list-wrap">
+            <div class="empty-box">
+              <p style="margin-bottom:14px;">No direct stream or video link is attached to this match right now.</p>
+              <a class="btn-primary" href="https://www.youtube.com/results?search_query=${ytQuery}" target="_blank" rel="noopener noreferrer">Search Highlights / Replay ↗</a>
+            </div>
+          </div>`;
         return;
       }
 
@@ -876,8 +955,8 @@
         bar.style.display = 'flex';
         bar.innerHTML = streams.map((st, i) => `
           <button class="src-chip ${i === idx ? 'active' : ''}" data-sidx="${i}">${escapeHtml(st.label)}</button>
-        `).join('');
-        bar.querySelectorAll('.src-chip').forEach(btn => {
+        `).join('') + `<a class="src-chip ext-link" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
+        bar.querySelectorAll('.src-chip[data-sidx]').forEach(btn => {
           btn.onclick = () => playStream(+btn.dataset.sidx);
         });
       };
@@ -919,6 +998,7 @@
         bar.innerHTML = `
           <span style="font-size:12px;color:var(--fg-tertiary);">Source ${idx + 1}/${list.length}</span>
           ${list.length > 1 ? `<button class="src-chip active" id="nextChSrc">Next Source ↻</button>` : ''}
+          <a class="src-chip ext-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>
         `;
         document.getElementById('nextChSrc')?.addEventListener('click', () => {
           idx = (idx + 1) % list.length;
@@ -961,28 +1041,31 @@
       document.getElementById('playerBar').style.display = 'none';
     }
 
-    function renderMatchCard(m, isLive) {
+    function renderMatchCard(m, status) {
       const fav = isMatchFav(m.id ?? m.title);
       const startTime = m.starts_at
         ? new Date(m.starts_at * 1000).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-        : 'Live Stream';
+        : 'Schedule TBD';
       const poster = m.poster || m.image || '';
       const encoded = encodeURIComponent(JSON.stringify(m));
+      const pillText = status === 'live'
+        ? '<span class="live-dot"></span> LIVE'
+        : status === 'ended'
+          ? (m.score ? `FT • ${escapeHtml(m.score)}` : 'FINISHED')
+          : escapeHtml(startTime);
 
       return `
         <div class="match-card">
           <div class="match-banner" onclick="openMatchPlayer(JSON.parse(decodeURIComponent('${encoded}')))">
             ${poster ? `<img src="${escapeHtml(poster)}" alt="${escapeHtml(m.title)}" loading="lazy" onerror="this.style.display='none'" />` : ''}
             <div class="match-scrim"></div>
-            <div class="match-pill">
-              ${isLive ? '<span class="live-dot"></span> LIVE' : escapeHtml(startTime)}
-            </div>
+            <div class="match-pill">${pillText}</div>
             <button class="fav-btn ${fav ? 'active' : ''}" onclick="event.stopPropagation(); toggleMatchFav(JSON.parse(decodeURIComponent('${encoded}')))" title="Favorite">★</button>
           </div>
           <div class="match-body" onclick="openMatchPlayer(JSON.parse(decodeURIComponent('${encoded}')))">
             <div class="match-league">${escapeHtml(m.league || m.category || 'Sports')}</div>
             <div class="match-title">${escapeHtml(m.title)}</div>
-            <div class="match-sub">${isLive ? 'Click to watch stream' : 'Starts ' + escapeHtml(startTime)}</div>
+            <div class="match-sub">${status === 'live' ? 'Watch live stream' : status === 'ended' ? 'View replay / highlights' : 'Starts ' + escapeHtml(startTime)}</div>
           </div>
         </div>`;
     }
@@ -990,17 +1073,21 @@
     function renderMatchesView() {
       const q = STATE.search.trim().toLowerCase();
       const now = Date.now();
+      const isTunisia = STATE.sportFilter === 'tunisia';
 
-      const filtered = STATE.matches.filter(m => {
-        const catOk = STATE.sportFilter === 'all' || (m.category || '').toLowerCase() === STATE.sportFilter.toLowerCase();
-        const qOk = !q || (m.title || '').toLowerCase().includes(q) || (m.league || '').toLowerCase().includes(q) || (m.category || '').toLowerCase().includes(q);
-        return catOk && qOk;
-      });
+      const sourceList = isTunisia
+        ? STATE.tunisiaEvents
+        : STATE.matches.filter(m => STATE.sportFilter === 'all' || (m.category || '').toLowerCase() === STATE.sportFilter.toLowerCase());
 
-      const live = filtered.filter(m => isLiveStream(m, now));
-      const upcoming = filtered.filter(m => !isLiveStream(m, now) && (m.starts_at || 0) * 1000 > now);
-      const featured = live[0] || upcoming[0] || null;
+      const filtered = sourceList.filter(m =>
+        !q || (m.title || '').toLowerCase().includes(q) || (m.league || '').toLowerCase().includes(q) || (m.category || '').toLowerCase().includes(q)
+      );
+
+      const live = filtered.filter(m => getMatchStatus(m, now) === 'live');
+      const upcoming = filtered.filter(m => getMatchStatus(m, now) === 'upcoming');
+      const featured = live[0] || upcoming[0] || filtered[0] || null;
       const featEncoded = featured ? encodeURIComponent(JSON.stringify(featured)) : '';
+      const featStatus = featured ? getMatchStatus(featured, now) : 'upcoming';
 
       return `
         ${featured ? `
@@ -1008,31 +1095,56 @@
             ${featured.poster ? `<div class="hero-glow" style="background-image:url('${escapeHtml(featured.poster)}')"></div>` : ''}
             <div class="hero-content">
               <div class="hero-meta-row">
-                <span class="badge-live"><span class="live-dot"></span> ${isLiveStream(featured, now) ? 'LIVE NOW' : 'FEATURED'}</span>
+                ${featStatus === 'live'
+                  ? '<span class="badge-live"><span class="live-dot"></span> LIVE NOW</span>'
+                  : '<span class="badge-upcoming">FEATURED FIXTURE</span>'}
                 <span class="badge-league">${escapeHtml(featured.league || featured.category || 'Football')}</span>
               </div>
               <h1 class="hero-title">${escapeHtml(featured.title)}</h1>
-              <p class="hero-sub">Instant access to live match streams and upcoming fixtures on Footime.</p>
-              <button class="btn-primary" onclick="openMatchPlayer(JSON.parse(decodeURIComponent('${featEncoded}')))">▶ Watch Now</button>
+              <p class="hero-sub">Live matches, Tunisian Ligue 1 fixtures, replays, and TV channels on Footime.</p>
+              <button class="btn-primary" onclick="openMatchPlayer(JSON.parse(decodeURIComponent('${featEncoded}')))">▶ Open Match</button>
             </div>
           </section>` : ''}
 
         <div class="filter-bar">
-          ${SPORT_CATEGORIES.map(cat => `
-            <button class="filter-chip ${STATE.sportFilter === cat ? 'active' : ''}" data-sport="${escapeHtml(cat)}">
-              ${cat === 'all' ? 'All Sports' : escapeHtml(cat)}
+          ${SPORT_FILTERS.map(f => `
+            <button class="filter-chip ${f.special ? 'tunisia-chip' : ''} ${STATE.sportFilter === f.id ? 'active' : ''}" data-sport="${escapeHtml(f.id)}">
+              ${escapeHtml(f.label)}
             </button>
           `).join('')}
         </div>
 
+        ${isTunisia ? `<div class="info-banner">🇹🇳 Tunisian League fixtures & results feed active.</div>` : ''}
+
         <h2 class="section-title"><span class="accent-bar"></span> Live Now (${live.length})</h2>
         <div class="matches-grid">
-          ${live.length ? live.map(m => renderMatchCard(m, true)).join('') : `<div class="empty-box">No live matches for "${escapeHtml(STATE.sportFilter)}" right now.</div>`}
+          ${live.length ? live.map(m => renderMatchCard(m, 'live')).join('') : `<div class="empty-box">No live matches for "${escapeHtml(STATE.sportFilter)}" right now. Check Upcoming or Replays & Highlights.</div>`}
         </div>
 
         <h2 class="section-title"><span class="accent-bar"></span> Upcoming (${upcoming.length})</h2>
         <div class="matches-grid">
-          ${upcoming.length ? upcoming.slice(0, 24).map(m => renderMatchCard(m, false)).join('') : `<div class="empty-box">No upcoming fixtures scheduled right now.</div>`}
+          ${upcoming.length ? upcoming.slice(0, 24).map(m => renderMatchCard(m, 'upcoming')).join('') : `<div class="empty-box">No upcoming matches in this filter right now.</div>`}
+        </div>
+      `;
+    }
+
+    function renderReplaysView() {
+      const q = STATE.search.trim().toLowerCase();
+      const now = Date.now();
+      const pool = [...STATE.matches, ...STATE.tunisiaEvents];
+      const ended = pool.filter(m => {
+        const st = getMatchStatus(m, now);
+        const qOk = !q || (m.title || '').toLowerCase().includes(q) || (m.league || '').toLowerCase().includes(q);
+        return (st === 'ended' || Boolean(m.videoUrl) || Boolean(m.score)) && qOk;
+      });
+
+      return `
+        <h2 class="section-title"><span class="accent-bar"></span> Replays & Match Highlights (${ended.length})</h2>
+        <div class="info-banner">Finished matches & highlights. If a match does not have a direct embedded replay URL, clicking opens a quick highlights search option.</div>
+        <div class="matches-grid">
+          ${ended.length
+            ? ended.slice(0, 30).map(m => renderMatchCard(m, 'ended')).join('')
+            : `<div class="empty-box">No finished matches or replay entries available yet.</div>`}
         </div>
       `;
     }
@@ -1060,6 +1172,8 @@
             <option value="all">All Categories</option>
             ${categories.map(c => `<option value="${escapeHtml(c)}" ${STATE.catFilter === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
           </select>
+          <button class="filter-chip ${STATE.catFilter === 'sports' ? 'active' : ''}" id="quickSportsChBtn">⚽ Sports Only</button>
+          <button class="filter-chip tunisia-chip ${STATE.countryFilter === 'TN' ? 'active' : ''}" id="quickTnChBtn">🇹🇳 Tunisia (TN)</button>
         </div>
         <div class="matches-grid">
           ${list.length ? list.map(ch => {
@@ -1087,7 +1201,7 @@
       return `
         <h2 class="section-title"><span class="accent-bar"></span> Favorite Matches (${favM.length})</h2>
         <div class="matches-grid">
-          ${favM.length ? favM.map(m => renderMatchCard(m, isLiveStream(m))).join('') : `<div class="empty-box">No favorite matches saved yet.</div>`}
+          ${favM.length ? favM.map(m => renderMatchCard(m, getMatchStatus(m))).join('') : `<div class="empty-box">No favorite matches saved yet.</div>`}
         </div>
         <h2 class="section-title"><span class="accent-bar"></span> Favorite Channels (${favC.length})</h2>
         <div class="matches-grid">
@@ -1110,12 +1224,14 @@
     function render() {
       const app = document.getElementById('appContent');
       if (STATE.tab === 'matches') app.innerHTML = renderMatchesView();
+      else if (STATE.tab === 'replays') app.innerHTML = renderReplaysView();
       else if (STATE.tab === 'channels') app.innerHTML = renderChannelsView();
       else app.innerHTML = renderFavoritesView();
 
       app.querySelectorAll('.filter-chip[data-sport]').forEach(btn => {
         btn.onclick = () => {
           STATE.sportFilter = btn.dataset.sport;
+          if (STATE.sportFilter === 'tunisia') loadTunisiaLeague();
           render();
         };
       });
@@ -1126,6 +1242,14 @@
       });
       document.getElementById('catSelect')?.addEventListener('change', e => {
         STATE.catFilter = e.target.value;
+        render();
+      });
+      document.getElementById('quickSportsChBtn')?.addEventListener('click', () => {
+        STATE.catFilter = STATE.catFilter === 'sports' ? 'all' : 'sports';
+        render();
+      });
+      document.getElementById('quickTnChBtn')?.addEventListener('click', () => {
+        STATE.countryFilter = STATE.countryFilter === 'TN' ? 'all' : 'TN';
         render();
       });
     }
@@ -1143,7 +1267,10 @@
     });
     document.getElementById('refreshBtn').addEventListener('click', () => {
       if (STATE.tab === 'channels') loadChannels(true);
-      else loadMatches(true);
+      else {
+        loadMatches(true);
+        if (STATE.sportFilter === 'tunisia') loadTunisiaLeague(true);
+      }
     });
     document.getElementById('closePlayerBtn').addEventListener('click', closePlayer);
     document.getElementById('playerModal').addEventListener('click', e => {
