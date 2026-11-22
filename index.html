@@ -92,6 +92,9 @@
     .stage{aspect-ratio:16/9;background:#000;width:100%}
     .stage iframe,.stage video{width:100%;height:100%;border:0}
     .m-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 18px;border-top:1px solid var(--border);background:var(--bg-card)}
+    .m-yt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;border-top:1px solid var(--border);background:var(--bg-elevated)}
+    .yt-in{flex:1;min-width:200px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:12px;outline:none}
+    .yt-in:focus{border-color:var(--accent)}
     .s-btn{padding:6px 12px;border-radius:8px;background:var(--bg-elevated);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--fg-secondary);text-decoration:none}
     .s-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-bright)}
     .ext{margin-left:auto;color:var(--accent-gold);border-color:rgba(245,158,11,.35)}
@@ -150,6 +153,11 @@
       </div>
       <div id="mBody"></div>
       <div class="m-bar" id="mBar" style="display:none;"></div>
+      <div class="m-yt" id="mYt" style="display:none;">
+        <a class="s-btn active" id="ytSearchLink" target="_blank" rel="noopener">▶ Search on YouTube</a>
+        <input class="yt-in" id="ytUrlInput" type="text" placeholder="Paste YouTube or embed link to play here..." />
+        <button class="s-btn active" id="ytPlayBtn">Load Link</button>
+      </div>
     </div>
   </div>
 
@@ -190,6 +198,14 @@
     };
 
     const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+    function toEmbedUrl(raw){
+      const u = (raw||'').trim();
+      if(!u) return '';
+      const m1 = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
+      if(m1) return `https://www.youtube.com/embed/${m1[1]}?autoplay=1`;
+      return u;
+    }
 
     function matchQ(item){
       const q = ST.q.trim().toLowerCase();
@@ -321,23 +337,35 @@
       document.getElementById('modal').classList.remove('open');
       document.getElementById('mBody').innerHTML = '';
       document.getElementById('mBar').style.display = 'none';
+      document.getElementById('mYt').style.display = 'none';
     }
 
     function openMatch(m){
       const sources = [];
       if(m.iframe) sources.push({label:`${(m.locale||'EN').toUpperCase()} • ${m.source_tag||'Main'}`, url:m.iframe});
       (m.substreams||[]).forEach((sub,i)=> sub.iframe && sources.push({label:`${(sub.locale||m.locale||'EN').toUpperCase()} • ${sub.source_tag||sub.name||'Backup '+(i+1)}`, url:sub.iframe}));
-      if(m.videoUrl) sources.push({label:'Highlight / Video', url:m.videoUrl});
+      if(m.videoUrl) sources.push({label:'Highlight / Video', url:toEmbedUrl(m.videoUrl)});
 
       const body = document.getElementById('mBody');
       const bar = document.getElementById('mBar');
+      const ytRow = document.getElementById('mYt');
       document.getElementById('mTitle').textContent = m.title + (m.score ? ` (${m.score})` : '');
       destroyHls();
       document.getElementById('modal').classList.add('open');
 
+      ytRow.style.display = 'flex';
+      document.getElementById('ytSearchLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(m.title + ' highlights replay')}`;
+      const ytInput = document.getElementById('ytUrlInput');
+      ytInput.value = '';
+      document.getElementById('ytPlayBtn').onclick = () => {
+        const emb = toEmbedUrl(ytInput.value);
+        if(!emb) return;
+        body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+      };
+
       if(!sources.length){
         bar.style.display = 'none';
-        body.innerHTML = `<div style="padding:24px;"><div class="empty">No stream URL attached.<br><br><a class="btn-primary" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(m.title+' highlights')}">Search Replay / Highlights ↗</a></div></div>`;
+        body.innerHTML = `<div style="padding:24px;"><div class="empty">No automatic stream URL attached. Use "Search on YouTube" below or paste a YouTube/embed link.</div></div>`;
         return;
       }
 
@@ -356,6 +384,7 @@
       const list = ch.streams || [ch.url].filter(Boolean);
       const body = document.getElementById('mBody');
       const bar = document.getElementById('mBar');
+      document.getElementById('mYt').style.display = 'none';
       document.getElementById('mTitle').textContent = ch.name;
       destroyHls();
       document.getElementById('modal').classList.add('open');
