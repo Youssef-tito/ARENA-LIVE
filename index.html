@@ -10,107 +10,227 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <style>
     :root {
-      --bg-base:#070b0a; --bg-elevated:#0d1412; --bg-card:#121c19; --bg-hover:#182622;
-      --fg-primary:#f4f8f6; --fg-secondary:#b7c7c1; --fg-tertiary:#798e87;
-      --accent:#10b981; --accent-bright:#34d399; --accent-gold:#f59e0b;
-      --accent-soft:rgba(16,185,129,.14); --live-red:#ef4444; --border:rgba(255,255,255,.08);
+      --bg-base: #070b0a;
+      --bg-elevated: #0d1412;
+      --bg-card: #121c19;
+      --bg-hover: #182622;
+      --fg-primary: #f4f8f6;
+      --fg-secondary: #b7c7c1;
+      --fg-tertiary: #798e87;
+      --accent: #10b981;
+      --accent-bright: #34d399;
+      --accent-gold: #f59e0b;
+      --accent-soft: rgba(16, 185, 129, 0.14);
+      --live-red: #ef4444;
+      --border: rgba(255, 255, 255, 0.08);
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg-base);color:var(--fg-primary);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden}
-    h1,h2,h3{font-family:'Outfit',sans-serif}
-    button,input,select{font-family:inherit;color:inherit}
-    button{cursor:pointer;background:none;border:none}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-base);
+      color: var(--fg-primary);
+      font-family: "Plus Jakarta Sans", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    h1, h2, h3 { font-family: "Outfit", sans-serif; }
+    button, input, select { font-family: inherit; color: inherit; }
+    button { cursor: pointer; background: none; border: none; }
 
-    .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 22px;background:rgba(7,11,10,.86);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
-    .arena-brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
-    .arena-logo{width:180px;height:78px;object-fit:contain;display:block;transition:transform .25s,filter .25s;filter:drop-shadow(0 0 10px rgba(0,255,100,.28))}
-    .arena-brand:hover .arena-logo{transform:scale(1.04);filter:drop-shadow(0 0 18px rgba(0,255,100,.6))}
-    @media(max-width:600px){.arena-logo{width:140px;height:60px}}
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 8px 22px;
+      background: rgba(7, 11, 10, 0.86);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .arena-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+    .arena-logo {
+      width: 180px; height: 78px; object-fit: contain; display: block;
+      transition: transform 0.25s, filter 0.25s;
+      filter: drop-shadow(0 0 10px rgba(0, 255, 100, 0.28));
+    }
+    .arena-brand:hover .arena-logo {
+      transform: scale(1.04);
+      filter: drop-shadow(0 0 18px rgba(0, 255, 100, 0.6));
+    }
+    @media (max-width: 600px) { .arena-logo { width: 140px; height: 60px; } }
 
-    .nav-pills{position:relative;display:flex;gap:4px;padding:4px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:999px}
-    .nav-btn{position:relative;z-index:2;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--fg-tertiary);white-space:nowrap}
-    .nav-btn.active{color:#04130e}
-    .nav-indicator{position:absolute;top:4px;left:4px;height:calc(100% - 8px);border-radius:999px;background:linear-gradient(135deg,var(--accent-bright),var(--accent));transition:all .22s ease;z-index:1}
+    .nav-pills {
+      position: relative; display: flex; gap: 4px; padding: 4px;
+      background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 999px;
+    }
+    .nav-btn {
+      position: relative; z-index: 2; padding: 8px 14px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; color: var(--fg-tertiary); white-space: nowrap;
+    }
+    .nav-btn.active { color: #04130e; }
+    .nav-indicator {
+      position: absolute; top: 4px; left: 4px; height: calc(100% - 8px); border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+      transition: all 0.22s ease; z-index: 1;
+    }
 
-    .top-actions{display:flex;align-items:center;gap:8px}
-    .search-box{display:flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;padding:8px 13px;width:210px}
-    .search-box:focus-within{border-color:var(--accent)}
-    .search-box input{background:transparent;border:none;outline:none;font-size:13px;width:100%}
-    .icon-btn{padding:8px 13px;border-radius:999px;background:var(--bg-card);border:1px solid var(--border);font-size:12.5px;font-weight:600;color:var(--fg-secondary)}
-    .icon-btn:hover{border-color:var(--accent);color:var(--fg-primary)}
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+    .search-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 999px; padding: 8px 13px; width: 210px;
+    }
+    .search-box:focus-within { border-color: var(--accent); }
+    .search-box input { background: transparent; border: none; outline: none; font-size: 13px; width: 100%; }
+    .icon-btn {
+      padding: 8px 13px; border-radius: 999px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      font-size: 12.5px; font-weight: 600; color: var(--fg-secondary);
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--fg-primary); }
 
-    .container{max-width:1360px;margin:0 auto;padding:22px}
-    .hero-card{position:relative;overflow:hidden;border-radius:20px;background:linear-gradient(135deg,#0d241c 0%,#0b1310 55%,#161409 100%);border:1px solid rgba(16,185,129,.22);padding:28px;margin-bottom:20px}
-    .hero-glow{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.2;filter:blur(18px);pointer-events:none}
-    .hero-content{position:relative;z-index:2;max-width:760px}
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-right:8px;margin-bottom:10px}
-    .badge-live{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#fca5a5}
-    .badge-up{background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.4);color:#fcd34d}
-    .badge-lg{background:var(--accent-soft);color:var(--accent-bright)}
-    .live-dot{width:7px;height:7px;border-radius:50%;background:var(--live-red);box-shadow:0 0 8px var(--live-red)}
-    .hero-title{font-size:clamp(22px,3.4vw,36px);font-weight:800;margin-bottom:8px}
-    .hero-sub{color:var(--fg-secondary);font-size:13.5px;margin-bottom:16px}
-    .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;background:linear-gradient(135deg,var(--accent-bright),var(--accent));color:#03120d;font-weight:700;font-size:13px;text-decoration:none}
+    .container { max-width: 1360px; margin: 0 auto; padding: 22px; }
+    .hero-card {
+      position: relative; overflow: hidden; border-radius: 20px;
+      background: linear-gradient(135deg, #0d241c 0%, #0b1310 55%, #161409 100%);
+      border: 1px solid rgba(16, 185, 129, 0.22); padding: 28px; margin-bottom: 20px;
+    }
+    .hero-glow {
+      position: absolute; inset: 0; background-size: cover; background-position: center;
+      opacity: 0.2; filter: blur(18px); pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 760px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+      border-radius: 999px; font-size: 11px; font-weight: 700; margin-right: 8px; margin-bottom: 10px;
+    }
+    .badge-live { background: rgba(239, 68, 68, 0.16); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; }
+    .badge-up { background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; }
+    .badge-lg { background: var(--accent-soft); color: var(--accent-bright); }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live-red); box-shadow: 0 0 8px var(--live-red); }
+    .hero-title { font-size: clamp(22px, 3.4vw, 36px); font-weight: 800; margin-bottom: 8px; }
+    .hero-sub { color: var(--fg-secondary); font-size: 13.5px; margin-bottom: 16px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+      color: #03120d; font-weight: 700; font-size: 13px; text-decoration: none;
+    }
 
-    .filter-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:18px;scrollbar-width:none}
-    .filter-bar::-webkit-scrollbar{display:none}
-    .chip{padding:8px 14px;border-radius:999px;background:var(--bg-card);border:1px solid var(--border);font-size:12.5px;font-weight:600;color:var(--fg-secondary);white-space:nowrap}
-    .chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-bright)}
-    .chip.tn.active{background:rgba(245,158,11,.16);border-color:var(--accent-gold);color:#fcd34d}
+    .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 18px; scrollbar-width: none; }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .chip {
+      padding: 8px 14px; border-radius: 999px; background: var(--bg-card);
+      border: 1px solid var(--border); font-size: 12.5px; font-weight: 600;
+      color: var(--fg-secondary); white-space: nowrap;
+    }
+    .chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-bright); }
+    .chip.tn.active { background: rgba(245, 158, 11, 0.16); border-color: var(--accent-gold); color: #fcd34d; }
 
-    .section-title{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;margin:22px 0 12px}
-    .bar{width:4px;height:18px;border-radius:999px;background:linear-gradient(180deg,var(--accent-bright),var(--accent-gold))}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:15px}
+    .section-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; margin: 22px 0 12px; }
+    .bar { width: 4px; height: 18px; border-radius: 999px; background: linear-gradient(180deg, var(--accent-bright), var(--accent-gold)); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 15px; }
 
-    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .2s,border-color .2s}
-    .card:hover{transform:translateY(-2px);border-color:rgba(16,185,129,.45)}
-    .banner{position:relative;aspect-ratio:16/9;background:#0b1210;overflow:hidden;cursor:pointer}
-    .banner img{width:100%;height:100%;object-fit:cover;opacity:.75}
-    .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,11,10,.15),rgba(7,11,10,.88))}
-    .pill{position:absolute;top:10px;left:10px;z-index:2;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(7,11,10,.8);border:1px solid var(--border);display:inline-flex;align-items:center;gap:5px}
-    .fav{position:absolute;top:10px;right:10px;z-index:3;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(7,11,10,.8);border:1px solid var(--border);color:var(--fg-tertiary)}
-    .fav.on{color:var(--accent-gold);border-color:rgba(245,158,11,.5)}
-    .body{padding:13px;cursor:pointer}
-    .lg{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--accent-bright)}
-    .title{font-size:14.5px;font-weight:700;margin:4px 0}
-    .sub{font-size:12px;color:var(--fg-tertiary)}
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover { transform: translateY(-2px); border-color: rgba(16, 185, 129, 0.45); }
+    .banner { position: relative; aspect-ratio: 16 / 9; background: #0b1210; overflow: hidden; cursor: pointer; }
+    .banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
+    .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 11, 10, 0.15), rgba(7, 11, 10, 0.88)); }
+    .pill {
+      position: absolute; top: 10px; left: 10px; z-index: 2; padding: 4px 9px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; background: rgba(7, 11, 10, 0.8);
+      border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 5px;
+    }
+    .fav {
+      position: absolute; top: 10px; right: 10px; z-index: 3; width: 30px; height: 30px;
+      border-radius: 50%; display: grid; place-items: center;
+      background: rgba(7, 11, 10, 0.8); border: 1px solid var(--border); color: var(--fg-tertiary);
+    }
+    .fav.on { color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.5); }
+    .body { padding: 13px; cursor: pointer; }
+    .lg { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-bright); }
+    .title { font-size: 14.5px; font-weight: 700; margin: 4px 0; }
+    .sub { font-size: 12px; color: var(--fg-tertiary); }
 
-    .team-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
-    .team-card:hover{border-color:var(--accent);background:var(--bg-hover)}
-    .team-badge{width:50px;height:50px;border-radius:12px;background:var(--bg-elevated);display:grid;place-items:center;overflow:hidden;flex-shrink:0;font-weight:800;font-size:13px;color:var(--accent-bright)}
-    .team-badge img{width:100%;height:100%;object-fit:contain}
+    .team-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .team-card:hover { border-color: var(--accent); background: var(--bg-hover); }
+    .team-badge {
+      width: 50px; height: 50px; border-radius: 12px; background: var(--bg-elevated);
+      display: grid; place-items: center; overflow: hidden; flex-shrink: 0;
+      font-weight: 800; font-size: 13px; color: var(--accent-bright);
+    }
+    .team-badge img { width: 100%; height: 100%; object-fit: contain; }
 
-    .ch-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px;cursor:pointer}
-    .ch-card:hover{border-color:var(--accent)}
-    .ch-logo{width:54px;height:38px;border-radius:8px;background:var(--bg-elevated);display:grid;place-items:center;overflow:hidden;flex-shrink:0;font-size:11px;font-weight:700;color:var(--fg-tertiary)}
-    .ch-logo img{max-width:100%;max-height:100%;object-fit:contain}
+    .ch-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 13px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+    }
+    .ch-card:hover { border-color: var(--accent); }
+    .ch-logo {
+      width: 54px; height: 38px; border-radius: 8px; background: var(--bg-elevated);
+      display: grid; place-items: center; overflow: hidden; flex-shrink: 0;
+      font-size: 11px; font-weight: 700; color: var(--fg-tertiary);
+    }
+    .ch-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-    .tv-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
-    .select{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px}
-    .note{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:12px;padding:11px 15px;font-size:12.5px;color:var(--fg-secondary);margin-bottom:16px}
-    .empty{grid-column:1/-1;text-align:center;padding:36px 18px;background:var(--bg-card);border:1px dashed var(--border);border-radius:14px;color:var(--fg-tertiary)}
+    .tv-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .select { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 13px; }
+    .note {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px; padding: 11px 15px; font-size: 12.5px; color: var(--fg-secondary); margin-bottom: 16px;
+    }
+    .empty {
+      grid-column: 1 / -1; text-align: center; padding: 36px 18px;
+      background: var(--bg-card); border: 1px dashed var(--border); border-radius: 14px; color: var(--fg-tertiary);
+    }
 
-    .modal{position:fixed;inset:0;z-index:100;background:rgba(3,6,5,.86);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:14px}
-    .modal.open{display:flex}
-    .box{width:100%;max-width:940px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
-    .m-head{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border)}
-    .m-scroll{overflow-y:auto}
-    .stage{aspect-ratio:16/9;background:#000;width:100%}
-    .stage iframe,.stage video{width:100%;height:100%;border:0}
-    .m-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 18px;border-top:1px solid var(--border);background:var(--bg-card)}
-    .m-yt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;border-top:1px solid var(--border);background:var(--bg-elevated)}
-    .yt-in{flex:1;min-width:200px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:12px;outline:none}
-    .yt-in:focus{border-color:var(--accent)}
-    .s-btn{padding:6px 12px;border-radius:8px;background:var(--bg-elevated);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--fg-secondary);text-decoration:none}
-    .s-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-bright)}
-    .ext{margin-left:auto;color:var(--accent-gold);border-color:rgba(245,158,11,.35)}
+    .modal {
+      position: fixed; inset: 0; z-index: 100; background: rgba(3, 6, 5, 0.86);
+      backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 14px;
+    }
+    .modal.open { display: flex; }
+    .box {
+      width: 100%; max-width: 940px; background: var(--bg-elevated);
+      border: 1px solid var(--border); border-radius: 18px; overflow: hidden;
+      max-height: 92vh; display: flex; flex-direction: column;
+    }
+    .m-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+    .m-scroll { overflow-y: auto; }
+    .stage { aspect-ratio: 16 / 9; background: #000; width: 100%; }
+    .stage iframe, .stage video { width: 100%; height: 100%; border: 0; }
+    .m-bar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 11px 18px; border-top: 1px solid var(--border); background: var(--bg-card);
+    }
+    .m-yt {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 10px 18px; border-top: 1px solid var(--border); background: var(--bg-elevated);
+    }
+    .yt-in {
+      flex: 1; min-width: 200px; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 7px 11px; font-size: 12px; outline: none;
+    }
+    .yt-in:focus { border-color: var(--accent); }
+    .s-btn {
+      padding: 6px 12px; border-radius: 8px; background: var(--bg-elevated);
+      border: 1px solid var(--border); font-size: 12px; font-weight: 600;
+      color: var(--fg-secondary); text-decoration: none;
+    }
+    .s-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-bright); }
+    .ext { margin-left: auto; color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.35); }
+    .t-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 12px; margin-bottom: 8px; border-radius: 10px;
+      background: var(--bg-card); border: 1px solid var(--border); font-size: 13px;
+    }
 
-    .t-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);font-size:13px}
-
-    @media(max-width:780px){
-      .topbar{flex-wrap:wrap;padding:8px 14px}
-      .nav-pills{order:3;width:100%;overflow-x:auto}
-      .search-box{width:160px}
+    @media (max-width: 780px) {
+      .topbar { flex-wrap: wrap; padding: 8px 14px; }
+      .nav-pills { order: 3; width: 100%; overflow-x: auto; }
+      .search-box { width: 160px; }
     }
   </style>
 </head>
@@ -136,9 +256,9 @@
 
     <nav class="nav-pills" id="navPills">
       <div class="nav-indicator" id="navInd"></div>
-      <button class="nav-btn active" data-tab="matches">Matches & Live</button>
+      <button class="nav-btn active" data-tab="matches">Matches &amp; Live</button>
       <button class="nav-btn" data-tab="teams">World Teams</button>
-      <button class="nav-btn" data-tab="replays">Replays & Highlights</button>
+      <button class="nav-btn" data-tab="replays">Replays &amp; Highlights</button>
       <button class="nav-btn" data-tab="channels">Live Channels</button>
       <button class="nav-btn" data-tab="favorites">Favorites (<span id="favCount">0</span>)</button>
     </nav>
@@ -146,7 +266,7 @@
     <div class="top-actions">
       <div class="search-box">
         <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="Search match, team, channel..." autocomplete="off"/>
+        <input type="text" id="searchInput" placeholder="Search match, team, channel..." autocomplete="off" />
       </div>
       <button class="icon-btn" id="refreshBtn">↻ Refresh</button>
     </div>
@@ -164,7 +284,7 @@
         <div id="mBody"></div>
         <div class="m-bar" id="mBar" style="display:none;"></div>
         <div class="m-yt" id="mYt" style="display:none;">
-          <a class="s-btn active" id="ytSearchLink" target="_blank" rel="noopener">▶ Search on YouTube</a>
+          <a class="s-btn active" id="ytSearchLink" target="_blank" rel="noopener noreferrer">▶ Search on YouTube</a>
           <input class="yt-in" id="ytUrlInput" type="text" placeholder="Paste YouTube or embed link to play here..." />
           <button class="s-btn active" id="ytPlayBtn">Load Link</button>
         </div>
@@ -173,320 +293,350 @@
   </div>
 
   <script>
-    const PPV_API = 'https://api.ppv.st/api/streams';
-    const IPTV_API = 'https://iptv-org.github.io/api';
-    const SDB_API = 'https://www.thesportsdb.com/api/v1/json/3';
+    const PPV_API = "https://api.ppv.st/api/streams";
+    const IPTV_API = "https://iptv-org.github.io/api";
+    const SDB_API = "https://www.thesportsdb.com/api/v1/json/3";
 
     const ALIASES = {
-      taraji: ['esperance','es tunis','taraji'],
-      esperance: ['esperance','es tunis','taraji'],
-      lifri9i: ['club africain','africain','ca'],
-      africain: ['club africain','africain','ca'],
-      etoile: ['etoile','sahel','ess'],
-      sfaxien: ['sfaxien','cs sfaxien','css'],
-      monastir: ['monastir','us monastir','usmo'],
-      bizerte: ['bizerte','ca bizertin','cab']
+      taraji: ["esperance", "es tunis", "taraji"],
+      esperance: ["esperance", "es tunis", "taraji"],
+      lifri9i: ["club africain", "africain", "ca"],
+      africain: ["club africain", "africain", "ca"],
+      etoile: ["etoile", "sahel", "ess"],
+      sfaxien: ["sfaxien", "cs sfaxien", "css"],
+      monastir: ["monastir", "us monastir", "usmo"],
+      bizerte: ["bizerte", "ca bizertin", "cab"]
     };
 
     const SPORTS = [
-      {id:'Football',label:'Football'},
-      {id:'tunisia',label:'🇹🇳 Tunisian League',tn:1},
-      {id:'all',label:'All Sports'},
-      {id:'Basketball',label:'Basketball'},
-      {id:'Combat Sports',label:'Combat Sports'},
-      {id:'American Football',label:'American Football'},
-      {id:'Tennis',label:'Tennis'},
-      {id:'Cricket',label:'Cricket'},
-      {id:'Motorsport',label:'Motorsport'}
+      { id: "Football", label: "Football" },
+      { id: "tunisia", label: "🇹🇳 Tunisian League", tn: 1 },
+      { id: "all", label: "All Sports" },
+      { id: "Basketball", label: "Basketball" },
+      { id: "Combat Sports", label: "Combat Sports" },
+      { id: "American Football", label: "American Football" },
+      { id: "Tennis", label: "Tennis" },
+      { id: "Cricket", label: "Cricket" },
+      { id: "Motorsport", label: "Motorsport" }
     ];
 
     const WORLD_LEAGUES = [
-      {id:'all', label:'All Loaded'},
-      {id:'tunisia', label:'🇹🇳 Tunisia', tn:1},
-      {id:'English Premier League', label:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'},
-      {id:'Spanish La Liga', label:'🇪🇸 La Liga'},
-      {id:'Italian Serie A', label:'🇮🇹 Serie A'},
-      {id:'German Bundesliga', label:'🇩🇪 Bundesliga'},
-      {id:'French Ligue 1', label:'🇫🇷 Ligue 1'}
+      { id: "all", label: "All Loaded" },
+      { id: "tunisia", label: "🇹🇳 Tunisia", tn: 1 },
+      { id: "English Premier League", label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League" },
+      { id: "Spanish La Liga", label: "🇪🇸 La Liga" },
+      { id: "Italian Serie A", label: "🇮🇹 Serie A" },
+      { id: "German Bundesliga", label: "🇩🇪 Bundesliga" },
+      { id: "French Ligue 1", label: "🇫🇷 Ligue 1" }
     ];
 
     const ST = {
-      tab:'matches', sport:'Football', teamLeague:'all', q:'',
-      matches:[], tnMatches:[], teams:[], channels:[],
-      country:'all', cat:'all',
-      favs: JSON.parse(localStorage.getItem('footime_favs')||'{"matches":[],"channels":[]}'),
-      hls:null
+      tab: "matches",
+      sport: "Football",
+      teamLeague: "all",
+      q: "",
+      matches: [],
+      tnMatches: [],
+      teams: [],
+      channels: [],
+      country: "all",
+      cat: "all",
+      favs: JSON.parse(localStorage.getItem("footime_favs") || '{"matches":[],"channels":[]}'),
+      hls: null
     };
 
-    const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const esc = s => String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
 
-    function toEmbedUrl(raw){
-      const u = (raw||'').trim();
-      if(!u) return '';
+    function toEmbedUrl(raw) {
+      const u = (raw || "").trim();
+      if (!u) return "";
       const m1 = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
-      if(m1) return `https://www.youtube.com/embed/${m1[1]}?autoplay=1`;
+      if (m1) return `https://www.youtube.com/embed/${m1[1]}?autoplay=1`;
       return u;
     }
 
-    function matchQ(item){
+    function matchQ(item) {
       const q = ST.q.trim().toLowerCase();
-      if(!q) return true;
-      const hay = `${item.title||''} ${item.name||''} ${item.league||''} ${item.strLeague||''} ${item.category||''}`.toLowerCase();
-      return [q, ...(ALIASES[q]||[])].some(t => hay.includes(t));
+      if (!q) return true;
+      const hay = `${item.title || ""} ${item.name || ""} ${item.league || ""} ${item.strLeague || ""} ${item.category || ""}`.toLowerCase();
+      return [q, ...(ALIASES[q] || [])].some(t => hay.includes(t));
     }
 
-    function saveFavs(){
-      localStorage.setItem('footime_favs', JSON.stringify(ST.favs));
-      document.getElementById('favCount').textContent = ST.favs.matches.length + ST.favs.channels.length;
+    function saveFavs() {
+      localStorage.setItem("footime_favs", JSON.stringify(ST.favs));
+      document.getElementById("favCount").textContent = ST.favs.matches.length + ST.favs.channels.length;
     }
 
-    function toggleFav(type, obj){
+    function toggleFav(type, obj) {
       const list = ST.favs[type];
       const key = String(obj.id ?? obj.title);
       const i = list.findIndex(x => String(x.id ?? x.title) === key);
-      if(i>-1) list.splice(i,1); else list.push(obj);
-      saveFavs(); render();
+      if (i > -1) list.splice(i, 1);
+      else list.push(obj);
+      saveFavs();
+      render();
     }
 
-    function moveInd(){
-      const b = document.querySelector('#navPills .nav-btn.active');
-      const ind = document.getElementById('navInd');
-      if(b && ind){ ind.style.left = b.offsetLeft+'px'; ind.style.width = b.offsetWidth+'px'; }
+    function moveInd() {
+      const b = document.querySelector("#navPills .nav-btn.active");
+      const ind = document.getElementById("navInd");
+      if (b && ind) {
+        ind.style.left = b.offsetLeft + "px";
+        ind.style.width = b.offsetWidth + "px";
+      }
     }
 
-    function statusOf(s, now=Date.now()){
-      if(s.always_live) return 'live';
-      const st = (s.starts_at||0)*1000, en = (s.ends_at||0)*1000;
-      if(!st) return 'live';
-      if(now < st) return 'upcoming';
-      if(en && now > en) return 'ended';
-      return 'live';
+    function statusOf(s, now = Date.now()) {
+      if (s.always_live) return "live";
+      const st = (s.starts_at || 0) * 1000;
+      const en = (s.ends_at || 0) * 1000;
+      if (!st) return "live";
+      if (now < st) return "upcoming";
+      if (en && now > en) return "ended";
+      return "live";
     }
 
-    async function loadMatches(force=false){
-      if(!force && ST.matches.length){ render(); return; }
-      document.getElementById('app').innerHTML = `<div class="empty">Loading matches...</div>`;
-      try{
+    async function loadMatches(force = false) {
+      if (!force && ST.matches.length) { render(); return; }
+      document.getElementById("app").innerHTML = `<div class="empty">Loading matches...</div>`;
+      try {
         const data = await (await fetch(PPV_API)).json();
         const out = [];
-        for(const cat of (data.streams||[])){
-          for(const s of (cat.streams||[])){
-            out.push({...s, id:s.id||s.name, title:s.name||'Match', league:s.tag||cat.category||'Sports', category:cat.category||s.category_name||'Sports'});
+        for (const cat of (data.streams || [])) {
+          for (const s of (cat.streams || [])) {
+            out.push({
+              ...s,
+              id: s.id || s.name,
+              title: s.name || "Match",
+              league: s.tag || cat.category || "Sports",
+              category: cat.category || s.category_name || "Sports"
+            });
           }
         }
         ST.matches = out;
         render();
-      }catch{
-        document.getElementById('app').innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
+      } catch {
+        document.getElementById("app").innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
       }
     }
 
-    async function loadTunisia(force=false){
-      if(!force && ST.tnMatches.length){ render(); return; }
-      const teams = ['Esperance','Club Africain','Etoile du Sahel','CS Sfaxien','US Monastir'];
+    async function loadTunisia(force = false) {
+      if (!force && ST.tnMatches.length) { render(); return; }
+      const teams = ["Esperance", "Club Africain", "Etoile du Sahel", "CS Sfaxien", "US Monastir"];
       const map = new Map();
-      const addEv = (ev, fallbackLeague='Tunisian Ligue 1') => {
-        if(!ev || !ev.idEvent || map.has(ev.idEvent)) return;
-        const ts = ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime()/1000) : 0;
+      const addEv = (ev, fallbackLeague = "Tunisian Ligue 1") => {
+        if (!ev || !ev.idEvent || map.has(ev.idEvent)) return;
+        const ts = ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : 0;
         const hasScore = ev.intHomeScore != null && ev.intAwayScore != null;
         map.set(ev.idEvent, {
-          id:'tn_'+ev.idEvent, title:ev.strEvent||'Tunisian Match', league:ev.strLeague||fallbackLeague,
-          category:'Football', poster:ev.strThumb||'', starts_at:ts,
-          ends_at:hasScore && ts ? ts+7200 : 0,
-          score:hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : '',
-          videoUrl:ev.strVideo||''
+          id: "tn_" + ev.idEvent,
+          title: ev.strEvent || "Tunisian Match",
+          league: ev.strLeague || fallbackLeague,
+          category: "Football",
+          poster: ev.strThumb || "",
+          starts_at: ts,
+          ends_at: hasScore && ts ? ts + 7200 : 0,
+          score: hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : "",
+          videoUrl: ev.strVideo || ""
         });
       };
 
       const leagueCalls = await Promise.all([
-        fetch(`${SDB_API}/eventsnextleague.php?id=4445`).then(r=>r.ok?r.json():{}).catch(()=>({})),
-        fetch(`${SDB_API}/eventspastleague.php?id=4445`).then(r=>r.ok?r.json():{}).catch(()=>({}))
+        fetch(`${SDB_API}/eventsnextleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+        fetch(`${SDB_API}/eventspastleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
       ]);
-      [...(leagueCalls[0].events||[]), ...(leagueCalls[1].events||[])].forEach(e=>addEv(e));
+      [...(leagueCalls[0].events || []), ...(leagueCalls[1].events || [])].forEach(e => addEv(e));
 
-      for(const t of teams){
-        try{
+      for (const t of teams) {
+        try {
           const td = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(t)}`)).json();
           const idTeam = td?.teams?.[0]?.idTeam;
-          if(!idTeam) continue;
+          if (!idTeam) continue;
           const [nx, ls] = await Promise.all([
-            fetch(`${SDB_API}/eventsnext.php?id=${idTeam}`).then(r=>r.ok?r.json():{}).catch(()=>({})),
-            fetch(`${SDB_API}/eventslast.php?id=${idTeam}`).then(r=>r.ok?r.json():{}).catch(()=>({}))
+            fetch(`${SDB_API}/eventsnext.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+            fetch(`${SDB_API}/eventslast.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
           ]);
-          [...(nx.events||[]), ...(ls.results||[])].forEach(e=>addEv(e, `${t} • Tunisia`));
-        }catch{}
+          [...(nx.events || []), ...(ls.results || [])].forEach(e => addEv(e, `${t} • Tunisia`));
+        } catch {}
       }
       ST.tnMatches = [...map.values()];
       render();
     }
 
-    async function loadTeams(force=false){
-      if(!force && ST.teams.length){ render(); return; }
-      document.getElementById('app').innerHTML = `<div class="empty">Loading world teams...</div>`;
+    async function loadTeams(force = false) {
+      if (!force && ST.teams.length) { render(); return; }
+      document.getElementById("app").innerHTML = `<div class="empty">Loading world teams...</div>`;
       const leagues = [
-        'English Premier League','Spanish La Liga','Italian Serie A',
-        'German Bundesliga','French Ligue 1','Tunisian Ligue 1'
+        "English Premier League", "Spanish La Liga", "Italian Serie A",
+        "German Bundesliga", "French Ligue 1", "Tunisian Ligue 1"
       ];
       const map = new Map();
-      for(const lg of leagues){
-        try{
+      for (const lg of leagues) {
+        try {
           const d = await (await fetch(`${SDB_API}/search_all_teams.php?l=${encodeURIComponent(lg)}`)).json();
-          for(const tm of (d.teams||[])){
-            if(!tm.idTeam || map.has(tm.idTeam)) continue;
+          for (const tm of (d.teams || [])) {
+            if (!tm.idTeam || map.has(tm.idTeam)) continue;
             map.set(tm.idTeam, {
               id: tm.idTeam,
               name: tm.strTeam,
-              league: lg.includes('Tunisian') ? 'tunisia' : lg,
+              league: lg.includes("Tunisian") ? "tunisia" : lg,
               leagueLabel: tm.strLeague || lg,
-              badge: tm.strBadge || '',
-              country: tm.strCountry || ''
+              badge: tm.strBadge || "",
+              country: tm.strCountry || ""
             });
           }
-        }catch{}
+        } catch {}
       }
       ST.teams = [...map.values()];
       render();
     }
 
-    async function searchAnyTeam(query){
-      const q = (query||'').trim();
-      if(!q) return;
-      try{
+    async function searchAnyTeam(query) {
+      const q = (query || "").trim();
+      if (!q) return;
+      try {
         const d = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(q)}`)).json();
-        const found = (d.teams||[]).filter(tm => tm.idTeam && (tm.strSport||'Soccer').toLowerCase().includes('soccer'));
-        const map = new Map(ST.teams.map(t=>[t.id, t]));
-        for(const tm of found){
-          if(!map.has(tm.idTeam)){
+        const found = (d.teams || []).filter(tm => tm.idTeam && (tm.strSport || "Soccer").toLowerCase().includes("soccer"));
+        const map = new Map(ST.teams.map(t => [t.id, t]));
+        for (const tm of found) {
+          if (!map.has(tm.idTeam)) {
             map.set(tm.idTeam, {
               id: tm.idTeam,
               name: tm.strTeam,
-              league: (tm.strLeague||'').toLowerCase().includes('tunisia') ? 'tunisia' : (tm.strLeague||'all'),
-              leagueLabel: tm.strLeague || 'World Team',
-              badge: tm.strBadge || '',
-              country: tm.strCountry || ''
+              league: (tm.strLeague || "").toLowerCase().includes("tunisia") ? "tunisia" : (tm.strLeague || "all"),
+              leagueLabel: tm.strLeague || "World Team",
+              badge: tm.strBadge || "",
+              country: tm.strCountry || ""
             });
           }
         }
         ST.teams = [...map.values()];
         render();
-      }catch{}
+      } catch {}
     }
 
-    async function openTeamDetails(tm){
-      const body = document.getElementById('mBody');
-      const bar = document.getElementById('mBar');
-      const ytRow = document.getElementById('mYt');
-      bar.style.display = 'none';
-      ytRow.style.display = 'flex';
-      document.getElementById('mTitle').textContent = `${tm.name} (${tm.leagueLabel})`;
-      document.getElementById('ytSearchLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(tm.name + ' match highlights')}`;
-      document.getElementById('ytUrlInput').value = '';
-      document.getElementById('ytPlayBtn').onclick = () => {
-        const emb = toEmbedUrl(document.getElementById('ytUrlInput').value);
-        if(emb) body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+    async function openTeamDetails(tm) {
+      const body = document.getElementById("mBody");
+      const bar = document.getElementById("mBar");
+      const ytRow = document.getElementById("mYt");
+      bar.style.display = "none";
+      ytRow.style.display = "flex";
+      document.getElementById("mTitle").textContent = `${tm.name} (${tm.leagueLabel})`;
+      document.getElementById("ytSearchLink").href = `https://www.youtube.com/results?search_query=${encodeURIComponent(tm.name + " match highlights")}`;
+      document.getElementById("ytUrlInput").value = "";
+      document.getElementById("ytPlayBtn").onclick = () => {
+        const emb = toEmbedUrl(document.getElementById("ytUrlInput").value);
+        if (emb) body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
       };
 
       destroyHls();
-      document.getElementById('modal').classList.add('open');
-      body.innerHTML = `<div style="padding:24px;"><div class="empty">Loading ${esc(tm.name)} live/upcoming & replays...</div></div>`;
+      document.getElementById("modal").classList.add("open");
+      body.innerHTML = `<div style="padding:24px;"><div class="empty">Loading ${esc(tm.name)} live/upcoming &amp; replays...</div></div>`;
 
-      const liveMatches = ST.matches.filter(m => (m.title||'').toLowerCase().includes(tm.name.toLowerCase()));
+      const liveMatches = ST.matches.filter(m => (m.title || "").toLowerCase().includes(tm.name.toLowerCase()));
       const [nx, ls] = await Promise.all([
-        fetch(`${SDB_API}/eventsnext.php?id=${tm.id}`).then(r=>r.ok?r.json():{}).catch(()=>({})),
-        fetch(`${SDB_API}/eventslast.php?id=${tm.id}`).then(r=>r.ok?r.json():{}).catch(()=>({}))
+        fetch(`${SDB_API}/eventsnext.php?id=${tm.id}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+        fetch(`${SDB_API}/eventslast.php?id=${tm.id}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
       ]);
       const upcoming = nx.events || [];
       const past = ls.results || [];
 
       const renderEvRow = (ev, isPast) => {
-        const title = ev.strEvent || 'Match';
-        const score = (ev.intHomeScore!=null && ev.intAwayScore!=null) ? ` (${ev.intHomeScore}-${ev.intAwayScore})` : '';
-        const yt = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + (isPast?' highlights':' live'))}`;
+        const title = ev.strEvent || "Match";
+        const score = (ev.intHomeScore != null && ev.intAwayScore != null) ? ` (${ev.intHomeScore}-${ev.intAwayScore})` : "";
+        const yt = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + (isPast ? " highlights" : " live"))}`;
         return `<div class="t-row">
           <div>
             <strong>${esc(title)}${esc(score)}</strong>
-            <div class="sub">${esc(ev.dateEvent || '')} • ${esc(ev.strLeague || tm.leagueLabel)}</div>
+            <div class="sub">${esc(ev.dateEvent || "")} • ${esc(ev.strLeague || tm.leagueLabel)}</div>
           </div>
-          <a class="s-btn active" target="_blank" rel="noopener" href="${esc(yt)}">${isPast?'Replay / Highlights ↗':'Search ↗'}</a>
+          <a class="s-btn active" target="_blank" rel="noopener noreferrer" href="${esc(yt)}">${isPast ? "Replay / Highlights ↗" : "Search ↗"}</a>
         </div>`;
       };
 
       body.innerHTML = `<div style="padding:18px;">
         <h3 style="margin-bottom:10px;">Live Stream Matches (${liveMatches.length})</h3>
         ${liveMatches.length
-          ? liveMatches.map(m => `<div class="t-row"><div><strong>${esc(m.title)}</strong><div class="sub">${esc(m.league)}</div></div><button class="s-btn active" onclick='openMatch(${JSON.stringify(m).replace(/'/g,"&#39;")})'>Watch Live ▶</button></div>`).join('')
+          ? liveMatches.map(m => `<div class="t-row"><div><strong>${esc(m.title)}</strong><div class="sub">${esc(m.league)}</div></div><button class="s-btn active" onclick='openMatch(${JSON.stringify(m).replace(/'/g, "&#39;")})'>Watch Live ▶</button></div>`).join("")
           : `<div class="sub" style="margin-bottom:14px;">No active stream in live feed for ${esc(tm.name)} right now.</div>`}
 
         <h3 style="margin:14px 0 10px;">Upcoming (${upcoming.length})</h3>
-        ${upcoming.length ? upcoming.slice(0,8).map(e=>renderEvRow(e,false)).join('') : `<div class="sub" style="margin-bottom:14px;">No upcoming fixtures listed.</div>`}
+        ${upcoming.length ? upcoming.slice(0, 8).map(e => renderEvRow(e, false)).join("") : `<div class="sub" style="margin-bottom:14px;">No upcoming fixtures listed.</div>`}
 
         <h3 style="margin:14px 0 10px;">Recent Matches / Replays (${past.length})</h3>
-        ${past.length ? past.slice(0,8).map(e=>renderEvRow(e,true)).join('') : `<div class="sub">No recent matches listed.</div>`}
+        ${past.length ? past.slice(0, 8).map(e => renderEvRow(e, true)).join("") : `<div class="sub">No recent matches listed.</div>`}
       </div>`;
     }
 
-    async function loadChannels(force=false){
-      if(!force && ST.channels.length){ render(); return; }
-      document.getElementById('app').innerHTML = `<div class="empty">Loading channels...</div>`;
-      try{
+    async function loadChannels(force = false) {
+      if (!force && ST.channels.length) { render(); return; }
+      document.getElementById("app").innerHTML = `<div class="empty">Loading channels...</div>`;
+      try {
         const [chs, sts, lgs] = await Promise.all([
-          fetch(`${IPTV_API}/channels.json`).then(r=>r.json()),
-          fetch(`${IPTV_API}/streams.json`).then(r=>r.json()),
-          fetch(`${IPTV_API}/logos.json`).then(r=>r.ok?r.json():[]).catch(()=>[])
+          fetch(`${IPTV_API}/channels.json`).then(r => r.json()),
+          fetch(`${IPTV_API}/streams.json`).then(r => r.json()),
+          fetch(`${IPTV_API}/logos.json`).then(r => r.ok ? r.json() : []).catch(() => [])
         ]);
         const logoMap = new Map();
-        for(const l of lgs) if(l.channel && l.url && !logoMap.has(l.channel)) logoMap.set(l.channel, l.url);
+        for (const l of lgs) if (l.channel && l.url && !logoMap.has(l.channel)) logoMap.set(l.channel, l.url);
         const stMap = new Map();
-        for(const s of sts){
-          if(!s.channel || !s.url || (s.status && s.status!=='online')) continue;
-          if(!stMap.has(s.channel)) stMap.set(s.channel, []);
+        for (const s of sts) {
+          if (!s.channel || !s.url || (s.status && s.status !== "online")) continue;
+          if (!stMap.has(s.channel)) stMap.set(s.channel, []);
           stMap.get(s.channel).push(s.url);
         }
-        ST.channels = chs.filter(c=>c.id && stMap.has(c.id)).map(c=>({
-          id:c.id, name:c.name||c.id, logo:logoMap.get(c.id)||'', streams:stMap.get(c.id),
-          country:(c.country||'').toUpperCase(),
-          category:Array.isArray(c.categories)?(c.categories[0]||'general'):(c.category||'general')
+        ST.channels = chs.filter(c => c.id && stMap.has(c.id)).map(c => ({
+          id: c.id,
+          name: c.name || c.id,
+          logo: logoMap.get(c.id) || "",
+          streams: stMap.get(c.id),
+          country: (c.country || "").toUpperCase(),
+          category: Array.isArray(c.categories) ? (c.categories[0] || "general") : (c.category || "general")
         }));
         render();
-      }catch{
-        document.getElementById('app').innerHTML = `<div class="empty">Failed to load channels. <button class="btn-primary" onclick="loadChannels(true)">Retry</button></div>`;
+      } catch {
+        document.getElementById("app").innerHTML = `<div class="empty">Failed to load channels. <button class="btn-primary" onclick="loadChannels(true)">Retry</button></div>`;
       }
     }
 
-    function destroyHls(){ if(ST.hls){ ST.hls.destroy(); ST.hls=null; } }
-    function closeModal(){
+    function destroyHls() { if (ST.hls) { ST.hls.destroy(); ST.hls = null; } }
+    function closeModal() {
       destroyHls();
-      document.getElementById('modal').classList.remove('open');
-      document.getElementById('mBody').innerHTML = '';
-      document.getElementById('mBar').style.display = 'none';
-      document.getElementById('mYt').style.display = 'none';
+      document.getElementById("modal").classList.remove("open");
+      document.getElementById("mBody").innerHTML = "";
+      document.getElementById("mBar").style.display = "none";
+      document.getElementById("mYt").style.display = "none";
     }
 
-    function openMatch(m){
+    function openMatch(m) {
       const sources = [];
-      if(m.iframe) sources.push({label:`${(m.locale||'EN').toUpperCase()} • ${m.source_tag||'Main'}`, url:m.iframe});
-      (m.substreams||[]).forEach((sub,i)=> sub.iframe && sources.push({label:`${(sub.locale||m.locale||'EN').toUpperCase()} • ${sub.source_tag||sub.name||'Backup '+(i+1)}`, url:sub.iframe}));
-      if(m.videoUrl) sources.push({label:'Highlight / Video', url:toEmbedUrl(m.videoUrl)});
+      if (m.iframe) sources.push({ label: `${(m.locale || "EN").toUpperCase()} • ${m.source_tag || "Main"}`, url: m.iframe });
+      (m.substreams || []).forEach((sub, i) => sub.iframe && sources.push({ label: `${(sub.locale || m.locale || "EN").toUpperCase()} • ${sub.source_tag || sub.name || "Backup " + (i + 1)}`, url: sub.iframe }));
+      if (m.videoUrl) sources.push({ label: "Highlight / Video", url: toEmbedUrl(m.videoUrl) });
 
-      const body = document.getElementById('mBody');
-      const bar = document.getElementById('mBar');
-      const ytRow = document.getElementById('mYt');
-      document.getElementById('mTitle').textContent = m.title + (m.score ? ` (${m.score})` : '');
+      const body = document.getElementById("mBody");
+      const bar = document.getElementById("mBar");
+      const ytRow = document.getElementById("mYt");
+      document.getElementById("mTitle").textContent = m.title + (m.score ? ` (${m.score})` : "");
       destroyHls();
-      document.getElementById('modal').classList.add('open');
+      document.getElementById("modal").classList.add("open");
 
-      ytRow.style.display = 'flex';
-      document.getElementById('ytSearchLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(m.title + ' highlights replay')}`;
-      const ytInput = document.getElementById('ytUrlInput');
-      ytInput.value = '';
-      document.getElementById('ytPlayBtn').onclick = () => {
+      ytRow.style.display = "flex";
+      document.getElementById("ytSearchLink").href = `https://www.youtube.com/results?search_query=${encodeURIComponent(m.title + " highlights replay")}`;
+      const ytInput = document.getElementById("ytUrlInput");
+      ytInput.value = "";
+      document.getElementById("ytPlayBtn").onclick = () => {
         const emb = toEmbedUrl(ytInput.value);
-        if(!emb) return;
+        if (!emb) return;
         body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
       };
 
-      if(!sources.length){
-        bar.style.display = 'none';
+      if (!sources.length) {
+        bar.style.display = "none";
         body.innerHTML = `<div style="padding:24px;"><div class="empty">No automatic stream URL attached. Use "Search on YouTube" below or paste a YouTube/embed link.</div></div>`;
         return;
       }
@@ -494,196 +644,201 @@
       const playIdx = (i) => {
         const s = sources[i];
         body.innerHTML = `<div class="stage"><iframe src="${esc(s.url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
-        bar.style.display = 'flex';
-        bar.innerHTML = sources.map((x,idx)=>`<button class="s-btn ${idx===i?'active':''}" data-i="${idx}">${esc(x.label)}</button>`).join('')
-          + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener">Open in Tab ↗</a>`;
-        bar.querySelectorAll('[data-i]').forEach(btn=>btn.onclick=()=>playIdx(+btn.dataset.i));
+        bar.style.display = "flex";
+        bar.innerHTML = sources.map((x, idx) => `<button class="s-btn ${idx === i ? "active" : ""}" data-i="${idx}">${esc(x.label)}</button>`).join("")
+          + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
+        bar.querySelectorAll("[data-i]").forEach(btn => btn.onclick = () => playIdx(+btn.dataset.i));
       };
       playIdx(0);
     }
 
-    function openChannel(ch){
+    function openChannel(ch) {
       const list = ch.streams || [ch.url].filter(Boolean);
-      const body = document.getElementById('mBody');
-      const bar = document.getElementById('mBar');
-      document.getElementById('mYt').style.display = 'none';
-      document.getElementById('mTitle').textContent = ch.name;
+      const body = document.getElementById("mBody");
+      const bar = document.getElementById("mBar");
+      document.getElementById("mYt").style.display = "none";
+      document.getElementById("mTitle").textContent = ch.name;
       destroyHls();
-      document.getElementById('modal').classList.add('open');
+      document.getElementById("modal").classList.add("open");
 
       let idx = 0;
       const run = () => {
         const url = list[idx];
         destroyHls();
-        bar.style.display = 'flex';
-        bar.innerHTML = `<span style="font-size:12px;color:var(--fg-tertiary);">Source ${idx+1}/${list.length}</span>`
-          + (list.length>1 ? `<button class="s-btn active" id="nxSrc">Next Source ↻</button>` : '')
-          + `<a class="s-btn ext" href="${esc(url)}" target="_blank" rel="noopener">Open in Tab ↗</a>`;
-        document.getElementById('nxSrc')?.addEventListener('click',()=>{ idx=(idx+1)%list.length; run(); });
+        bar.style.display = "flex";
+        bar.innerHTML = `<span style="font-size:12px;color:var(--fg-tertiary);">Source ${idx + 1}/${list.length}</span>`
+          + (list.length > 1 ? `<button class="s-btn active" id="nxSrc">Next Source ↻</button>` : "")
+          + `<a class="s-btn ext" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
+        document.getElementById("nxSrc")?.addEventListener("click", () => { idx = (idx + 1) % list.length; run(); });
 
-        if(/\.m3u8(\?|$)/i.test(url) && window.Hls && Hls.isSupported()){
+        if (/\.m3u8(\?|$)/i.test(url) && window.Hls && Hls.isSupported()) {
           body.innerHTML = `<div class="stage"><video id="vid" controls autoplay playsinline></video></div>`;
-          const v = document.getElementById('vid');
-          const hls = new Hls({enableWorker:true,lowLatencyMode:true});
-          ST.hls = hls; hls.loadSource(url); hls.attachMedia(v);
-          hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
-          hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal && idx<list.length-1){ idx++; run(); } });
-        }else{
+          const v = document.getElementById("vid");
+          const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+          ST.hls = hls;
+          hls.loadSource(url);
+          hls.attachMedia(v);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(() => {}));
+          hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal && idx < list.length - 1) { idx++; run(); } });
+        } else {
           body.innerHTML = `<div class="stage"><iframe src="${esc(url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
         }
       };
       run();
     }
 
-    function matchCard(m, st){
-      const isFav = ST.favs.matches.some(x=>String(x.id??x.title)===String(m.id??m.title));
-      const dt = m.starts_at ? new Date(m.starts_at*1000).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : 'TBD';
+    function matchCard(m, st) {
+      const isFav = ST.favs.matches.some(x => String(x.id ?? x.title) === String(m.id ?? m.title));
+      const dt = m.starts_at ? new Date(m.starts_at * 1000).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD";
       const enc = encodeURIComponent(JSON.stringify(m));
-      const pill = st==='live' ? '<span class="live-dot"></span> LIVE' : st==='ended' ? (m.score?`FT • ${esc(m.score)}`:'FINISHED') : esc(dt);
+      const pill = st === "live" ? '<span class="live-dot"></span> LIVE' : st === "ended" ? (m.score ? `FT • ${esc(m.score)}` : "FINISHED") : esc(dt);
       return `<div class="card">
         <div class="banner" onclick="openMatch(JSON.parse(decodeURIComponent('${enc}')))">
-          ${m.poster?`<img src="${esc(m.poster)}" loading="lazy" onerror="this.style.display='none'">`:''}
+          ${m.poster ? `<img src="${esc(m.poster)}" loading="lazy" onerror="this.style.display='none'">` : ""}
           <div class="scrim"></div>
           <div class="pill">${pill}</div>
-          <button class="fav ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav('matches',JSON.parse(decodeURIComponent('${enc}')))">★</button>
+          <button class="fav ${isFav ? "on" : ""}" onclick="event.stopPropagation();toggleFav('matches',JSON.parse(decodeURIComponent('${enc}')))">★</button>
         </div>
         <div class="body" onclick="openMatch(JSON.parse(decodeURIComponent('${enc}')))">
-          <div class="lg">${esc(m.league||m.category)}</div>
+          <div class="lg">${esc(m.league || m.category)}</div>
           <div class="title">${esc(m.title)}</div>
-          <div class="sub">${st==='live'?'Live stream':st==='ended'?'Replay / Highlights':'Starts '+esc(dt)}</div>
+          <div class="sub">${st === "live" ? "Live stream" : st === "ended" ? "Replay / Highlights" : "Starts " + esc(dt)}</div>
         </div>
       </div>`;
     }
 
-    function render(){
-      const app = document.getElementById('app');
+    function render() {
+      const app = document.getElementById("app");
       const now = Date.now();
 
-      if(ST.tab==='matches'){
-        const isTn = ST.sport==='tunisia';
-        const base = isTn ? ST.tnMatches : ST.matches.filter(m=>ST.sport==='all'||(m.category||'').toLowerCase()===ST.sport.toLowerCase());
+      if (ST.tab === "matches") {
+        const isTn = ST.sport === "tunisia";
+        const base = isTn ? ST.tnMatches : ST.matches.filter(m => ST.sport === "all" || (m.category || "").toLowerCase() === ST.sport.toLowerCase());
         const list = base.filter(matchQ);
-        const live = list.filter(m=>statusOf(m,now)==='live');
-        const up = list.filter(m=>statusOf(m,now)==='upcoming');
-        const past = list.filter(m=>statusOf(m,now)==='ended');
+        const live = list.filter(m => statusOf(m, now) === "live");
+        const up = list.filter(m => statusOf(m, now) === "upcoming");
+        const past = list.filter(m => statusOf(m, now) === "ended");
         const feat = live[0] || up[0] || list[0];
-        const fEnc = feat ? encodeURIComponent(JSON.stringify(feat)) : '';
+        const fEnc = feat ? encodeURIComponent(JSON.stringify(feat)) : "";
 
         app.innerHTML = `
           ${feat ? `<section class="hero-card">
-            ${feat.poster?`<div class="hero-glow" style="background-image:url('${esc(feat.poster)}')"></div>`:''}
+            ${feat.poster ? `<div class="hero-glow" style="background-image:url('${esc(feat.poster)}')"></div>` : ""}
             <div class="hero-content">
-              <span class="badge ${statusOf(feat,now)==='live'?'badge-live':'badge-up'}">${statusOf(feat,now)==='live'?'LIVE NOW':'FEATURED'}</span>
-              <span class="badge badge-lg">${esc(feat.league||feat.category)}</span>
+              <span class="badge ${statusOf(feat, now) === "live" ? "badge-live" : "badge-up"}">${statusOf(feat, now) === "live" ? "LIVE NOW" : "FEATURED"}</span>
+              <span class="badge badge-lg">${esc(feat.league || feat.category)}</span>
               <h1 class="hero-title">${esc(feat.title)}</h1>
               <p class="hero-sub">Footime — Live football, Tunisian Ligue 1, world teams, replays, and channels.</p>
               <a href="javascript:void(0)" class="btn-primary" onclick="openMatch(JSON.parse(decodeURIComponent('${fEnc}')))">▶ Open Match</a>
             </div>
-          </section>` : ''}
+          </section>` : ""}
           <div class="filter-bar">
-            ${SPORTS.map(s=>`<button class="chip ${s.tn?'tn':''} ${ST.sport===s.id?'active':''}" data-sp="${esc(s.id)}">${esc(s.label)}</button>`).join('')}
+            ${SPORTS.map(s => `<button class="chip ${s.tn ? "tn" : ""} ${ST.sport === s.id ? "active" : ""}" data-sp="${esc(s.id)}">${esc(s.label)}</button>`).join("")}
           </div>
-          ${ST.q ? `<div class="note"><span>Search: <strong>${esc(ST.q)}</strong></span><button class="s-btn active" id="clrQ">Clear Search</button></div>` : ''}
+          ${ST.q ? `<div class="note"><span>Search: <strong>${esc(ST.q)}</strong></span><button class="s-btn active" id="clrQ">Clear Search</button></div>` : ""}
           <h2 class="section-title"><span class="bar"></span> Live Now (${live.length})</h2>
-          <div class="grid">${live.length?live.map(m=>matchCard(m,'live')).join(''):`<div class="empty">No live matches right now.</div>`}</div>
+          <div class="grid">${live.length ? live.map(m => matchCard(m, "live")).join("") : `<div class="empty">No live matches right now.</div>`}</div>
           <h2 class="section-title"><span class="bar"></span> Upcoming (${up.length})</h2>
-          <div class="grid">${up.length?up.slice(0,24).map(m=>matchCard(m,'upcoming')).join(''):`<div class="empty">No upcoming matches right now.</div>`}</div>
+          <div class="grid">${up.length ? up.slice(0, 24).map(m => matchCard(m, "upcoming")).join("") : `<div class="empty">No upcoming matches right now.</div>`}</div>
           ${isTn ? `<h2 class="section-title"><span class="bar"></span> Recent Results (${past.length})</h2>
-          <div class="grid">${past.length?past.slice(0,24).map(m=>matchCard(m,'ended')).join(''):`<div class="empty">No recent results returned.</div>`}</div>` : ''}
+          <div class="grid">${past.length ? past.slice(0, 24).map(m => matchCard(m, "ended")).join("") : `<div class="empty">No recent results returned.</div>`}</div>` : ""}
         `;
-        app.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{
+        app.querySelectorAll("[data-sp]").forEach(b => b.onclick = () => {
           ST.sport = b.dataset.sp;
-          if(ST.sport==='tunisia') loadTunisia();
+          if (ST.sport === "tunisia") loadTunisia();
           render();
         });
-        document.getElementById('clrQ')?.addEventListener('click',()=>{ ST.q=''; document.getElementById('searchInput').value=''; render(); });
+        document.getElementById("clrQ")?.addEventListener("click", () => { ST.q = ""; document.getElementById("searchInput").value = ""; render(); });
 
-      }else if(ST.tab==='teams'){
-        const tList = ST.teams.filter(t => (ST.teamLeague==='all'||t.league===ST.teamLeague) && matchQ(t));
+      } else if (ST.tab === "teams") {
+        const tList = ST.teams.filter(t => (ST.teamLeague === "all" || t.league === ST.teamLeague) && matchQ(t));
         app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Teams (${tList.length})</h2>
           <div class="filter-bar">
-            ${WORLD_LEAGUES.map(l=>`<button class="chip ${l.tn?'tn':''} ${ST.teamLeague===l.id?'active':''}" data-tlg="${esc(l.id)}">${esc(l.label)}</button>`).join('')}
+            ${WORLD_LEAGUES.map(l => `<button class="chip ${l.tn ? "tn" : ""} ${ST.teamLeague === l.id ? "active" : ""}" data-tlg="${esc(l.id)}">${esc(l.label)}</button>`).join("")}
             <button class="chip active" id="findTeamApiBtn">🌐 Search Any Team Online</button>
           </div>
-          <div class="grid">${tList.length ? tList.map(tm=>{
+          <div class="grid">${tList.length ? tList.map(tm => {
             const enc = encodeURIComponent(JSON.stringify(tm));
             return `<div class="team-card" onclick="openTeamDetails(JSON.parse(decodeURIComponent('${enc}')))">
-              <div class="team-badge">${tm.badge?`<img src="${esc(tm.badge)}" loading="lazy" onerror="this.remove()">`:esc(tm.name.slice(0,3).toUpperCase())}</div>
+              <div class="team-badge">${tm.badge ? `<img src="${esc(tm.badge)}" loading="lazy" onerror="this.remove()">` : esc(tm.name.slice(0, 3).toUpperCase())}</div>
               <div style="flex:1;min-width:0;">
                 <div class="title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(tm.name)}</div>
-                <div class="sub">${esc(tm.leagueLabel)} ${tm.country?'• '+esc(tm.country):''}</div>
+                <div class="sub">${esc(tm.leagueLabel)} ${tm.country ? "• " + esc(tm.country) : ""}</div>
               </div>
             </div>`;
-          }).join('') : `<div class="empty">No teams match your filter. Try "Search Any Team Online".</div>`}</div>`;
-        app.querySelectorAll('[data-tlg]').forEach(b=>b.onclick=()=>{ ST.teamLeague=b.dataset.tlg; render(); });
-        document.getElementById('findTeamApiBtn')?.addEventListener('click', ()=>searchAnyTeam(ST.q || 'Real Madrid'));
+          }).join("") : `<div class="empty">No teams match your filter. Try "Search Any Team Online".</div>`}</div>`;
+        app.querySelectorAll("[data-tlg]").forEach(b => b.onclick = () => { ST.teamLeague = b.dataset.tlg; render(); });
+        document.getElementById("findTeamApiBtn")?.addEventListener("click", () => searchAnyTeam(ST.q || "Real Madrid"));
 
-      }else if(ST.tab==='replays'){
-        const ended = [...ST.matches,...ST.tnMatches].filter(m=>(statusOf(m,now)==='ended'||m.videoUrl||m.score)&&matchQ(m));
-        app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Replays & Highlights (${ended.length})</h2>
-          <div class="grid">${ended.length?ended.slice(0,30).map(m=>matchCard(m,'ended')).join(''):`<div class="empty">No replays or highlights available yet.</div>`}</div>`;
+      } else if (ST.tab === "replays") {
+        const ended = [...ST.matches, ...ST.tnMatches].filter(m => (statusOf(m, now) === "ended" || m.videoUrl || m.score) && matchQ(m));
+        app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Replays &amp; Highlights (${ended.length})</h2>
+          <div class="grid">${ended.length ? ended.slice(0, 30).map(m => matchCard(m, "ended")).join("") : `<div class="empty">No replays or highlights available yet.</div>`}</div>`;
 
-      }else if(ST.tab==='channels'){
+      } else if (ST.tab === "channels") {
         const q = ST.q.trim().toLowerCase();
-        const countries = [...new Set(ST.channels.map(c=>c.country).filter(Boolean))].sort();
-        const cats = [...new Set(ST.channels.map(c=>c.category).filter(Boolean))].sort();
-        const chs = ST.channels.filter(c=> (ST.country==='all'||c.country===ST.country) && (ST.cat==='all'||c.category===ST.cat) && (!q||(c.name||'').toLowerCase().includes(q)) ).slice(0,90);
+        const countries = [...new Set(ST.channels.map(c => c.country).filter(Boolean))].sort();
+        const cats = [...new Set(ST.channels.map(c => c.category).filter(Boolean))].sort();
+        const chs = ST.channels.filter(c => (ST.country === "all" || c.country === ST.country) && (ST.cat === "all" || c.category === ST.cat) && (!q || (c.name || "").toLowerCase().includes(q))).slice(0, 90);
         app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Live Channels</h2>
           <div class="tv-bar">
-            <select class="select" id="selC"><option value="all">All Countries</option>${countries.map(c=>`<option value="${esc(c)}" ${ST.country===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-            <select class="select" id="selK"><option value="all">All Categories</option>${cats.map(c=>`<option value="${esc(c)}" ${ST.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-            <button class="chip ${ST.cat==='sports'?'active':''}" id="qSp">⚽ Sports</button>
-            <button class="chip tn ${ST.country==='TN'?'active':''}" id="qTn">🇹🇳 Tunisia</button>
+            <select class="select" id="selC"><option value="all">All Countries</option>${countries.map(c => `<option value="${esc(c)}" ${ST.country === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
+            <select class="select" id="selK"><option value="all">All Categories</option>${cats.map(c => `<option value="${esc(c)}" ${ST.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
+            <button class="chip ${ST.cat === "sports" ? "active" : ""}" id="qSp">⚽ Sports</button>
+            <button class="chip tn ${ST.country === "TN" ? "active" : ""}" id="qTn">🇹🇳 Tunisia</button>
           </div>
-          <div class="grid">${chs.length?chs.map(ch=>{
-            const isFav = ST.favs.channels.some(x=>String(x.id)===String(ch.id));
+          <div class="grid">${chs.length ? chs.map(ch => {
+            const isFav = ST.favs.channels.some(x => String(x.id) === String(ch.id));
             const enc = encodeURIComponent(JSON.stringify(ch));
             return `<div class="ch-card" onclick="openChannel(JSON.parse(decodeURIComponent('${enc}')))">
-              <div class="ch-logo">${ch.logo?`<img src="${esc(ch.logo)}" loading="lazy" onerror="this.remove()">`:'TV'}</div>
-              <div style="flex:1;min-width:0;"><div class="title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(ch.name)}</div><div class="sub">${esc(ch.country||'INTL')} • ${esc(ch.category)}</div></div>
-              <button class="fav ${isFav?'on':''}" style="position:static;" onclick="event.stopPropagation();toggleFav('channels',JSON.parse(decodeURIComponent('${enc}')))">★</button>
+              <div class="ch-logo">${ch.logo ? `<img src="${esc(ch.logo)}" loading="lazy" onerror="this.remove()">` : "TV"}</div>
+              <div style="flex:1;min-width:0;"><div class="title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(ch.name)}</div><div class="sub">${esc(ch.country || "INTL")} • ${esc(ch.category)}</div></div>
+              <button class="fav ${isFav ? "on" : ""}" style="position:static;" onclick="event.stopPropagation();toggleFav('channels',JSON.parse(decodeURIComponent('${enc}')))">★</button>
             </div>`;
-          }).join(''):`<div class="empty">No channels found.</div>`}</div>`;
-        document.getElementById('selC').onchange = e => { ST.country = e.target.value; render(); };
-        document.getElementById('selK').onchange = e => { ST.cat = e.target.value; render(); };
-        document.getElementById('qSp').onclick = () => { ST.cat = ST.cat==='sports'?'all':'sports'; render(); };
-        document.getElementById('qTn').onclick = () => { ST.country = ST.country==='TN'?'all':'TN'; render(); };
+          }).join("") : `<div class="empty">No channels found.</div>`}</div>`;
+        document.getElementById("selC").onchange = e => { ST.country = e.target.value; render(); };
+        document.getElementById("selK").onchange = e => { ST.cat = e.target.value; render(); };
+        document.getElementById("qSp").onclick = () => { ST.cat = ST.cat === "sports" ? "all" : "sports"; render(); };
+        document.getElementById("qTn").onclick = () => { ST.country = ST.country === "TN" ? "all" : "TN"; render(); };
 
-      }else{
+      } else {
         app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Favorite Matches (${ST.favs.matches.length})</h2>
-          <div class="grid">${ST.favs.matches.length?ST.favs.matches.map(m=>matchCard(m,statusOf(m,now))).join(''):`<div class="empty">No favorite matches yet.</div>`}</div>
+          <div class="grid">${ST.favs.matches.length ? ST.favs.matches.map(m => matchCard(m, statusOf(m, now))).join("") : `<div class="empty">No favorite matches yet.</div>`}</div>
           <h2 class="section-title"><span class="bar"></span> Favorite Channels (${ST.favs.channels.length})</h2>
-          <div class="grid">${ST.favs.channels.length?ST.favs.channels.map(ch=>{
+          <div class="grid">${ST.favs.channels.length ? ST.favs.channels.map(ch => {
             const enc = encodeURIComponent(JSON.stringify(ch));
             return `<div class="ch-card" onclick="openChannel(JSON.parse(decodeURIComponent('${enc}')))">
-              <div class="ch-logo">${ch.logo?`<img src="${esc(ch.logo)}">`:'TV'}</div>
-              <div style="flex:1;"><div class="title">${esc(ch.name)}</div><div class="sub">${esc(ch.country||'INTL')} • ${esc(ch.category)}</div></div>
+              <div class="ch-logo">${ch.logo ? `<img src="${esc(ch.logo)}">` : "TV"}</div>
+              <div style="flex:1;"><div class="title">${esc(ch.name)}</div><div class="sub">${esc(ch.country || "INTL")} • ${esc(ch.category)}</div></div>
               <button class="fav on" style="position:static;" onclick="event.stopPropagation();toggleFav('channels',JSON.parse(decodeURIComponent('${enc}')))">★</button>
             </div>`;
-          }).join(''):`<div class="empty">No favorite channels yet.</div>`}</div>`;
+          }).join("") : `<div class="empty">No favorite channels yet.</div>`}</div>`;
       }
     }
 
-    document.querySelectorAll('#navPills .nav-btn').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#navPills .nav-btn").forEach(b => b.onclick = () => {
       ST.tab = b.dataset.tab;
-      document.querySelectorAll('#navPills .nav-btn').forEach(x=>x.classList.toggle('active',x===b));
-      moveInd(); render();
-      if(ST.tab==='teams' && !ST.teams.length) loadTeams();
-      if(ST.tab==='channels' && !ST.channels.length) loadChannels();
-      if(ST.sport==='tunisia' && !ST.tnMatches.length) loadTunisia();
+      document.querySelectorAll("#navPills .nav-btn").forEach(x => x.classList.toggle("active", x === b));
+      moveInd();
+      render();
+      if (ST.tab === "teams" && !ST.teams.length) loadTeams();
+      if (ST.tab === "channels" && !ST.channels.length) loadChannels();
+      if (ST.sport === "tunisia" && !ST.tnMatches.length) loadTunisia();
     });
-    document.getElementById('brandHome').onclick = e => { e.preventDefault(); document.querySelector('[data-tab="matches"]').click(); };
-    document.getElementById('searchInput').oninput = e => { ST.q = e.target.value; render(); };
-    document.getElementById('refreshBtn').onclick = () => {
-      if(ST.tab==='channels') loadChannels(true);
-      else if(ST.tab==='teams') loadTeams(true);
-      else { loadMatches(true); if(ST.sport==='tunisia') loadTunisia(true); }
+    document.getElementById("brandHome").onclick = e => { e.preventDefault(); document.querySelector('[data-tab="matches"]').click(); };
+    document.getElementById("searchInput").oninput = e => { ST.q = e.target.value; render(); };
+    document.getElementById("refreshBtn").onclick = () => {
+      if (ST.tab === "channels") loadChannels(true);
+      else if (ST.tab === "teams") loadTeams(true);
+      else { loadMatches(true); if (ST.sport === "tunisia") loadTunisia(true); }
     };
-    document.getElementById('mClose').onclick = closeModal;
-    document.getElementById('modal').onclick = e => { if(e.target.id==='modal') closeModal(); };
+    document.getElementById("mClose").onclick = closeModal;
+    document.getElementById("modal").onclick = e => { if (e.target.id === "modal") closeModal(); };
     window.onresize = moveInd;
 
-    saveFavs(); moveInd(); loadMatches();
+    saveFavs();
+    moveInd();
+    loadMatches();
   </script>
 </body>
 </html>
