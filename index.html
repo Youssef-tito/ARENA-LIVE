@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Footime — Live Football, Replays & Sports</title>
+  <title>Footime — Live Football, Teams & Replays</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -75,6 +75,11 @@
     .title{font-size:14.5px;font-weight:700;margin:4px 0}
     .sub{font-size:12px;color:var(--fg-tertiary)}
 
+    .team-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
+    .team-card:hover{border-color:var(--accent);background:var(--bg-hover)}
+    .team-badge{width:50px;height:50px;border-radius:12px;background:var(--bg-elevated);display:grid;place-items:center;overflow:hidden;flex-shrink:0;font-weight:800;font-size:13px;color:var(--accent-bright)}
+    .team-badge img{width:100%;height:100%;object-fit:contain}
+
     .ch-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px;cursor:pointer}
     .ch-card:hover{border-color:var(--accent)}
     .ch-logo{width:54px;height:38px;border-radius:8px;background:var(--bg-elevated);display:grid;place-items:center;overflow:hidden;flex-shrink:0;font-size:11px;font-weight:700;color:var(--fg-tertiary)}
@@ -87,8 +92,9 @@
 
     .modal{position:fixed;inset:0;z-index:100;background:rgba(3,6,5,.86);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:14px}
     .modal.open{display:flex}
-    .box{width:100%;max-width:940px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+    .box{width:100%;max-width:940px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
     .m-head{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border)}
+    .m-scroll{overflow-y:auto}
     .stage{aspect-ratio:16/9;background:#000;width:100%}
     .stage iframe,.stage video{width:100%;height:100%;border:0}
     .m-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 18px;border-top:1px solid var(--border);background:var(--bg-card)}
@@ -98,6 +104,8 @@
     .s-btn{padding:6px 12px;border-radius:8px;background:var(--bg-elevated);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--fg-secondary);text-decoration:none}
     .s-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-bright)}
     .ext{margin-left:auto;color:var(--accent-gold);border-color:rgba(245,158,11,.35)}
+
+    .t-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);font-size:13px}
 
     @media(max-width:780px){
       .topbar{flex-wrap:wrap;padding:8px 14px}
@@ -129,6 +137,7 @@
     <nav class="nav-pills" id="navPills">
       <div class="nav-indicator" id="navInd"></div>
       <button class="nav-btn active" data-tab="matches">Matches & Live</button>
+      <button class="nav-btn" data-tab="teams">World Teams</button>
       <button class="nav-btn" data-tab="replays">Replays & Highlights</button>
       <button class="nav-btn" data-tab="channels">Live Channels</button>
       <button class="nav-btn" data-tab="favorites">Favorites (<span id="favCount">0</span>)</button>
@@ -151,12 +160,14 @@
         <strong id="mTitle">Stream</strong>
         <button id="mClose" style="font-size:18px;padding:4px 8px;">✕</button>
       </div>
-      <div id="mBody"></div>
-      <div class="m-bar" id="mBar" style="display:none;"></div>
-      <div class="m-yt" id="mYt" style="display:none;">
-        <a class="s-btn active" id="ytSearchLink" target="_blank" rel="noopener">▶ Search on YouTube</a>
-        <input class="yt-in" id="ytUrlInput" type="text" placeholder="Paste YouTube or embed link to play here..." />
-        <button class="s-btn active" id="ytPlayBtn">Load Link</button>
+      <div class="m-scroll">
+        <div id="mBody"></div>
+        <div class="m-bar" id="mBar" style="display:none;"></div>
+        <div class="m-yt" id="mYt" style="display:none;">
+          <a class="s-btn active" id="ytSearchLink" target="_blank" rel="noopener">▶ Search on YouTube</a>
+          <input class="yt-in" id="ytUrlInput" type="text" placeholder="Paste YouTube or embed link to play here..." />
+          <button class="s-btn active" id="ytPlayBtn">Load Link</button>
+        </div>
       </div>
     </div>
   </div>
@@ -189,9 +200,19 @@
       {id:'Motorsport',label:'Motorsport'}
     ];
 
+    const WORLD_LEAGUES = [
+      {id:'all', label:'All Loaded'},
+      {id:'tunisia', label:'🇹🇳 Tunisia', tn:1},
+      {id:'English Premier League', label:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'},
+      {id:'Spanish La Liga', label:'🇪🇸 La Liga'},
+      {id:'Italian Serie A', label:'🇮🇹 Serie A'},
+      {id:'German Bundesliga', label:'🇩🇪 Bundesliga'},
+      {id:'French Ligue 1', label:'🇫🇷 Ligue 1'}
+    ];
+
     const ST = {
-      tab:'matches', sport:'Football', q:'',
-      matches:[], tnMatches:[], channels:[],
+      tab:'matches', sport:'Football', teamLeague:'all', q:'',
+      matches:[], tnMatches:[], teams:[], channels:[],
       country:'all', cat:'all',
       favs: JSON.parse(localStorage.getItem('footime_favs')||'{"matches":[],"channels":[]}'),
       hls:null
@@ -210,7 +231,7 @@
     function matchQ(item){
       const q = ST.q.trim().toLowerCase();
       if(!q) return true;
-      const hay = `${item.title||''} ${item.league||''} ${item.category||''}`.toLowerCase();
+      const hay = `${item.title||''} ${item.name||''} ${item.league||''} ${item.strLeague||''} ${item.category||''}`.toLowerCase();
       return [q, ...(ALIASES[q]||[])].some(t => hay.includes(t));
     }
 
@@ -269,12 +290,8 @@
         const ts = ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime()/1000) : 0;
         const hasScore = ev.intHomeScore != null && ev.intAwayScore != null;
         map.set(ev.idEvent, {
-          id:'tn_'+ev.idEvent,
-          title:ev.strEvent||'Tunisian Match',
-          league:ev.strLeague||fallbackLeague,
-          category:'Football',
-          poster:ev.strThumb||'',
-          starts_at:ts,
+          id:'tn_'+ev.idEvent, title:ev.strEvent||'Tunisian Match', league:ev.strLeague||fallbackLeague,
+          category:'Football', poster:ev.strThumb||'', starts_at:ts,
           ends_at:hasScore && ts ? ts+7200 : 0,
           score:hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : '',
           videoUrl:ev.strVideo||''
@@ -301,6 +318,111 @@
       }
       ST.tnMatches = [...map.values()];
       render();
+    }
+
+    async function loadTeams(force=false){
+      if(!force && ST.teams.length){ render(); return; }
+      document.getElementById('app').innerHTML = `<div class="empty">Loading world teams...</div>`;
+      const leagues = [
+        'English Premier League','Spanish La Liga','Italian Serie A',
+        'German Bundesliga','French Ligue 1','Tunisian Ligue 1'
+      ];
+      const map = new Map();
+      for(const lg of leagues){
+        try{
+          const d = await (await fetch(`${SDB_API}/search_all_teams.php?l=${encodeURIComponent(lg)}`)).json();
+          for(const tm of (d.teams||[])){
+            if(!tm.idTeam || map.has(tm.idTeam)) continue;
+            map.set(tm.idTeam, {
+              id: tm.idTeam,
+              name: tm.strTeam,
+              league: lg.includes('Tunisian') ? 'tunisia' : lg,
+              leagueLabel: tm.strLeague || lg,
+              badge: tm.strBadge || '',
+              country: tm.strCountry || ''
+            });
+          }
+        }catch{}
+      }
+      ST.teams = [...map.values()];
+      render();
+    }
+
+    async function searchAnyTeam(query){
+      const q = (query||'').trim();
+      if(!q) return;
+      try{
+        const d = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(q)}`)).json();
+        const found = (d.teams||[]).filter(tm => tm.idTeam && (tm.strSport||'Soccer').toLowerCase().includes('soccer'));
+        const map = new Map(ST.teams.map(t=>[t.id, t]));
+        for(const tm of found){
+          if(!map.has(tm.idTeam)){
+            map.set(tm.idTeam, {
+              id: tm.idTeam,
+              name: tm.strTeam,
+              league: (tm.strLeague||'').toLowerCase().includes('tunisia') ? 'tunisia' : (tm.strLeague||'all'),
+              leagueLabel: tm.strLeague || 'World Team',
+              badge: tm.strBadge || '',
+              country: tm.strCountry || ''
+            });
+          }
+        }
+        ST.teams = [...map.values()];
+        render();
+      }catch{}
+    }
+
+    async function openTeamDetails(tm){
+      const body = document.getElementById('mBody');
+      const bar = document.getElementById('mBar');
+      const ytRow = document.getElementById('mYt');
+      bar.style.display = 'none';
+      ytRow.style.display = 'flex';
+      document.getElementById('mTitle').textContent = `${tm.name} (${tm.leagueLabel})`;
+      document.getElementById('ytSearchLink').href = `https://www.youtube.com/results?search_query=${encodeURIComponent(tm.name + ' match highlights')}`;
+      document.getElementById('ytUrlInput').value = '';
+      document.getElementById('ytPlayBtn').onclick = () => {
+        const emb = toEmbedUrl(document.getElementById('ytUrlInput').value);
+        if(emb) body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+      };
+
+      destroyHls();
+      document.getElementById('modal').classList.add('open');
+      body.innerHTML = `<div style="padding:24px;"><div class="empty">Loading ${esc(tm.name)} live/upcoming & replays...</div></div>`;
+
+      const liveMatches = ST.matches.filter(m => (m.title||'').toLowerCase().includes(tm.name.toLowerCase()));
+      const [nx, ls] = await Promise.all([
+        fetch(`${SDB_API}/eventsnext.php?id=${tm.id}`).then(r=>r.ok?r.json():{}).catch(()=>({})),
+        fetch(`${SDB_API}/eventslast.php?id=${tm.id}`).then(r=>r.ok?r.json():{}).catch(()=>({}))
+      ]);
+      const upcoming = nx.events || [];
+      const past = ls.results || [];
+
+      const renderEvRow = (ev, isPast) => {
+        const title = ev.strEvent || 'Match';
+        const score = (ev.intHomeScore!=null && ev.intAwayScore!=null) ? ` (${ev.intHomeScore}-${ev.intAwayScore})` : '';
+        const yt = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + (isPast?' highlights':' live'))}`;
+        return `<div class="t-row">
+          <div>
+            <strong>${esc(title)}${esc(score)}</strong>
+            <div class="sub">${esc(ev.dateEvent || '')} • ${esc(ev.strLeague || tm.leagueLabel)}</div>
+          </div>
+          <a class="s-btn active" target="_blank" rel="noopener" href="${esc(yt)}">${isPast?'Replay / Highlights ↗':'Search ↗'}</a>
+        </div>`;
+      };
+
+      body.innerHTML = `<div style="padding:18px;">
+        <h3 style="margin-bottom:10px;">Live Stream Matches (${liveMatches.length})</h3>
+        ${liveMatches.length
+          ? liveMatches.map(m => `<div class="t-row"><div><strong>${esc(m.title)}</strong><div class="sub">${esc(m.league)}</div></div><button class="s-btn active" onclick='openMatch(${JSON.stringify(m).replace(/'/g,"&#39;")})'>Watch Live ▶</button></div>`).join('')
+          : `<div class="sub" style="margin-bottom:14px;">No active stream in live feed for ${esc(tm.name)} right now.</div>`}
+
+        <h3 style="margin:14px 0 10px;">Upcoming (${upcoming.length})</h3>
+        ${upcoming.length ? upcoming.slice(0,8).map(e=>renderEvRow(e,false)).join('') : `<div class="sub" style="margin-bottom:14px;">No upcoming fixtures listed.</div>`}
+
+        <h3 style="margin:14px 0 10px;">Recent Matches / Replays (${past.length})</h3>
+        ${past.length ? past.slice(0,8).map(e=>renderEvRow(e,true)).join('') : `<div class="sub">No recent matches listed.</div>`}
+      </div>`;
     }
 
     async function loadChannels(force=false){
@@ -454,7 +576,7 @@
               <span class="badge ${statusOf(feat,now)==='live'?'badge-live':'badge-up'}">${statusOf(feat,now)==='live'?'LIVE NOW':'FEATURED'}</span>
               <span class="badge badge-lg">${esc(feat.league||feat.category)}</span>
               <h1 class="hero-title">${esc(feat.title)}</h1>
-              <p class="hero-sub">Footime — Live football, Tunisian Ligue 1, replays, and channels.</p>
+              <p class="hero-sub">Footime — Live football, Tunisian Ligue 1, world teams, replays, and channels.</p>
               <a href="javascript:void(0)" class="btn-primary" onclick="openMatch(JSON.parse(decodeURIComponent('${fEnc}')))">▶ Open Match</a>
             </div>
           </section>` : ''}
@@ -475,6 +597,26 @@
           render();
         });
         document.getElementById('clrQ')?.addEventListener('click',()=>{ ST.q=''; document.getElementById('searchInput').value=''; render(); });
+
+      }else if(ST.tab==='teams'){
+        const tList = ST.teams.filter(t => (ST.teamLeague==='all'||t.league===ST.teamLeague) && matchQ(t));
+        app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Teams (${tList.length})</h2>
+          <div class="filter-bar">
+            ${WORLD_LEAGUES.map(l=>`<button class="chip ${l.tn?'tn':''} ${ST.teamLeague===l.id?'active':''}" data-tlg="${esc(l.id)}">${esc(l.label)}</button>`).join('')}
+            <button class="chip active" id="findTeamApiBtn">🌐 Search Any Team Online</button>
+          </div>
+          <div class="grid">${tList.length ? tList.map(tm=>{
+            const enc = encodeURIComponent(JSON.stringify(tm));
+            return `<div class="team-card" onclick="openTeamDetails(JSON.parse(decodeURIComponent('${enc}')))">
+              <div class="team-badge">${tm.badge?`<img src="${esc(tm.badge)}" loading="lazy" onerror="this.remove()">`:esc(tm.name.slice(0,3).toUpperCase())}</div>
+              <div style="flex:1;min-width:0;">
+                <div class="title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(tm.name)}</div>
+                <div class="sub">${esc(tm.leagueLabel)} ${tm.country?'• '+esc(tm.country):''}</div>
+              </div>
+            </div>`;
+          }).join('') : `<div class="empty">No teams match your filter. Try "Search Any Team Online".</div>`}</div>`;
+        app.querySelectorAll('[data-tlg]').forEach(b=>b.onclick=()=>{ ST.teamLeague=b.dataset.tlg; render(); });
+        document.getElementById('findTeamApiBtn')?.addEventListener('click', ()=>searchAnyTeam(ST.q || 'Real Madrid'));
 
       }else if(ST.tab==='replays'){
         const ended = [...ST.matches,...ST.tnMatches].filter(m=>(statusOf(m,now)==='ended'||m.videoUrl||m.score)&&matchQ(m));
@@ -526,13 +668,15 @@
       ST.tab = b.dataset.tab;
       document.querySelectorAll('#navPills .nav-btn').forEach(x=>x.classList.toggle('active',x===b));
       moveInd(); render();
+      if(ST.tab==='teams' && !ST.teams.length) loadTeams();
       if(ST.tab==='channels' && !ST.channels.length) loadChannels();
       if(ST.sport==='tunisia' && !ST.tnMatches.length) loadTunisia();
     });
-    document.getElementById('brandHome').onclick = e => { e.preventDefault(); ST.tab='matches'; document.querySelector('[data-tab="matches"]').click(); };
+    document.getElementById('brandHome').onclick = e => { e.preventDefault(); document.querySelector('[data-tab="matches"]').click(); };
     document.getElementById('searchInput').oninput = e => { ST.q = e.target.value; render(); };
     document.getElementById('refreshBtn').onclick = () => {
       if(ST.tab==='channels') loadChannels(true);
+      else if(ST.tab==='teams') loadTeams(true);
       else { loadMatches(true); if(ST.sport==='tunisia') loadTunisia(true); }
     };
     document.getElementById('mClose').onclick = closeModal;
