@@ -1,188 +1,72 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARENA LIVE — Live Scores & Fixtures</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARENA LIVE</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="bg-orb bg-orb-crimson" aria-hidden="true"></div>
-  <div class="bg-orb bg-orb-amber" aria-hidden="true"></div>
 
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <a href="#matches" class="brand" id="brandLink">
-        <span class="brand-mark">ARENA</span>
-        <span class="brand-accent">LIVE</span>
-      </a>
+<header class="topbar">
+  <a class="logo" href="#">ARENA <span>LIVE</span></a>
 
-      <nav class="nav-links" aria-label="Primary Navigation">
-        <a href="#home" class="nav-link" data-route="home">Home</a>
-        <a href="#live" class="nav-link" data-route="live">
-          <span class="live-dot"></span>
-          Live
-        </a>
-        <a href="#matches" class="nav-link active" data-route="matches">Matches</a>
-      </nav>
+  <nav>
+    <button data-filter="all">All</button>
+    <button data-filter="live">LIVE</button>
+    <button data-filter="upcoming">Upcoming</button>
+    <button data-filter="finished">Finished</button>
+  </nav>
 
-      <div class="topbar-meta">
-        <span class="quota-pill" id="quotaBadge">Quota: --</span>
-      </div>
-    </div>
-  </header>
-
-  <main class="container main-content">
-    <section class="page-header">
-      <div class="title-group">
-        <span class="title-bar" aria-hidden="true"></span>
-        <div>
-          <h1 class="page-title" id="viewTitle">Matches</h1>
-          <p class="page-subtitle" id="viewSubtitle">Real-time fixtures, live scores, and competition filters</p>
-        </div>
-      </div>
-
-      <div class="date-controls">
-        <button type="button" class="icon-btn" id="prevDayBtn" title="Previous day" aria-label="Previous day">&lt;</button>
-        <div class="date-input-wrap">
-          <input type="date" id="datePicker" class="date-input" aria-label="Select date" />
-          <span class="date-display" id="dateDisplay">--/--/----</span>
-        </div>
-        <button type="button" class="icon-btn" id="nextDayBtn" title="Next day" aria-label="Next day">&gt;</button>
-        <button type="button" class="btn-secondary" id="todayBtn">Today</button>
-      </div>
-    </section>
-
-    <section class="filters-panel" aria-label="Match Filters">
-      <div class="search-row">
-        <div class="search-box">
-          <span class="search-icon" aria-hidden="true">⌕</span>
-          <input
-            type="search"
-            id="searchInput"
-            class="search-input"
-            placeholder="Search a team, league, or country..."
-            autocomplete="off"
-          />
-          <button type="button" class="clear-btn hidden" id="clearSearchBtn" aria-label="Clear search">✕</button>
-        </div>
-      </div>
-
-      <div class="chips-row" id="statusChips" role="group" aria-label="Match status filter">
-        <button type="button" class="chip active" data-status="all">All</button>
-        <button type="button" class="chip" data-status="live">
-          <span class="chip-live-dot"></span>
-          Live now
-        </button>
-        <button type="button" class="chip" data-status="upcoming">Upcoming</button>
-        <button type="button" class="chip" data-status="finished">Finished</button>
-      </div>
-
-      <div class="chips-row" id="featuredLeagueChips" role="group" aria-label="Featured leagues filter">
-        <button type="button" class="chip active" data-featured="all">All</button>
-        <button type="button" class="chip" data-featured="tunisia">🇹🇳 Tunisia</button>
-        <button type="button" class="chip" data-featured="ucl">Champions League</button>
-        <button type="button" class="chip" data-featured="uel">Europa League</button>
-        <button type="button" class="chip" data-featured="epl">Premier League</button>
-        <button type="button" class="chip" data-featured="laliga">La Liga</button>
-        <button type="button" class="chip" data-featured="seriea">Serie A</button>
-        <button type="button" class="chip" data-featured="bundesliga">Bundesliga</button>
-        <button type="button" class="chip" data-featured="ligue1">Ligue 1</button>
-        <button type="button" class="chip" data-featured="africa">Africa</button>
-      </div>
-
-      <div class="comp-select-row">
-        <label for="competitionSelect" class="sr-only">Competition</label>
-        <select id="competitionSelect" class="comp-select">
-          <option value="__ALL__">All competitions (0)</option>
-        </select>
-      </div>
-    </section>
-
-    <div class="status-bar">
-      <div class="matches-count" id="matchesCount">0 matches</div>
-      <div class="updated-time" id="updatedTime">Updated --:--</div>
-    </div>
-
-    <div id="stateContainer" class="state-container hidden"></div>
-    <div id="matchesList" class="matches-list"></div>
-  </main>
-
-  <div id="watchModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalMatchTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-league-wrap">
-          <img id="modalLeagueLogo" class="league-logo hidden" src="" alt="" />
-          <div>
-            <div id="modalMatchTitle" class="modal-title">Match Center</div>
-            <div id="modalMatchMeta" class="modal-subtitle">Competition • Status</div>
-          </div>
-        </div>
-        <button type="button" class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">✕</button>
-      </div>
-
-      <div class="modal-scoreboard">
-        <div class="modal-team">
-          <img id="modalHomeLogo" class="modal-team-logo hidden" src="" alt="" />
-          <span id="modalHomeName" class="modal-team-name">Home</span>
-        </div>
-
-        <div class="modal-score-block">
-          <div id="modalScore" class="modal-score">- : -</div>
-          <div id="modalStatusBadge" class="status-badge is-upcoming">NS</div>
-        </div>
-
-        <div class="modal-team">
-          <img id="modalAwayLogo" class="modal-team-logo hidden" src="" alt="" />
-          <span id="modalAwayName" class="modal-team-name">Away</span>
-        </div>
-      </div>
-
-      <div class="modal-player-box" id="modalPlayerBox">
-        <div class="player-placeholder" id="playerPlaceholder">
-          <div class="player-badge" id="playerModeBadge">LIVE PLAYER</div>
-          <h3 id="playerPlaceholderTitle" class="player-placeholder-title">No stream available for this match yet</h3>
-          <p id="playerPlaceholderDesc" class="player-placeholder-desc">
-            A stream or replay link has not been assigned to this fixture yet.
-          </p>
-        </div>
-
-        <iframe
-          id="matchStreamFrame"
-          class="match-stream-frame hidden"
-          src=""
-          title="Match Stream Player"
-          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-          allowfullscreen
-          referrerpolicy="no-referrer"
-        ></iframe>
-
-        <video
-          id="matchReplayVideo"
-          class="match-replay-video hidden"
-          controls
-          playsinline
-          preload="metadata"
-        ></video>
-      </div>
-
-      <div class="modal-footer-bar">
-        <span id="modalExtraInfo" class="modal-extra-info"></span>
-        <button type="button" class="btn-secondary hidden" id="toggleSourceBtn">Open Channel</button>
-      </div>
-    </div>
+  <div class="tools">
+    <button id="themeBtn">☀</button>
+    <select id="language">
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+      <option value="ar">AR</option>
+    </select>
   </div>
+</header>
 
-  <footer class="footer">
-    <div class="container footer-inner">
-      <span>© 2026 ARENA LIVE. Scores, fixtures, and external/official links only. We do not host media files on our servers; third-party sources and official broadcasters remain responsible for their content.</span>
+<main>
+  <section class="hero">
+    <p>THE WORLD OF FOOTBALL</p>
+    <h1>Every Match.<br><span>One Arena.</span></h1>
+    <p>Live scores, fixtures and official replays.</p>
+  </section>
+
+  <section class="toolbar">
+    <input type="date" id="matchDate">
+    <input type="search" id="search" placeholder="Search teams or leagues...">
+  </section>
+
+  <section class="matches-section">
+    <h2 id="sectionTitle">All Matches</h2>
+    <div id="matches">
+      <p class="loading">Loading matches...</p>
     </div>
-  </footer>
+  </section>
+</main>
 
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
+<div id="playerModal" class="modal">
+  <div class="modal-content">
+    <button id="closePlayer" class="close">✕</button>
+    <h2 id="matchTitle">Match</h2>
+    <div class="player-tabs">
+      <button data-player="live">LIVE</button>
+      <button data-player="replay">REPLAY</button>
+    </div>
+    <div id="videoPlayer">
+      <p>Select a match source.</p>
+    </div>
+    <a id="officialLink" target="_blank" rel="noopener noreferrer" hidden>
+      Open official source
+    </a>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="sources.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
