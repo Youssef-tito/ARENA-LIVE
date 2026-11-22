@@ -39,13 +39,13 @@
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
-    h1, h2, h3, h4, .brand-name {
+    h1, h2, h3, h4 {
       font-family: 'Outfit', sans-serif;
     }
     button, input, select { font-family: inherit; color: inherit; }
     button { cursor: pointer; background: none; border: none; }
 
-    /* Topbar */
+    /* Topbar & Brand Logo */
     .topbar {
       position: sticky;
       top: 0;
@@ -54,35 +54,41 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 14px 24px;
-      background: rgba(7, 11, 10, 0.78);
+      padding: 8px 24px;
+      background: rgba(7, 11, 10, 0.82);
       backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--glass-border);
     }
-    .brand {
+
+    .arena-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
       text-decoration: none;
+      overflow: hidden;
+      flex-shrink: 0;
     }
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 11px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--accent), #047857);
-      color: #04130e;
-      font-weight: 800;
-      font-size: 16px;
-      box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
+
+    .arena-logo {
+      width: 190px;
+      height: 85px;
+      object-fit: contain;
+      display: block;
+      transition: transform .3s ease, filter .3s ease;
+      filter: drop-shadow(0 0 10px rgba(0, 255, 100, .25));
     }
-    .brand-name {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+
+    .arena-brand:hover .arena-logo {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 18px rgba(0, 255, 100, .55));
     }
-    .brand-name span { color: var(--accent-bright); }
+
+    @media (max-width: 600px) {
+      .arena-logo {
+        width: 145px;
+        height: 65px;
+      }
+    }
 
     .nav-pills {
       position: relative;
@@ -250,19 +256,6 @@
       transform: translateY(-1px);
       box-shadow: 0 10px 24px rgba(16, 185, 129, 0.3);
     }
-    .btn-ghost {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 9px 14px;
-      border-radius: 10px;
-      background: var(--bg-card);
-      border: 1px solid var(--glass-border);
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--fg-secondary);
-    }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--fg-primary); }
 
     /* Filters */
     .filter-bar {
@@ -573,7 +566,7 @@
     .toast.show { opacity: 1; transform: translateY(0); }
 
     @media (max-width: 780px) {
-      .topbar { flex-wrap: wrap; padding: 12px 16px; }
+      .topbar { flex-wrap: wrap; padding: 8px 16px; }
       .nav-pills { order: 3; width: 100%; justify-content: space-between; overflow-x: auto; }
       .search-box { width: 170px; }
       .search-box:focus-within { width: 200px; }
@@ -583,9 +576,12 @@
 </head>
 <body>
   <header class="topbar">
-    <a href="#matches" class="brand" id="brandHome">
-      <div class="brand-mark">FT</div>
-      <div class="brand-name">Foo<span>time</span></div>
+    <a href="#matches" class="arena-brand" id="brandHome">
+      <img
+        src="assets/arena-live-logo.png"
+        alt="ARENA LIVE"
+        class="arena-logo"
+      >
     </a>
 
     <nav class="nav-pills" id="navPills">
@@ -624,12 +620,11 @@
     const IPTV_BASE = 'https://iptv-org.github.io/api';
 
     const STATE = {
-      tab: 'matches', // 'matches' | 'channels' | 'favorites'
+      tab: 'matches',
       sportFilter: 'Football',
       search: '',
       matches: [],
       channels: [],
-      filteredChannels: [],
       countryFilter: 'all',
       catFilter: 'all',
       favorites: JSON.parse(localStorage.getItem('footime_favs') || '{"matches":[],"channels":[]}'),
@@ -856,7 +851,6 @@
         });
       };
 
-      // If single stream, play right away; if multiple, let user pick or click first
       if (streams.length === 1) {
         playStream(0);
       } else {
