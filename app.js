@@ -1,7 +1,9 @@
+```javascript
 /* =========================================================
    ARENA LIVE — ULTIMATE FOOTBALL APP
    API-SPORTS + CLOUDFLARE WORKER
-   Version 3.0
+   OFFICIAL SOURCES INTEGRATION
+   Version 4.0
 ========================================================= */
 
 "use strict";
@@ -94,7 +96,12 @@ const TRANSLATIONS = {
     noSource: "No authorized video source is available for this match.",
     sourceHelp: "Check the official competition website for broadcast information.",
     connectionError: "Check your internet connection and try again.",
-    dataError: "The server returned invalid match data."
+    dataError: "The server returned invalid match data.",
+    sourcesTitle: "Official Football Sources",
+    sourcesDescription: "Discover official football websites, competitions and video platforms.",
+    sourcesEmpty: "No sources available.",
+    openWebsite: "Visit Website",
+    unverified: "Unverified sources"
   },
 
   fr: {
@@ -155,7 +162,12 @@ const TRANSLATIONS = {
     noSource: "Aucune source vidéo autorisée n'est disponible.",
     sourceHelp: "Consultez le site officiel de la compétition.",
     connectionError: "Vérifiez votre connexion Internet.",
-    dataError: "Le serveur a renvoyé des données invalides."
+    dataError: "Le serveur a renvoyé des données invalides.",
+    sourcesTitle: "Sources officielles du football",
+    sourcesDescription: "Découvrez les sites officiels, les compétitions et les plateformes vidéo.",
+    sourcesEmpty: "Aucune source disponible.",
+    openWebsite: "Visiter le site",
+    unverified: "Sources non vérifiées"
   },
 
   ar: {
@@ -216,7 +228,12 @@ const TRANSLATIONS = {
     noSource: "لا يوجد مصدر فيديو مرخّص لهذه المباراة.",
     sourceHelp: "تحقق من الموقع الرسمي للبطولة لمعرفة معلومات البث.",
     connectionError: "تحقق من اتصال الإنترنت وحاول مجدداً.",
-    dataError: "الخادم أرسل بيانات مباريات غير صالحة."
+    dataError: "الخادم أرسل بيانات مباريات غير صالحة.",
+    sourcesTitle: "مصادر كرة القدم الرسمية",
+    sourcesDescription: "اكتشف المواقع الرسمية والبطولات ومنصات الفيديو.",
+    sourcesEmpty: "لا توجد مصادر متاحة.",
+    openWebsite: "زيارة الموقع",
+    unverified: "مصادر غير موثوقة"
   }
 
 };
@@ -229,19 +246,12 @@ const TRANSLATIONS = {
 const state = {
 
   selectedDate: getTodayDate(),
-
   matches: [],
-
   quota: null,
-
   statusFilter: "all",
-
   featuredFilter: "all",
-
   competitionFilter: "__ALL__",
-
   searchQuery: "",
-
   route: getRoute(),
 
   theme: localStorage.getItem("arena_theme") || ARENA_CONFIG.defaultTheme,
@@ -249,15 +259,10 @@ const state = {
   language: localStorage.getItem("arena_language") || ARENA_CONFIG.defaultLanguage,
 
   isLoading: false,
-
   errorMessage: "",
-
   lastUpdated: "",
-
   activeMatch: null,
-
   activeMediaUrl: "",
-
   requestId: 0
 
 };
@@ -581,6 +586,8 @@ function applyLanguage() {
 
   renderMatches();
 
+  renderOfficialSources();
+
   localStorage.setItem("arena_language", language);
 
 }
@@ -722,130 +729,6 @@ function getCompetitionKey(match) {
 
 
 /* =========================================================
-   SEARCH AND FILTER ENGINE
-========================================================= */
-
-function getFilteredMatches(ignoreCompetition = false) {
-
-  const query = state.searchQuery.trim().toLowerCase();
-
-  return state.matches.filter(match => {
-
-    const category = getStatusCategory(match.status);
-
-    if (
-      state.route === "live" &&
-      category !== "live"
-    ) {
-      return false;
-    }
-
-    if (
-      state.statusFilter !== "all" &&
-      category !== state.statusFilter
-    ) {
-      return false;
-    }
-
-    if (!matchesFeaturedFilter(match, state.featuredFilter)) {
-      return false;
-    }
-
-    if (
-      !ignoreCompetition &&
-      state.competitionFilter !== "__ALL__" &&
-      getCompetitionKey(match) !== state.competitionFilter
-    ) {
-      return false;
-    }
-
-    if (query) {
-
-      const haystack = [
-        match.home,
-        match.away,
-        match.league,
-        match.country
-      ].join(" ").toLowerCase();
-
-      if (!haystack.includes(query)) {
-        return false;
-      }
-
-    }
-
-    return true;
-
-  });
-
-}
-
-
-/* =========================================================
-   COMPETITION SELECT
-========================================================= */
-
-function updateCompetitionSelect() {
-
-  if (!els.competitionSelect) return;
-
-  const pool = getFilteredMatches(true);
-
-  const counts = new Map();
-
-  pool.forEach(match => {
-
-    const key = getCompetitionKey(match);
-
-    counts.set(key, (counts.get(key) || 0) + 1);
-
-  });
-
-  const entries = [...counts.entries()].sort(
-    (a, b) => a[0].localeCompare(b[0])
-  );
-
-  const previous = state.competitionFilter;
-
-  els.competitionSelect.innerHTML = "";
-
-  const allOption = document.createElement("option");
-
-  allOption.value = "__ALL__";
-
-  allOption.textContent =
-    `${t("allCompetitions")} (${entries.length})`;
-
-  els.competitionSelect.appendChild(allOption);
-
-  entries.forEach(([key, count]) => {
-
-    const option = document.createElement("option");
-
-    option.value = key;
-
-    option.textContent = `${key} (${count})`;
-
-    els.competitionSelect.appendChild(option);
-
-  });
-
-  if (counts.has(previous)) {
-
-    els.competitionSelect.value = previous;
-
-  } else {
-
-    state.competitionFilter = "__ALL__";
-
-    els.competitionSelect.value = "__ALL__";
-
-  }
-
-}
-
-
-/* =========================================================
    HTML SECURITY
 ========================================================= */
 
@@ -861,10 +744,6 @@ function escapeHtml(value) {
 }
 
 
-/* =========================================================
-   OFFICIAL SOURCE RESOLVER
-========================================================= */
-
 function isSafeMediaUrl(value) {
 
   try {
@@ -879,23 +758,220 @@ function isSafeMediaUrl(value) {
 
   }
 
+
 }
 
+
+/* =========================================================
+   OFFICIAL SOURCES DIRECTORY
+========================================================= */
+
+function getOfficialSources() {
+
+  return Array.isArray(window.ARENA_OFFICIAL_SOURCES)
+    ? window.ARENA_OFFICIAL_SOURCES
+    : [];
+
+}
+
+
+function getSourceCategoryName(category) {
+
+  const names = {
+
+    official: {
+      en: "Official Sports & TV",
+      fr: "Sports et télévision officiels",
+      ar: "القنوات والمصادر الرياضية الرسمية"
+    },
+
+    competition: {
+      en: "Official Competitions",
+      fr: "Compétitions officielles",
+      ar: "البطولات الرسمية"
+    },
+
+    scores: {
+      en: "Scores & Results",
+      fr: "Scores et résultats",
+      ar: "النتائج والمباريات"
+    },
+
+    platform: {
+      en: "Video Platforms",
+      fr: "Plateformes vidéo",
+      ar: "منصات الفيديو"
+    }
+
+  };
+
+  return names[category]?.[state.language] ||
+    names[category]?.en ||
+    category;
+
+}
+
+
+function renderOfficialSources() {
+
+  const sources = getOfficialSources();
+
+  let container = $("arenaSourcesDirectory");
+
+  if (!container) {
+
+    container = document.createElement("section");
+
+    container.id = "arenaSourcesDirectory";
+
+    container.className = "arena-sources-directory";
+
+    const main = document.querySelector("main");
+
+    if (!main) return;
+
+    main.appendChild(container);
+
+  }
+
+  if (!sources.length) {
+
+    container.innerHTML = "";
+
+    return;
+
+  }
+
+  const grouped = {};
+
+  sources.forEach(source => {
+
+    if (!source || !source.name || !source.url) return;
+
+    if (!isSafeMediaUrl(source.url)) return;
+
+    const category = source.category || "official";
+
+    if (!grouped[category]) grouped[category] = [];
+
+    grouped[category].push(source);
+
+  });
+
+  const sourceCards = Object.entries(grouped).map(([category, items]) => {
+
+    return `
+
+      <div class="source-category">
+
+        <h3>${escapeHtml(getSourceCategoryName(category))}</h3>
+
+        <div class="sources-grid">
+
+          ${items.map(source => `
+
+            <a
+              class="source-card"
+              href="${escapeHtml(source.url)}"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="${escapeHtml(source.name)}"
+            >
+
+              <div class="source-card-icon">⚽</div>
+
+              <div class="source-card-info">
+
+                <strong>${escapeHtml(source.name)}</strong>
+
+                <span>
+                  ${escapeHtml(source.description || source.country || "")}
+                </span>
+
+              </div>
+
+              <span class="source-external">↗</span>
+
+            </a>
+
+          `).join("")}
+
+        </div>
+
+      </div>
+
+    `;
+
+  }).join("");
+
+  container.innerHTML = `
+
+    <div class="sources-heading">
+
+      <span class="sources-eyebrow">ARENA LIVE • DIRECTORY</span>
+
+      <h2>${t("sourcesTitle")}</h2>
+
+      <p>${t("sourcesDescription")}</p>
+
+    </div>
+
+    ${sourceCards}
+
+  `;
+
+}
+
+
+/* =========================================================
+   COMPETITION OFFICIAL LINKS
+========================================================= */
 
 function getOfficialCompetitionUrl(match) {
 
   const league = String(match.league || "").toLowerCase();
 
-  if (league.includes("champions league") ||
-      league.includes("europa league") ||
-      league.includes("uefa")) {
+  const country = String(match.country || "").toLowerCase();
+
+  if (
+    league.includes("caf") ||
+    league.includes("africa") ||
+    country.includes("africa")
+  ) {
+
+    return "https://www.cafonline.com/fr/ligue-des-champions/";
+
+  }
+
+  if (
+    league.includes("saudi") ||
+    country.includes("saudi arabia")
+  ) {
+
+    return "https://www.saff.com.sa/en/championship.php?id=73";
+
+  }
+
+  if (country.includes("tunisia")) {
+
+    return "https://www.tunisiatv.tn/ar";
+
+  }
+
+  if (
+    league.includes("uefa") ||
+    league.includes("europa league") ||
+    league.includes("champions league")
+  ) {
 
     return "https://www.uefa.com/";
 
   }
 
-  if (league.includes("world cup") ||
-      league.includes("fifa")) {
+  if (
+    league.includes("world cup") ||
+    league.includes("fifa")
+  ) {
 
     return "https://www.fifa.com/";
 
@@ -903,13 +979,16 @@ function getOfficialCompetitionUrl(match) {
 
   if (league.includes("premier league")) {
 
-    return "https://www.premierleague.com/";
+    return "https://www.premierleague.com/en/watch-live";
 
   }
 
-  if (league.includes("la liga")) {
+  if (
+    league.includes("la liga") ||
+    league.includes("primera division")
+  ) {
 
-    return "https://www.laliga.com/";
+    return "https://www.laliga.com/en-GB";
 
   }
 
@@ -935,6 +1014,10 @@ function getOfficialCompetitionUrl(match) {
 
 }
 
+
+/* =========================================================
+   MEDIA RESOLVER
+========================================================= */
 
 function resolveMedia(match) {
 
@@ -1447,6 +1530,8 @@ function renderMatches() {
 
 function openMatch(match) {
 
+  if (!els.watchModal) return;
+
   state.activeMatch = match;
 
   const category = getStatusCategory(match.status);
@@ -1629,6 +1714,130 @@ function closePlayer() {
 
 
 /* =========================================================
+   SEARCH AND FILTER ENGINE
+========================================================= */
+
+function getFilteredMatches(ignoreCompetition = false) {
+
+  const query = state.searchQuery.trim().toLowerCase();
+
+  return state.matches.filter(match => {
+
+    const category = getStatusCategory(match.status);
+
+    if (
+      state.route === "live" &&
+      category !== "live"
+    ) {
+      return false;
+    }
+
+    if (
+      state.statusFilter !== "all" &&
+      category !== state.statusFilter
+    ) {
+      return false;
+    }
+
+    if (!matchesFeaturedFilter(match, state.featuredFilter)) {
+      return false;
+    }
+
+    if (
+      !ignoreCompetition &&
+      state.competitionFilter !== "__ALL__" &&
+      getCompetitionKey(match) !== state.competitionFilter
+    ) {
+      return false;
+    }
+
+    if (query) {
+
+      const haystack = [
+        match.home,
+        match.away,
+        match.league,
+        match.country
+      ].join(" ").toLowerCase();
+
+      if (!haystack.includes(query)) {
+        return false;
+      }
+
+    }
+
+    return true;
+
+  });
+
+}
+
+
+/* =========================================================
+   COMPETITION SELECT
+========================================================= */
+
+function updateCompetitionSelect() {
+
+  if (!els.competitionSelect) return;
+
+  const pool = getFilteredMatches(true);
+
+  const counts = new Map();
+
+  pool.forEach(match => {
+
+    const key = getCompetitionKey(match);
+
+    counts.set(key, (counts.get(key) || 0) + 1);
+
+  });
+
+  const entries = [...counts.entries()].sort(
+    (a, b) => a[0].localeCompare(b[0])
+  );
+
+  const previous = state.competitionFilter;
+
+  els.competitionSelect.innerHTML = "";
+
+  const allOption = document.createElement("option");
+
+  allOption.value = "__ALL__";
+
+  allOption.textContent =
+    `${t("allCompetitions")} (${entries.length})`;
+
+  els.competitionSelect.appendChild(allOption);
+
+  entries.forEach(([key, count]) => {
+
+    const option = document.createElement("option");
+
+    option.value = key;
+
+    option.textContent = `${key} (${count})`;
+
+    els.competitionSelect.appendChild(option);
+
+  });
+
+  if (counts.has(previous)) {
+
+    els.competitionSelect.value = previous;
+
+  } else {
+
+    state.competitionFilter = "__ALL__";
+
+    els.competitionSelect.value = "__ALL__";
+
+  }
+
+}
+
+
+/* =========================================================
    API FETCH
 ========================================================= */
 
@@ -1702,7 +1911,7 @@ async function fetchMatches(date) {
     state.quota = data.quota ?? null;
 
     state.lastUpdated = new Intl.DateTimeFormat(
-      state.language === "ar" ? "ar-TN" : "fr-FR",
+      state.language === "ar" ? "ar-TN" : state.language === "fr" ? "fr-FR" : "en-GB",
       {
         timeZone: ARENA_CONFIG.timezone,
         hour: "2-digit",
@@ -1990,12 +2199,14 @@ function initializeArena() {
 
   bindEvents();
 
+  renderOfficialSources();
+
   fetchMatches(state.selectedDate);
 
   startAutoRefresh();
 
   console.log(
-    "%c ARENA LIVE 3.0 ",
+    "%c ARENA LIVE 4.0 ",
     "background:#7054f7;color:white;padding:10px;font-weight:bold;"
   );
 
@@ -2005,3 +2216,4 @@ function initializeArena() {
 
 
 initializeArena();
+```
