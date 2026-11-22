@@ -1,137 +1,126 @@
-/* ============================================================
-   ARENA LIVE — Cloudflare Worker (proxy vers API-Sports)
-   Secret requis :  APISPORTS_FOOTBALL_KEY
-   ============================================================ */
-
-// 1) Seuls ces sites ont le droit d'appeler ton Worker.
-//    Remplace par ton vrai domaine DigitalPlat quand il est prêt.
 const ALLOWED_ORIGINS = [
+  "https://footime.dpdns.org",
+  "https://www.footime.dpdns.org",
   "https://youssef-tito.github.io",
-  "https://TON-DOMAINE.dpdns.org",
-  "http://localhost:8000",
+  "http://localhost:3000",
   "http://127.0.0.1:5500"
 ];
 
-// 2) Durée de cache (secondes). Plus c'est long, moins tu consommes de requêtes API.
-//    Le plan gratuit d'API-Sports est limité par jour : adapte selon ton plan.
-const TTL_TODAY = 120;      // aujourd'hui : scores plutôt frais
-const TTL_FUTURE = 1800;    // jours à venir : 30 min
-const TTL_PAST = 3600;      // jours passés : 1 h
+function cors(request, env) {
+  const origin = request.headers.get("Origin") || "";
 
-function corsHeaders(origin) {
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowed = env.ALLOWED_ORIGINS
+    ? env.ALLOWED_ORIGINS.split(",").map(x => x.trim())
+    : ALLOWED_ORIGINS;
+
+  const valid = allowed.includes("*") || allowed.includes(origin);
+
   return {
-    "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Origin": valid ? (origin || "*") : "null",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Vary": "Origin"
   };
 }
 
-function json(data, status, origin) {
-  return new Response(JSON.stringify(data), { status, headers: corsHeaders(origin) });
+function json(data, status, headers) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      ...headers,
+      "Content-Type": "application/json; charset=utf-8"
+    }
+  });
 }
 
-function tunisToday() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Africa/Tunis", year: "numeric", month: "2-digit", day: "2-digit"
-  }).format(new Date());
-}
+function validDate(date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date || "")) return false;
 
-function ttlFor(date) {
-  const today = tunisToday();
-  if (date === today) return TTL_TODAY;
-  return date > today ? TTL_FUTURE : TTL_PAST;   // "YYYY-MM-DD" se compare comme du texte
+  const parsed = new Date(`${date}T00:00:00Z`);
+
+  return !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === date;
 }
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get("Origin") || "";
+    const headers = cors(request, env);
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: corsHeaders(origin) });
+      return new Response(null, { status: 204, headers });
     }
+
     if (request.method !== "GET") {
-      return json({ error: "Method not allowed" }, 405, origin);
+      return json({ error: "Method not allowed" }, 405, headers);
     }
 
-    // Les navigateurs envoient Origin ; on bloque les autres sites.
-    if (origin && !ALLOWED_ORIGINS.includes(origin)) {
-      return json({ error: "Origin not allowed" }, 403, origin);
+    const origin = request.headers.get("Origin") || "";
+    const allowed = env.ALLOWED_ORIGINS
+      ? env.ALLOWED_ORIGINS.split(",").map(x => x.trim())
+      : ALLOWED_ORIGINS;
+
+    if (origin && !allowed.includes("*") && !allowed.includes(origin)) {
+      return json({ error: "Origin not allowed" }, 403, headers);
     }
 
-    const apiKey = env.APISPORTS_FOOTBALL_KEY;
-    if (!apiKey) {
-      return json({ error: "API key missing in Cloudflare secrets" }, 500, origin);
+    const url = new URL(request.url);
+    const date = url.searchParams.get("date");
+
+    if (!validDate(date)) {
+      return json({ error: "Invalid date. Use YYYY-MM-DD" }, 400, headers);
     }
 
-    const date = new URL(request.url).searchParams.get("date");
-    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return json({ error: "Invalid date. Use YYYY-MM-DD" }, 400, origin);
+    if (!env.APISPORTS_FOOTBALL_KEY) {
+      return json({ error: "Missing API key secret" }, 500, headers);
     }
 
     try {
-      const apiURL = new URL("https://v3.football.api-sports.io/fixtures");
-      apiURL.searchParams.set("date", date);
-      apiURL.searchParams.set("timezone", "Africa/Tunis");
+      const apiUrl =
+        `https://v3.football.api-sports.io/fixtures?date=${date}&timezone=Africa%2FTunis`;
 
-      const ttl = ttlFor(date);
-
-      const apiResponse = await fetch(apiURL.toString(), {
-        headers: { "x-apisports-key": apiKey },
-        // Cache Cloudflare : plusieurs visiteurs = une seule requête API
-        cf: { cacheEverything: true, cacheTtlByStatus: { "200-299": ttl, "400-599": 0 } }
+      const response = await fetch(apiUrl, {
+        headers: {
+          "x-apisports-key": env.APISPORTS_FOOTBALL_KEY
+        }
       });
 
-      const data = await apiResponse.json();
+      const data = await response.json();
 
-      if (!apiResponse.ok || (data.errors && Object.keys(data.errors).length > 0)) {
+      if (!response.ok || (data.errors && Object.keys(data.errors).length)) {
         return json({
           error: "API-Sports request failed",
-          details: data.errors || data.message || "Unknown API error"
-        }, 502, origin);
+          details: data.errors || data.message || response.status
+        }, 502, headers);
       }
 
-      const matches = (data.response || []).map(item => {
-        const fixture = item.fixture || {};
-        const league = item.league || {};
-        const teams = item.teams || {};
-        const goals = item.goals || {};
-
-        return {
-          id: fixture.id,
-          timestamp: fixture.timestamp || null,
-          status: fixture.status?.short || "NS",
-          statusText: fixture.status?.long || "",
-          elapsed: fixture.status?.elapsed ?? null,
-          time: fixture.date
-            ? new Date(fixture.date).toLocaleTimeString("fr-FR", {
-                hour: "2-digit", minute: "2-digit", timeZone: "Africa/Tunis"
-              })
-            : "",
-          league: league.name || "Competition",
-          country: league.country || "",
-          leagueLogo: league.logo || "",
-          round: league.round || "",
-          home: teams.home?.name || "Home",
-          homeLogo: teams.home?.logo || "",
-          away: teams.away?.name || "Away",
-          awayLogo: teams.away?.logo || "",
-          homeGoals: goals.home ?? null,
-          awayGoals: goals.away ?? null
-        };
-      });
+      const matches = (data.response || []).map(item => ({
+        id: item.fixture?.id,
+        time: item.fixture?.date,
+        status: item.fixture?.status?.short || "NS",
+        statusText: item.fixture?.status?.long || "",
+        elapsed: item.fixture?.status?.elapsed,
+        league: item.league?.name || "",
+        country: item.league?.country || "",
+        leagueLogo: item.league?.logo || "",
+        home: item.teams?.home?.name || "",
+        homeLogo: item.teams?.home?.logo || "",
+        away: item.teams?.away?.name || "",
+        awayLogo: item.teams?.away?.logo || "",
+        homeGoals: item.goals?.home,
+        awayGoals: item.goals?.away
+      }));
 
       return json({
         date,
         total: matches.length,
-        quota: apiResponse.headers.get("x-ratelimit-requests-remaining"),
         matches
-      }, 200, origin);
+      }, 200, headers);
 
     } catch (error) {
-      return json({ error: "Unable to contact API-Sports", details: String(error) }, 502, origin);
+      return json({
+        error: "Unable to fetch fixtures",
+        details: String(error)
+      }, 502, headers);
     }
   }
 };
