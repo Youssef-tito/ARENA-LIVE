@@ -3,70 +3,766 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARENA LIVE</title>
+
+  <title>ARENA LIVE — The World of Football</title>
+
+  <meta name="description" content="ARENA LIVE — Football fixtures, live scores and official match sources.">
+  <meta name="theme-color" content="#080b14">
+
+  <link rel="preconnect" href="https://media.api-sports.io">
+  <link rel="preconnect" href="https://arena-live.youssefmehrzi666.workers.dev">
+
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="topbar">
-  <a class="logo" href="#">ARENA <span>LIVE</span></a>
+<!-- =====================================
+     BACKGROUND EFFECTS
+===================================== -->
 
-  <nav>
-    <button data-filter="all">All</button>
-    <button data-filter="live">LIVE</button>
-    <button data-filter="upcoming">Upcoming</button>
-    <button data-filter="finished">Finished</button>
+<div class="background-effects">
+  <div class="glow glow-one"></div>
+  <div class="glow glow-two"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+
+<!-- =====================================
+     TOP NAVIGATION
+===================================== -->
+
+<header class="topbar">
+
+  <a href="#matches" class="logo">
+    <span class="logo-icon">A</span>
+
+    <span class="logo-text">
+      ARENA<span class="logo-highlight">LIVE</span>
+    </span>
+  </a>
+
+
+  <nav class="main-navigation">
+
+    <a href="#matches" class="nav-link active" data-route="matches">
+      <span>◈</span>
+      <span>Matches</span>
+    </a>
+
+    <a href="#live" class="nav-link" data-route="live">
+      <span class="live-dot"></span>
+      <span>Live Now</span>
+    </a>
+
+    <a href="#home" class="nav-link" data-route="home">
+      <span>⌂</span>
+      <span>Overview</span>
+    </a>
+
   </nav>
 
-  <div class="tools">
-    <button id="themeBtn">☀</button>
-    <select id="language">
+
+  <div class="topbar-actions">
+
+    <div class="connection-status">
+      <span class="connection-dot"></span>
+      <span>SPORTS DATA</span>
+    </div>
+
+    <button id="themeBtn" class="icon-button" title="Change theme">
+      ☀
+    </button>
+
+    <select id="language" class="language-select">
       <option value="en">EN</option>
       <option value="fr">FR</option>
       <option value="ar">AR</option>
     </select>
+
   </div>
+
 </header>
 
-<main>
+
+<!-- =====================================
+     MAIN CONTENT
+===================================== -->
+
+<main class="main-container">
+
+
+  <!-- HERO SECTION -->
+
   <section class="hero">
-    <p>THE WORLD OF FOOTBALL</p>
-    <h1>Every Match.<br><span>One Arena.</span></h1>
-    <p>Live scores, fixtures and official replays.</p>
-  </section>
 
-  <section class="toolbar">
-    <input type="date" id="matchDate">
-    <input type="search" id="search" placeholder="Search teams or leagues...">
-  </section>
+    <div class="hero-content">
 
-  <section class="matches-section">
-    <h2 id="sectionTitle">All Matches</h2>
-    <div id="matches">
-      <p class="loading">Loading matches...</p>
+      <div class="hero-label">
+        <span class="hero-label-dot"></span>
+        THE WORLD OF FOOTBALL
+      </div>
+
+      <h1>
+        EVERY MATCH.
+        <br>
+        <span>ONE ARENA.</span>
+      </h1>
+
+      <p class="hero-description">
+        Follow football around the world.
+        Discover fixtures, live scores and match information
+        in one place.
+      </p>
+
+      <div class="hero-actions">
+
+        <a href="#live" class="primary-button">
+          <span>▶</span>
+          WATCH LIVE
+        </a>
+
+        <a href="#matches" class="secondary-button">
+          EXPLORE MATCHES
+          <span>↗</span>
+        </a>
+
+      </div>
+
+      <div class="hero-statistics">
+
+        <div class="hero-stat">
+          <strong>GLOBAL</strong>
+          <span>FOOTBALL</span>
+        </div>
+
+        <div class="hero-stat-divider"></div>
+
+        <div class="hero-stat">
+          <strong>LIVE</strong>
+          <span>UPDATES</span>
+        </div>
+
+        <div class="hero-stat-divider"></div>
+
+        <div class="hero-stat">
+          <strong>24/7</strong>
+          <span>COVERAGE</span>
+        </div>
+
+      </div>
+
     </div>
+
+
+    <div class="hero-visual">
+
+      <div class="hero-orbit orbit-one"></div>
+      <div class="hero-orbit orbit-two"></div>
+
+      <div class="hero-ball">
+        ⚽
+      </div>
+
+      <div class="floating-card floating-card-top">
+        <span class="floating-indicator"></span>
+        <span>FOOTBALL WORLD</span>
+      </div>
+
+      <div class="floating-card floating-card-bottom">
+        <strong>ARENA LIVE</strong>
+        <span>YOUR FOOTBALL DESTINATION</span>
+      </div>
+
+    </div>
+
   </section>
+
+
+  <!-- =====================================
+       MATCH CONTROL PANEL
+  ===================================== -->
+
+  <section class="match-dashboard">
+
+    <div class="dashboard-heading">
+
+      <div>
+        <div class="section-eyebrow">
+          MATCH CENTER
+        </div>
+
+        <h2 id="viewTitle">
+          Matches
+        </h2>
+
+        <p id="viewSubtitle">
+          Real-time fixtures and football information.
+        </p>
+      </div>
+
+
+      <div class="dashboard-information">
+
+        <div class="data-indicator">
+          <span class="connection-dot"></span>
+          <span>DATA CONNECTED</span>
+        </div>
+
+        <span id="updatedTime">
+          Updated --:--
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- DATE NAVIGATION -->
+
+    <div class="date-toolbar">
+
+      <div class="date-navigation">
+
+        <button id="prevDayBtn" class="date-arrow">
+          ‹
+        </button>
+
+        <div class="date-display-box">
+
+          <span class="date-icon">▦</span>
+
+          <span id="dateDisplay">
+            --/--/----
+          </span>
+
+          <input
+            type="date"
+            id="datePicker"
+            aria-label="Choose match date"
+          >
+
+        </div>
+
+        <button id="nextDayBtn" class="date-arrow">
+          ›
+        </button>
+
+        <button id="todayBtn" class="today-button">
+          TODAY
+        </button>
+
+      </div>
+
+
+      <div class="quota-information">
+        <span class="quota-icon">◉</span>
+        <span id="quotaBadge">Quota: --</span>
+      </div>
+
+    </div>
+
+
+    <!-- SEARCH AND FILTERS -->
+
+    <div class="filter-panel">
+
+      <div class="search-container">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Search teams, competitions or countries..."
+          autocomplete="off"
+        >
+
+        <button
+          id="clearSearchBtn"
+          class="clear-search hidden"
+          type="button"
+          aria-label="Clear search"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <div class="competition-filter">
+
+        <span class="filter-icon">▤</span>
+
+        <select id="competitionSelect">
+          <option value="__ALL__">
+            All competitions
+          </option>
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- STATUS FILTERS -->
+
+    <div class="status-filter-section">
+
+      <div class="filter-heading">
+        MATCH STATUS
+      </div>
+
+      <div id="statusChips" class="filter-chips">
+
+        <button
+          class="chip active"
+          data-status="all"
+        >
+          All Matches
+        </button>
+
+        <button
+          class="chip"
+          data-status="live"
+        >
+          <span class="live-dot"></span>
+          LIVE
+        </button>
+
+        <button
+          class="chip"
+          data-status="upcoming"
+        >
+          Upcoming
+        </button>
+
+        <button
+          class="chip"
+          data-status="finished"
+        >
+          Finished
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- FEATURED COMPETITIONS -->
+
+    <div class="featured-section">
+
+      <div class="filter-heading">
+        POPULAR COMPETITIONS
+      </div>
+
+      <div
+        id="featuredLeagueChips"
+        class="featured-chips"
+      >
+
+        <button
+          class="chip active"
+          data-featured="all"
+        >
+          🌍 All
+        </button>
+
+        <button
+          class="chip"
+          data-featured="tunisia"
+        >
+          🇹🇳 Tunisia
+        </button>
+
+        <button
+          class="chip"
+          data-featured="epl"
+        >
+          🏴 Premier League
+        </button>
+
+        <button
+          class="chip"
+          data-featured="laliga"
+        >
+          🇪🇸 La Liga
+        </button>
+
+        <button
+          class="chip"
+          data-featured="seriea"
+        >
+          🇮🇹 Serie A
+        </button>
+
+        <button
+          class="chip"
+          data-featured="bundesliga"
+        >
+          🇩🇪 Bundesliga
+        </button>
+
+        <button
+          class="chip"
+          data-featured="ligue1"
+        >
+          🇫🇷 Ligue 1
+        </button>
+
+        <button
+          class="chip"
+          data-featured="ucl"
+        >
+          ⭐ Champions League
+        </button>
+
+        <button
+          class="chip"
+          data-featured="uel"
+        >
+          🏆 Europa League
+        </button>
+
+        <button
+          class="chip"
+          data-featured="africa"
+        >
+          🌍 Africa
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================
+         MATCHES HEADER
+    ===================================== -->
+
+    <div class="matches-heading">
+
+      <div>
+        <span class="section-eyebrow">
+          FOOTBALL FIXTURES
+        </span>
+
+        <h2>All Matches</h2>
+      </div>
+
+      <div class="matches-heading-right">
+
+        <span id="matchesCount">
+          Loading...
+        </span>
+
+        <span class="matches-heading-icon">
+          ⚽
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================
+         LOADING / ERROR STATE
+    ===================================== -->
+
+    <div id="stateContainer" class="state-container hidden">
+    </div>
+
+
+    <!-- =====================================
+         MATCH LIST
+    ===================================== -->
+
+    <div id="matchesList" class="matches-list">
+
+      <div class="loading-card">
+
+        <div class="loading-spinner"></div>
+
+        <h3>Loading football matches</h3>
+
+        <p>
+          Connecting to the ARENA LIVE football database...
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
 </main>
 
-<div id="playerModal" class="modal">
-  <div class="modal-content">
-    <button id="closePlayer" class="close">✕</button>
-    <h2 id="matchTitle">Match</h2>
-    <div class="player-tabs">
-      <button data-player="live">LIVE</button>
-      <button data-player="replay">REPLAY</button>
+
+<!-- =====================================
+     MATCH PLAYER MODAL
+===================================== -->
+
+<div
+  id="watchModal"
+  class="watch-modal hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modalMatchTitle"
+>
+
+  <div class="watch-modal-content">
+
+
+    <!-- MODAL HEADER -->
+
+    <div class="modal-header">
+
+      <div class="modal-header-title">
+
+        <span class="modal-eyebrow">
+          ARENA LIVE PLAYER
+        </span>
+
+        <h2 id="modalMatchTitle">
+          Match
+        </h2>
+
+        <p id="modalMatchMeta">
+          Football match information
+        </p>
+
+      </div>
+
+      <button
+        id="closeModalBtn"
+        class="modal-close"
+        aria-label="Close player"
+      >
+        ✕
+      </button>
+
     </div>
-    <div id="videoPlayer">
-      <p>Select a match source.</p>
+
+
+    <!-- MATCH SCOREBOARD -->
+
+    <div class="modal-scoreboard">
+
+      <div class="modal-team">
+
+        <img
+          id="modalHomeLogo"
+          src=""
+          alt=""
+          class="modal-team-logo"
+        >
+
+        <strong id="modalHomeName">
+          Home
+        </strong>
+
+      </div>
+
+
+      <div class="modal-score-center">
+
+        <div id="modalScore" class="modal-score">
+          - : -
+        </div>
+
+        <span
+          id="modalStatusBadge"
+          class="status-badge is-upcoming"
+        >
+          UPCOMING
+        </span>
+
+      </div>
+
+
+      <div class="modal-team">
+
+        <img
+          id="modalAwayLogo"
+          src=""
+          alt=""
+          class="modal-team-logo"
+        >
+
+        <strong id="modalAwayName">
+          Away
+        </strong>
+
+      </div>
+
     </div>
-    <a id="officialLink" target="_blank" rel="noopener noreferrer" hidden>
-      Open official source
-    </a>
+
+
+    <!-- PLAYER -->
+
+    <div class="player-section">
+
+      <div class="player-header">
+
+        <div class="player-header-left">
+
+          <span class="player-live-indicator"></span>
+
+          <span id="playerModeBadge">
+            LIVE
+          </span>
+
+        </div>
+
+        <button
+          id="toggleSourceBtn"
+          class="source-button hidden"
+          type="button"
+        >
+          Open Source ↗
+        </button>
+
+      </div>
+
+
+      <div class="player-screen">
+
+
+        <!-- PLACEHOLDER -->
+
+        <div
+          id="playerPlaceholder"
+          class="player-placeholder"
+        >
+
+          <div class="player-placeholder-icon">
+            ▶
+          </div>
+
+          <h3 id="playerPlaceholderTitle">
+            No stream available
+          </h3>
+
+          <p id="playerPlaceholderDesc">
+            An authorized video source has not been configured
+            for this match.
+          </p>
+
+        </div>
+
+
+        <!-- EMBED PLAYER -->
+
+        <iframe
+          id="matchStreamFrame"
+          class="hidden"
+          src=""
+          title="ARENA LIVE Match Player"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+
+
+        <!-- DIRECT VIDEO -->
+
+        <video
+          id="matchReplayVideo"
+          class="hidden"
+          controls
+          playsinline
+        ></video>
+
+      </div>
+
+
+      <div id="modalExtraInfo" class="modal-extra-info">
+      </div>
+
+
+      <div class="player-disclaimer">
+        Video availability depends on official sources and
+        their embedding permissions.
+      </div>
+
+    </div>
+
+
+    <!-- OFFICIAL SOURCE -->
+
+    <div class="modal-footer">
+
+      <img
+        id="modalLeagueLogo"
+        src=""
+        alt=""
+        class="modal-league-logo"
+      >
+
+      <div class="modal-footer-text">
+        <strong>Match information</strong>
+        <span>ARENA LIVE</span>
+      </div>
+
+    </div>
+
   </div>
+
 </div>
+
+
+<!-- =====================================
+     FOOTER
+===================================== -->
+
+<footer class="site-footer">
+
+  <div class="footer-main">
+
+    <a href="#matches" class="logo footer-logo">
+      <span class="logo-icon">A</span>
+
+      <span class="logo-text">
+        ARENA<span class="logo-highlight">LIVE</span>
+      </span>
+    </a>
+
+    <p>
+      The world of football, all in one arena.
+    </p>
+
+  </div>
+
+
+  <div class="footer-bottom">
+
+    <span>
+      © 2026 ARENA LIVE
+    </span>
+
+    <span>
+      FOOTBALL • PASSION • TECHNOLOGY
+    </span>
+
+  </div>
+
+</footer>
+
+
+<!-- =====================================
+     JAVASCRIPT FILES
+===================================== -->
 
 <script src="config.js"></script>
 <script src="sources.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>
