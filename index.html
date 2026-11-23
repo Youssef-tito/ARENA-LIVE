@@ -407,6 +407,14 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
 
+    function fetchJsonTimeout(url, ms = 7000) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { signal: ctrl.signal })
+        .then(r => (r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status))))
+        .finally(() => clearTimeout(timer));
+    }
+
     function toEmbedUrl(raw) {
       const u = (raw || "").trim();
       if (!u) return "";
@@ -478,11 +486,28 @@
       };
     }
 
+    async function loadFallbackFixtures() {
+      const ids = ["4328", "4335", "4445"];
+      const out = [];
+      for (const id of ids) {
+        try {
+          const [nx, ps] = await Promise.all([
+            fetchJsonTimeout(`${SDB_API}/eventsnextleague.php?id=${id}`).catch(() => ({})),
+            fetchJsonTimeout(`${SDB_API}/eventspastleague.php?id=${id}`).catch(() => ({}))
+          ]);
+          for (const ev of [...(nx.events || []), ...(ps.events || [])]) {
+            if (ev?.idEvent) out.push(mapEvent(ev, ev.strLeague || "Football"));
+          }
+        } catch {}
+      }
+      return out;
+    }
+
     async function loadMatches(force = false) {
       if (!force && ST.matches.length) { render(); return; }
       document.getElementById("app").innerHTML = `<div class="empty">Loading matches...</div>`;
       try {
-        const data = await (await fetch(PPV_API)).json();
+        const data = await fetchJsonTimeout(PPV_API, 7000);
         const out = [];
         for (const cat of (data.streams || [])) {
           for (const s of (cat.streams || [])) {
@@ -495,10 +520,16 @@
             });
           }
         }
-        ST.matches = out;
+        ST.matches = out.length ? out : await loadFallbackFixtures();
         render();
       } catch {
-        document.getElementById("app").innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
+        const fallback = await loadFallbackFixtures();
+        if (fallback.length) {
+          ST.matches = fallback;
+          render();
+        } else {
+          document.getElementById("app").innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
+        }
       }
     }
 
@@ -507,20 +538,20 @@
       const teams = ["Esperance", "Club Africain", "Etoile du Sahel", "CS Sfaxien", "US Monastir"];
       const map = new Map();
       const [nxL, psL] = await Promise.all([
-        fetch(`${SDB_API}/eventsnextleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-        fetch(`${SDB_API}/eventspastleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        fetchJsonTimeout(`${SDB_API}/eventsnextleague.php?id=4445`).catch(() => ({})),
+        fetchJsonTimeout(`${SDB_API}/eventspastleague.php?id=4445`).catch(() => ({}))
       ]);
       for (const ev of [...(nxL.events || []), ...(psL.events || [])]) {
         if (ev?.idEvent && !map.has(ev.idEvent)) map.set(ev.idEvent, mapEvent(ev, "Tunisian Ligue 1"));
       }
       for (const t of teams) {
         try {
-          const td = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(t)}`)).json();
+          const td = await fetchJsonTimeout(`${SDB_API}/searchteams.php?t=${encodeURIComponent(t)}`);
           const idTeam = td?.teams?.[0]?.idTeam;
           if (!idTeam) continue;
           const [nx, ls] = await Promise.all([
-            fetch(`${SDB_API}/eventsnext.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-            fetch(`${SDB_API}/eventslast.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+            fetchJsonTimeout(`${SDB_API}/eventsnext.php?id=${idTeam}`).catch(() => ({})),
+            fetchJsonTimeout(`${SDB_API}/eventslast.php?id=${idTeam}`).catch(() => ({}))
           ]);
           for (const ev of [...(nx.events || []), ...(ls.results || [])]) {
             if (ev?.idEvent && !map.has(ev.idEvent)) map.set(ev.idEvent, mapEvent(ev, `${t} • Tunisia`));
@@ -539,8 +570,8 @@
         return;
       }
       const [nx, ps] = await Promise.all([
-        fetch(`${SDB_API}/eventsnextleague.php?id=${tab.leagueId}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-        fetch(`${SDB_API}/eventspastleague.php?id=${tab.leagueId}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        fetchJsonTimeout(`${SDB_API}/eventsnextleague.php?id=${tab.leagueId}`).catch(() => ({})),
+        fetchJsonTimeout(`${SDB_API}/eventspastleague.php?id=${tab.leagueId}`).catch(() => ({}))
       ]);
       const map = new Map();
       for (const ev of [...(nx.events || []), ...(ps.events || [])]) {
@@ -556,7 +587,7 @@
       const map = new Map();
       for (const lg of LEAGUE_TABS.filter(x => x.leagueId)) {
         try {
-          const d = await (await fetch(`${SDB_API}/lookup_all_teams.php?id=${lg.leagueId}`)).json();
+          const d = await fetchJsonTimeout(`${SDB_API}/lookup_all_teams.php?id=${lg.leagueId}`);
           for (const tm of (d.teams || [])) {
             if (!tm.idTeam || map.has(tm.idTeam)) continue;
             map.set(tm.idTeam, {
@@ -581,7 +612,7 @@
       const collected = [];
       for (const term of terms.slice(0, 2)) {
         try {
-          const d = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(term)}`)).json();
+          const d = await fetchJsonTimeout(`${SDB_API}/searchteams.php?t=${encodeURIComponent(term)}`);
           const tMap = new Map(ST.teams.map(t => [t.id, t]));
           for (const tm of (d.teams || [])) {
             if (!tm.idTeam) continue;
@@ -596,8 +627,8 @@
               });
             }
             const [nx, ls] = await Promise.all([
-              fetch(`${SDB_API}/eventsnext.php?id=${tm.idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-              fetch(`${SDB_API}/eventslast.php?id=${tm.idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+              fetchJsonTimeout(`${SDB_API}/eventsnext.php?id=${tm.idTeam}`).catch(() => ({})),
+              fetchJsonTimeout(`${SDB_API}/eventslast.php?id=${tm.idTeam}`).catch(() => ({}))
             ]);
             for (const ev of [...(nx.events || []), ...(ls.results || [])]) {
               collected.push(mapEvent(ev, tm.strLeague || tm.strTeam));
@@ -620,7 +651,7 @@
       const map = new Map();
       for (const name of FEATURED_PLAYERS) {
         try {
-          const d = await (await fetch(`${SDB_API}/searchplayers.php?p=${encodeURIComponent(name)}`)).json();
+          const d = await fetchJsonTimeout(`${SDB_API}/searchplayers.php?p=${encodeURIComponent(name)}`);
           const p = (d.player || []).find(x => (x.strSport || "").toLowerCase() === "soccer") || (d.player || [])[0];
           if (p?.idPlayer && !map.has(p.idPlayer)) map.set(p.idPlayer, p);
         } catch {}
@@ -633,7 +664,7 @@
       const q = (rawName || "").trim();
       if (!q) return;
       try {
-        const d = await (await fetch(`${SDB_API}/searchplayers.php?p=${encodeURIComponent(q)}`)).json();
+        const d = await fetchJsonTimeout(`${SDB_API}/searchplayers.php?p=${encodeURIComponent(q)}`);
         const list = (d.player || []).filter(p => p.idPlayer);
         if (list.length) {
           const map = new Map(ST.players.map(p => [p.idPlayer, p]));
@@ -664,8 +695,8 @@
 
       const liveMatches = ST.matches.filter(m => (m.title || "").toLowerCase().includes(tm.name.toLowerCase()));
       const [nx, ls] = await Promise.all([
-        fetch(`${SDB_API}/eventsnext.php?id=${tm.id}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-        fetch(`${SDB_API}/eventslast.php?id=${tm.id}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        fetchJsonTimeout(`${SDB_API}/eventsnext.php?id=${tm.id}`).catch(() => ({})),
+        fetchJsonTimeout(`${SDB_API}/eventslast.php?id=${tm.id}`).catch(() => ({}))
       ]);
       const upcoming = nx.events || [];
       const past = ls.results || [];
@@ -702,9 +733,9 @@
       document.getElementById("app").innerHTML = `<div class="empty">Loading channels...</div>`;
       try {
         const [chs, sts, lgs] = await Promise.all([
-          fetch(`${IPTV_API}/channels.json`).then(r => r.json()),
-          fetch(`${IPTV_API}/streams.json`).then(r => r.json()),
-          fetch(`${IPTV_API}/logos.json`).then(r => r.ok ? r.json() : []).catch(() => [])
+          fetchJsonTimeout(`${IPTV_API}/channels.json`, 9000),
+          fetchJsonTimeout(`${IPTV_API}/streams.json`, 9000),
+          fetchJsonTimeout(`${IPTV_API}/logos.json`, 9000).catch(() => [])
         ]);
         const logoMap = new Map();
         for (const l of lgs) if (l.channel && l.url && !logoMap.has(l.channel)) logoMap.set(l.channel, l.url);
