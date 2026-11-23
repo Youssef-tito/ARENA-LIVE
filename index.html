@@ -341,6 +341,7 @@
   </div>
 
   <script>
+    const WORKER_API = "https://arena-live.youssefmehrzi666.workers.dev";
     const PPV_API = "https://api.ppv.st/api/streams";
     const IPTV_API = "https://iptv-org.github.io/api";
     const SDB_API = "https://www.thesportsdb.com/api/v1/json/3";
@@ -506,6 +507,34 @@
     async function loadMatches(force = false) {
       if (!force && ST.matches.length) { render(); return; }
       document.getElementById("app").innerHTML = `<div class="empty">Loading matches...</div>`;
+
+      const today = new Date().toISOString().slice(0, 10);
+
+      try {
+        const wData = await fetchJsonTimeout(`${WORKER_API}/?date=${today}`, 7000);
+        if (wData && Array.isArray(wData.matches) && wData.matches.length) {
+          ST.matches = wData.matches.map((m, idx) => {
+            const ts = m.time ? Math.floor(new Date(m.time).getTime() / 1000) : 0;
+            const hasScore = m.homeGoals != null && m.awayGoals != null;
+            const isLive = ["1H", "2H", "HT", "ET", "P", "LIVE"].includes(String(m.status || "").toUpperCase());
+            const isEnded = ["FT", "AET", "PEN"].includes(String(m.status || "").toUpperCase());
+            return {
+              id: m.id || `w_${idx}`,
+              title: `${m.home || "Home"} vs ${m.away || "Away"}`,
+              league: m.league || "Football",
+              category: "Football",
+              poster: m.homeLogo || m.leagueLogo || "",
+              starts_at: ts,
+              ends_at: isEnded && ts ? ts + 7200 : 0,
+              always_live: isLive,
+              score: hasScore ? `${m.homeGoals} - ${m.awayGoals}` : ""
+            };
+          });
+          render();
+          return;
+        }
+      } catch {}
+
       try {
         const data = await fetchJsonTimeout(PPV_API, 7000);
         const out = [];
@@ -520,17 +549,21 @@
             });
           }
         }
-        ST.matches = out.length ? out : await loadFallbackFixtures();
-        render();
-      } catch {
-        const fallback = await loadFallbackFixtures();
-        if (fallback.length) {
-          ST.matches = fallback;
+        if (out.length) {
+          ST.matches = out;
           render();
-        } else {
-          document.getElementById("app").innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
+          return;
         }
+      } catch {}
+
+      const fallback = await loadFallbackFixtures();
+      if (fallback.length) {
+        ST.matches = fallback;
+        render();
+        return;
       }
+
+      document.getElementById("app").innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
     }
 
     async function loadTunisia(force = false) {
