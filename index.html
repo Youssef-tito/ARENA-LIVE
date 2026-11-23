@@ -6,27 +6,31 @@
   <title>Footime — Live Football, Teams & Replays</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <style>
     :root {
-      --bg-base: #070b0a;
-      --bg-elevated: #0d1412;
-      --bg-card: #121c19;
-      --bg-hover: #182622;
-      --fg-primary: #f4f8f6;
-      --fg-secondary: #b7c7c1;
-      --fg-tertiary: #798e87;
+      --bg-base: #060a09;
+      --bg-elevated: #0c1311;
+      --bg-card: #111b18;
+      --bg-hover: #172521;
+      --fg-primary: #f5f9f7;
+      --fg-secondary: #b9cac4;
+      --fg-tertiary: #7b9089;
       --accent: #10b981;
       --accent-bright: #34d399;
       --accent-gold: #f59e0b;
+      --accent-gold-bright: #fbbf24;
       --accent-soft: rgba(16, 185, 129, 0.14);
       --live-red: #ef4444;
       --border: rgba(255, 255, 255, 0.08);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg-base);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.09), transparent 42%),
+        radial-gradient(circle at 88% 8%, rgba(245, 158, 11, 0.07), transparent 38%),
+        var(--bg-base);
       color: var(--fg-primary);
       font-family: "Plus Jakarta Sans", sans-serif;
       min-height: 100vh;
@@ -40,21 +44,21 @@
       position: sticky; top: 0; z-index: 40;
       display: flex; align-items: center; justify-content: space-between; gap: 14px;
       padding: 8px 22px;
-      background: rgba(7, 11, 10, 0.86);
-      backdrop-filter: blur(16px);
+      background: rgba(6, 10, 9, 0.88);
+      backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
     }
     .arena-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
     .arena-logo {
-      width: 180px; height: 78px; object-fit: contain; display: block;
-      transition: transform 0.25s, filter 0.25s;
-      filter: drop-shadow(0 0 10px rgba(0, 255, 100, 0.28));
+      width: 215px; height: 68px; object-fit: contain; display: block;
+      transition: transform 0.25s ease, filter 0.25s ease;
+      filter: drop-shadow(0 6px 16px rgba(16, 185, 129, 0.22));
     }
     .arena-brand:hover .arena-logo {
-      transform: scale(1.04);
-      filter: drop-shadow(0 0 18px rgba(0, 255, 100, 0.6));
+      transform: translateY(-1px) scale(1.03);
+      filter: drop-shadow(0 8px 22px rgba(52, 211, 153, 0.42));
     }
-    @media (max-width: 600px) { .arena-logo { width: 140px; height: 60px; } }
+    @media (max-width: 600px) { .arena-logo { width: 168px; height: 54px; } }
 
     .nav-pills {
       position: relative; display: flex; gap: 4px; padding: 4px;
@@ -63,6 +67,7 @@
     .nav-btn {
       position: relative; z-index: 2; padding: 8px 14px; border-radius: 999px;
       font-size: 13px; font-weight: 600; color: var(--fg-tertiary); white-space: nowrap;
+      transition: color 0.2s ease;
     }
     .nav-btn.active { color: #04130e; }
     .nav-indicator {
@@ -75,7 +80,7 @@
     .search-box {
       display: flex; align-items: center; gap: 8px;
       background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 999px; padding: 8px 13px; width: 210px;
+      border-radius: 999px; padding: 8px 13px; width: 215px;
     }
     .search-box:focus-within { border-color: var(--accent); }
     .search-box input { background: transparent; border: none; outline: none; font-size: 13px; width: 100%; }
@@ -89,12 +94,12 @@
     .container { max-width: 1360px; margin: 0 auto; padding: 22px; }
     .hero-card {
       position: relative; overflow: hidden; border-radius: 20px;
-      background: linear-gradient(135deg, #0d241c 0%, #0b1310 55%, #161409 100%);
-      border: 1px solid rgba(16, 185, 129, 0.22); padding: 28px; margin-bottom: 20px;
+      background: linear-gradient(135deg, #0d261d 0%, #0a120f 55%, #171409 100%);
+      border: 1px solid rgba(16, 185, 129, 0.24); padding: 28px; margin-bottom: 20px;
     }
     .hero-glow {
       position: absolute; inset: 0; background-size: cover; background-position: center;
-      opacity: 0.2; filter: blur(18px); pointer-events: none;
+      opacity: 0.22; filter: blur(18px); pointer-events: none;
     }
     .hero-content { position: relative; z-index: 2; max-width: 760px; }
     .badge {
@@ -133,17 +138,17 @@
     }
     .card:hover { transform: translateY(-2px); border-color: rgba(16, 185, 129, 0.45); }
     .banner { position: relative; aspect-ratio: 16 / 9; background: #0b1210; overflow: hidden; cursor: pointer; }
-    .banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
-    .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 11, 10, 0.15), rgba(7, 11, 10, 0.88)); }
+    .banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.78; }
+    .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 11, 10, 0.15), rgba(7, 11, 10, 0.9)); }
     .pill {
       position: absolute; top: 10px; left: 10px; z-index: 2; padding: 4px 9px; border-radius: 999px;
-      font-size: 11px; font-weight: 700; background: rgba(7, 11, 10, 0.8);
+      font-size: 11px; font-weight: 700; background: rgba(7, 11, 10, 0.82);
       border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 5px;
     }
     .fav {
       position: absolute; top: 10px; right: 10px; z-index: 3; width: 30px; height: 30px;
       border-radius: 50%; display: grid; place-items: center;
-      background: rgba(7, 11, 10, 0.8); border: 1px solid var(--border); color: var(--fg-tertiary);
+      background: rgba(7, 11, 10, 0.82); border: 1px solid var(--border); color: var(--fg-tertiary);
     }
     .fav.on { color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.5); }
     .body { padding: 13px; cursor: pointer; }
@@ -186,6 +191,11 @@
       grid-column: 1 / -1; text-align: center; padding: 36px 18px;
       background: var(--bg-card); border: 1px dashed var(--border); border-radius: 14px; color: var(--fg-tertiary);
     }
+    .stream-fallback {
+      height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; padding: 24px; text-align: center;
+      background: radial-gradient(circle at center, rgba(16, 185, 129, 0.14), #070b0a 72%);
+    }
 
     .modal {
       position: fixed; inset: 0; z-index: 100; background: rgba(3, 6, 5, 0.86);
@@ -217,7 +227,7 @@
     .s-btn {
       padding: 6px 12px; border-radius: 8px; background: var(--bg-elevated);
       border: 1px solid var(--border); font-size: 12px; font-weight: 600;
-      color: var(--fg-secondary); text-decoration: none;
+      color: var(--fg-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
     }
     .s-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-bright); }
     .ext { margin-left: auto; color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.35); }
@@ -236,21 +246,53 @@
 </head>
 <body>
   <header class="topbar">
-    <a href="#matches" class="arena-brand" id="brandHome">
-      <svg class="arena-logo" viewBox="0 0 260 110" xmlns="http://www.w3.org/2000/svg">
+    <a href="#matches" class="arena-brand" id="brandHome" aria-label="Footime Pro Home">
+      <svg class="arena-logo" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="gE" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#047857"/></linearGradient>
-          <linearGradient id="gG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
-          <linearGradient id="gB" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0f261e"/><stop offset="100%" stop-color="#08120e"/></linearGradient>
+          <linearGradient id="proEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6ee7b7"/>
+            <stop offset="50%" stop-color="#10b981"/>
+            <stop offset="100%" stop-color="#047857"/>
+          </linearGradient>
+          <linearGradient id="proGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fde68a"/>
+            <stop offset="55%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#b45309"/>
+          </linearGradient>
+          <linearGradient id="proShieldBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#132c23"/>
+            <stop offset="100%" stop-color="#070e0b"/>
+          </linearGradient>
         </defs>
-        <g transform="translate(10,13)">
-          <rect x="2" y="2" width="80" height="80" rx="22" fill="url(#gB)" stroke="url(#gE)" stroke-width="2.5"/>
-          <path d="M25 58 L42 22 L59 58" fill="none" stroke="url(#gE)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M31 46 H53" stroke="url(#gG)" stroke-width="3.5" stroke-linecap="round"/>
-          <circle cx="67" cy="21" r="6" fill="#ef4444"/>
+
+        <!-- Pro Shield Emblem -->
+        <g transform="translate(8, 10)">
+          <path d="M38 4 L68 15 L64 49 C61 65 49 74 38 78 C27 74 15 65 12 49 L8 15 Z"
+                fill="url(#proShieldBg)" stroke="url(#proEmerald)" stroke-width="2.4"/>
+          <path d="M38 11 L61 19.5 L57.8 47.5 C55.4 60 46.2 67.5 38 71 C29.8 67.5 20.6 60 18.2 47.5 L15 19.5 Z"
+                fill="none" stroke="url(#proGold)" stroke-width="1" opacity="0.65"/>
+          <!-- Dynamic Arena Strike / Crown Chevron -->
+          <path d="M23 51 L38 24 L53 51" fill="none" stroke="url(#proEmerald)" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M26 39 L34 39 L38 33 L42 44 L46 39 L51 39" fill="none" stroke="url(#proGold)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Live Broadcast Beacon -->
+          <circle cx="63" cy="15" r="6.5" fill="#070e0b"/>
+          <circle cx="63" cy="15" r="4.3" fill="#ef4444"/>
         </g>
-        <text x="102" y="54" fill="#f4f8f6" font-family="Outfit,sans-serif" font-size="25" font-weight="800">ARENA <tspan fill="url(#gE)">LIVE</tspan></text>
-        <text x="103" y="76" fill="url(#gG)" font-family="Plus Jakarta Sans,sans-serif" font-size="11" font-weight="700" letter-spacing="2.4">FOOTIME SPORTS</text>
+
+        <!-- Wordmark -->
+        <text x="88" y="48" fill="#f8fafc" font-family="Outfit, sans-serif" font-size="27" font-weight="900" letter-spacing="0.6">
+          FOOTIME
+        </text>
+        <rect x="218" y="29" width="38" height="18" rx="5" fill="url(#proGold)"/>
+        <text x="237" y="42" text-anchor="middle" fill="#060a09" font-family="Outfit, sans-serif" font-size="11" font-weight="900" letter-spacing="1">
+          PRO
+        </text>
+
+        <!-- Sub-tag & Accent Line -->
+        <line x1="89" y1="57" x2="256" y2="57" stroke="url(#proEmerald)" stroke-width="1.4" opacity="0.55"/>
+        <text x="89" y="73" fill="url(#proEmerald)" font-family="Plus Jakarta Sans, sans-serif" font-size="10.5" font-weight="800" letter-spacing="2.6">
+          ARENA LIVE • SPORTS HUB
+        </text>
       </svg>
     </a>
 
@@ -320,14 +362,71 @@
       { id: "Motorsport", label: "Motorsport" }
     ];
 
-    const WORLD_LEAGUES = [
-      { id: "all", label: "All Loaded" },
-      { id: "tunisia", label: "🇹🇳 Tunisia", tn: 1 },
-      { id: "English Premier League", label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League" },
-      { id: "Spanish La Liga", label: "🇪🇸 La Liga" },
-      { id: "Italian Serie A", label: "🇮🇹 Serie A" },
-      { id: "German Bundesliga", label: "🇩🇪 Bundesliga" },
-      { id: "French Ligue 1", label: "🇫🇷 Ligue 1" }
+    const FALLBACK_TUNISIA = [
+      {
+        id: "tn_f1",
+        title: "Esperance de Tunis vs Club Africain",
+        league: "Tunisian Ligue 1",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) + 3600,
+        score: ""
+      },
+      {
+        id: "tn_f2",
+        title: "Etoile du Sahel vs CS Sfaxien",
+        league: "Tunisian Ligue 1",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) + 7200,
+        score: ""
+      },
+      {
+        id: "tn_r1",
+        title: "US Monastir vs CA Bizertin",
+        league: "Tunisian Ligue 1 • Replay",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 86400,
+        ends_at: Math.floor(Date.now() / 1000) - 79200,
+        score: "2 - 1"
+      },
+      {
+        id: "tn_r2",
+        title: "Club Africain vs Etoile du Sahel",
+        league: "Tunisian Ligue 1 • Highlights",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 172800,
+        ends_at: Math.floor(Date.now() / 1000) - 165600,
+        score: "1 - 1"
+      }
+    ];
+
+    const FALLBACK_REPLAYS = [
+      {
+        id: "rep_1",
+        title: "Arsenal vs Liverpool — Full Highlights",
+        league: "Premier League • Replay",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 90000,
+        ends_at: Math.floor(Date.now() / 1000) - 82800,
+        score: "2 - 2"
+      },
+      {
+        id: "rep_2",
+        title: "Real Madrid vs Barcelona — Match Replay",
+        league: "La Liga • Replay",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 176400,
+        ends_at: Math.floor(Date.now() / 1000) - 169200,
+        score: "3 - 1"
+      },
+      {
+        id: "rep_3",
+        title: "Esperance de Tunis vs Club Africain — Derby Highlights",
+        league: "Tunisian Ligue 1 • Highlights",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 259200,
+        ends_at: Math.floor(Date.now() / 1000) - 252000,
+        score: "2 - 0"
+      }
     ];
 
     const ST = {
@@ -337,6 +436,7 @@
       q: "",
       matches: [],
       tnMatches: [],
+      replays: [],
       teams: [],
       channels: [],
       country: "all",
@@ -400,6 +500,22 @@
       return "live";
     }
 
+    function mapEventToMatch(ev, prefix = "ev", fallbackLeague = "Football") {
+      const ts = ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : Math.floor((Date.now() - 86400000) / 1000);
+      const hasScore = ev.intHomeScore != null && ev.intAwayScore != null;
+      return {
+        id: `${prefix}_${ev.idEvent}`,
+        title: ev.strEvent || "Match",
+        league: ev.strLeague || fallbackLeague,
+        category: "Football",
+        poster: ev.strThumb || "",
+        starts_at: ts,
+        ends_at: ts + 7200,
+        score: hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : "FT",
+        videoUrl: ev.strVideo || ""
+      };
+    }
+
     async function loadMatches(force = false) {
       if (!force && ST.matches.length) { render(); return; }
       document.getElementById("app").innerHTML = `<div class="empty">Loading matches...</div>`;
@@ -428,42 +544,65 @@
       if (!force && ST.tnMatches.length) { render(); return; }
       const teams = ["Esperance", "Club Africain", "Etoile du Sahel", "CS Sfaxien", "US Monastir"];
       const map = new Map();
-      const addEv = (ev, fallbackLeague = "Tunisian Ligue 1") => {
-        if (!ev || !ev.idEvent || map.has(ev.idEvent)) return;
-        const ts = ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : 0;
-        const hasScore = ev.intHomeScore != null && ev.intAwayScore != null;
-        map.set(ev.idEvent, {
-          id: "tn_" + ev.idEvent,
-          title: ev.strEvent || "Tunisian Match",
-          league: ev.strLeague || fallbackLeague,
-          category: "Football",
-          poster: ev.strThumb || "",
-          starts_at: ts,
-          ends_at: hasScore && ts ? ts + 7200 : 0,
-          score: hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : "",
-          videoUrl: ev.strVideo || ""
-        });
-      };
 
-      const leagueCalls = await Promise.all([
-        fetch(`${SDB_API}/eventsnextleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-        fetch(`${SDB_API}/eventspastleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
-      ]);
-      [...(leagueCalls[0].events || []), ...(leagueCalls[1].events || [])].forEach(e => addEv(e));
+      try {
+        const leagueCalls = await Promise.all([
+          fetch(`${SDB_API}/eventsnextleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+          fetch(`${SDB_API}/eventspastleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        ]);
+        for (const ev of [...(leagueCalls[0].events || []), ...(leagueCalls[1].events || [])]) {
+          if (ev?.idEvent && !map.has(ev.idEvent)) map.set(ev.idEvent, mapEventToMatch(ev, "tn", "Tunisian Ligue 1"));
+        }
 
-      for (const t of teams) {
+        for (const t of teams) {
+          try {
+            const td = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(t)}`)).json();
+            const idTeam = td?.teams?.[0]?.idTeam;
+            if (!idTeam) continue;
+            const [nx, ls] = await Promise.all([
+              fetch(`${SDB_API}/eventsnext.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+              fetch(`${SDB_API}/eventslast.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+            ]);
+            for (const ev of [...(nx.events || []), ...(ls.results || [])]) {
+              if (ev?.idEvent && !map.has(ev.idEvent)) map.set(ev.idEvent, mapEventToMatch(ev, "tn", `${t} • Tunisia`));
+            }
+          } catch {}
+        }
+      } catch {}
+
+      ST.tnMatches = map.size ? [...map.values()] : FALLBACK_TUNISIA;
+      render();
+    }
+
+    async function loadReplays(force = false) {
+      if (!force && ST.replays.length) { render(); return; }
+      const map = new Map();
+      const leagueIds = ["4445", "4328", "4335", "4332", "4331", "4334"];
+
+      for (const id of leagueIds) {
         try {
-          const td = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(t)}`)).json();
-          const idTeam = td?.teams?.[0]?.idTeam;
-          if (!idTeam) continue;
-          const [nx, ls] = await Promise.all([
-            fetch(`${SDB_API}/eventsnext.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-            fetch(`${SDB_API}/eventslast.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
-          ]);
-          [...(nx.events || []), ...(ls.results || [])].forEach(e => addEv(e, `${t} • Tunisia`));
+          const d = await (await fetch(`${SDB_API}/eventspastleague.php?id=${id}`)).json();
+          for (const ev of (d.events || [])) {
+            if (ev?.idEvent && !map.has(ev.idEvent)) {
+              map.set(ev.idEvent, mapEventToMatch(ev, "rep", ev.strLeague || "Match Replay"));
+            }
+          }
         } catch {}
       }
-      ST.tnMatches = [...map.values()];
+
+      const endedFromFeed = [...ST.matches, ...ST.tnMatches].filter(m => statusOf(m) === "ended" || m.videoUrl || m.score);
+      for (const m of endedFromFeed) {
+        const k = String(m.id ?? m.title);
+        if (!map.has(k)) {
+          map.set(k, {
+            ...m,
+            starts_at: m.starts_at || Math.floor((Date.now() - 86400000) / 1000),
+            ends_at: m.ends_at || Math.floor((Date.now() - 79200000) / 1000)
+          });
+        }
+      }
+
+      ST.replays = map.size ? [...map.values()] : FALLBACK_REPLAYS;
       render();
     }
 
@@ -612,6 +751,22 @@
       document.getElementById("mYt").style.display = "none";
     }
 
+    function renderFallbackPlayerBox(title, url, reasonText) {
+      const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + " highlights live")}`;
+      return `<div class="stage">
+        <div class="stream-fallback">
+          <div style="font-size:15px;font-weight:700;color:var(--fg-primary);">${esc(reasonText)}</div>
+          <div style="font-size:12.5px;color:var(--fg-tertiary);max-width:520px;">
+            Some external stream hosts block embedded playback or have temporary network errors. Open the stream in a new tab, search highlights on YouTube, or paste a working link below.
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+            ${url ? `<a class="btn-primary" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open Stream in New Tab ↗</a>` : ""}
+            <a class="s-btn active" href="${esc(ytUrl)}" target="_blank" rel="noopener noreferrer">▶ Watch / Search on YouTube</a>
+          </div>
+        </div>
+      </div>`;
+    }
+
     function openMatch(m) {
       const sources = [];
       if (m.iframe) sources.push({ label: `${(m.locale || "EN").toUpperCase()} • ${m.source_tag || "Main"}`, url: m.iframe });
@@ -637,7 +792,7 @@
 
       if (!sources.length) {
         bar.style.display = "none";
-        body.innerHTML = `<div style="padding:24px;"><div class="empty">No automatic stream URL attached. Use "Search on YouTube" below or paste a YouTube/embed link.</div></div>`;
+        body.innerHTML = `<div style="padding:18px;">${renderFallbackPlayerBox(m.title, "", "Direct stream not attached for this fixture.")}</div>`;
         return;
       }
 
@@ -646,8 +801,12 @@
         body.innerHTML = `<div class="stage"><iframe src="${esc(s.url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
         bar.style.display = "flex";
         bar.innerHTML = sources.map((x, idx) => `<button class="s-btn ${idx === i ? "active" : ""}" data-i="${idx}">${esc(x.label)}</button>`).join("")
+          + `<button class="s-btn" id="fixEmbedBtn">Can't Play? Options</button>`
           + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
         bar.querySelectorAll("[data-i]").forEach(btn => btn.onclick = () => playIdx(+btn.dataset.i));
+        document.getElementById("fixEmbedBtn")?.addEventListener("click", () => {
+          body.innerHTML = renderFallbackPlayerBox(m.title, s.url, "Stream player fallback options");
+        });
       };
       playIdx(0);
     }
@@ -679,7 +838,16 @@
           hls.loadSource(url);
           hls.attachMedia(v);
           hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(() => {}));
-          hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal && idx < list.length - 1) { idx++; run(); } });
+          hls.on(Hls.Events.ERROR, (_, d) => {
+            if (d.fatal) {
+              if (idx < list.length - 1) {
+                idx++;
+                run();
+              } else {
+                body.innerHTML = renderFallbackPlayerBox(ch.name, url, "HLS stream unavailable or blocked by network.");
+              }
+            }
+          });
         } else {
           body.innerHTML = `<div class="stage"><iframe src="${esc(url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
         }
@@ -720,7 +888,6 @@
         const past = list.filter(m => statusOf(m, now) === "ended");
         const feat = live[0] || up[0] || list[0];
         const fEnc = feat ? encodeURIComponent(JSON.stringify(feat)) : "";
-
         app.innerHTML = `
           ${feat ? `<section class="hero-card">
             ${feat.poster ? `<div class="hero-glow" style="background-image:url('${esc(feat.poster)}')"></div>` : ""}
@@ -728,14 +895,12 @@
               <span class="badge ${statusOf(feat, now) === "live" ? "badge-live" : "badge-up"}">${statusOf(feat, now) === "live" ? "LIVE NOW" : "FEATURED"}</span>
               <span class="badge badge-lg">${esc(feat.league || feat.category)}</span>
               <h1 class="hero-title">${esc(feat.title)}</h1>
-              <p class="hero-sub">Footime — Live football, Tunisian Ligue 1, world teams, replays, and channels.</p>
+              <p class="hero-sub">Footime Pro — Live football, Tunisian Ligue 1, world teams, replays, and channels.</p>
               <a href="javascript:void(0)" class="btn-primary" onclick="openMatch(JSON.parse(decodeURIComponent('${fEnc}')))">▶ Open Match</a>
             </div>
           </section>` : ""}
-          <div class="filter-bar">
-            ${SPORTS.map(s => `<button class="chip ${s.tn ? "tn" : ""} ${ST.sport === s.id ? "active" : ""}" data-sp="${esc(s.id)}">${esc(s.label)}</button>`).join("")}
-          </div>
-          ${ST.q ? `<div class="note"><span>Search: <strong>${esc(ST.q)}</strong></span><button class="s-btn active" id="clrQ">Clear Search</button></div>` : ""}
+          <div class="filter-bar">${SPORTS.map(s => `<button class="chip ${s.tn ? "tn" : ""} ${ST.sport === s.id ? "active" : ""}" data-sp="${esc(s.id)}">${esc(s.label)}</button>`).join("")}</div>
+          ${ST.q ? `<div class="note"><span>Search: <strong>${esc(ST.q)}</strong></span><button class="s-btn" id="clrQ">Clear</button></div>` : ""}
           <h2 class="section-title"><span class="bar"></span> Live Now (${live.length})</h2>
           <div class="grid">${live.length ? live.map(m => matchCard(m, "live")).join("") : `<div class="empty">No live matches right now.</div>`}</div>
           <h2 class="section-title"><span class="bar"></span> Upcoming (${up.length})</h2>
@@ -751,29 +916,22 @@
         document.getElementById("clrQ")?.addEventListener("click", () => { ST.q = ""; document.getElementById("searchInput").value = ""; render(); });
 
       } else if (ST.tab === "teams") {
-        const tList = ST.teams.filter(t => (ST.teamLeague === "all" || t.league === ST.teamLeague) && matchQ(t));
-        app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Teams (${tList.length})</h2>
-          <div class="filter-bar">
-            ${WORLD_LEAGUES.map(l => `<button class="chip ${l.tn ? "tn" : ""} ${ST.teamLeague === l.id ? "active" : ""}" data-tlg="${esc(l.id)}">${esc(l.label)}</button>`).join("")}
-            <button class="chip active" id="findTeamApiBtn">🌐 Search Any Team Online</button>
-          </div>
-          <div class="grid">${tList.length ? tList.map(tm => {
+        const list = ST.teams.filter(t => (ST.teamLeague === "all" || t.league === ST.teamLeague) && matchQ(t));
+        app.innerHTML = `<h2 class="section-title"><span class="bar"></span> World Teams (${list.length})</h2>
+          <div class="filter-bar">${WORLD_LEAGUES.map(l => `<button class="chip ${l.tn ? "tn" : ""} ${ST.teamLeague === l.id ? "active" : ""}" data-tlg="${esc(l.id)}">${esc(l.label)}</button>`).join("")}</div>
+          <div class="grid">${list.length ? list.map(tm => {
             const enc = encodeURIComponent(JSON.stringify(tm));
             return `<div class="team-card" onclick="openTeamDetails(JSON.parse(decodeURIComponent('${enc}')))">
               <div class="team-badge">${tm.badge ? `<img src="${esc(tm.badge)}" loading="lazy" onerror="this.remove()">` : esc(tm.name.slice(0, 3).toUpperCase())}</div>
-              <div style="flex:1;min-width:0;">
-                <div class="title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(tm.name)}</div>
-                <div class="sub">${esc(tm.leagueLabel)} ${tm.country ? "• " + esc(tm.country) : ""}</div>
-              </div>
+              <div style="flex:1;min-width:0;"><div class="title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(tm.name)}</div><div class="sub">${esc(tm.leagueLabel)} ${tm.country ? "• " + esc(tm.country) : ""}</div></div>
             </div>`;
-          }).join("") : `<div class="empty">No teams match your filter. Try "Search Any Team Online".</div>`}</div>`;
+          }).join("") : `<div class="empty">No teams found. Type any team name in search and press Enter.</div>`}</div>`;
         app.querySelectorAll("[data-tlg]").forEach(b => b.onclick = () => { ST.teamLeague = b.dataset.tlg; render(); });
-        document.getElementById("findTeamApiBtn")?.addEventListener("click", () => searchAnyTeam(ST.q || "Real Madrid"));
 
       } else if (ST.tab === "replays") {
-        const ended = [...ST.matches, ...ST.tnMatches].filter(m => (statusOf(m, now) === "ended" || m.videoUrl || m.score) && matchQ(m));
-        app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Replays &amp; Highlights (${ended.length})</h2>
-          <div class="grid">${ended.length ? ended.slice(0, 30).map(m => matchCard(m, "ended")).join("") : `<div class="empty">No replays or highlights available yet.</div>`}</div>`;
+        const list = (ST.replays.length ? ST.replays : FALLBACK_REPLAYS).filter(matchQ);
+        app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Replays &amp; Highlights (${list.length})</h2>
+          <div class="grid">${list.length ? list.slice(0, 30).map(m => matchCard(m, "ended")).join("") : `<div class="empty">No replays or highlights available yet.</div>`}</div>`;
 
       } else if (ST.tab === "channels") {
         const q = ST.q.trim().toLowerCase();
@@ -822,14 +980,17 @@
       moveInd();
       render();
       if (ST.tab === "teams" && !ST.teams.length) loadTeams();
+      if (ST.tab === "replays" && !ST.replays.length) loadReplays();
       if (ST.tab === "channels" && !ST.channels.length) loadChannels();
       if (ST.sport === "tunisia" && !ST.tnMatches.length) loadTunisia();
     });
     document.getElementById("brandHome").onclick = e => { e.preventDefault(); document.querySelector('[data-tab="matches"]').click(); };
     document.getElementById("searchInput").oninput = e => { ST.q = e.target.value; render(); };
+    document.getElementById("searchInput").onkeydown = e => { if (e.key === "Enter" && ST.tab === "teams") searchAnyTeam(ST.q); };
     document.getElementById("refreshBtn").onclick = () => {
       if (ST.tab === "channels") loadChannels(true);
       else if (ST.tab === "teams") loadTeams(true);
+      else if (ST.tab === "replays") loadReplays(true);
       else { loadMatches(true); if (ST.sport === "tunisia") loadTunisia(true); }
     };
     document.getElementById("mClose").onclick = closeModal;
