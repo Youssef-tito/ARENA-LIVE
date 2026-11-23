@@ -345,13 +345,6 @@
     const IPTV_API = "https://iptv-org.github.io/api";
     const SDB_API = "https://www.thesportsdb.com/api/v1/json/3";
 
-    const DEFAULT_MATCHES = [
-      { id: "d1", title: "Esperance de Tunis vs Club Africain", league: "Tunisian Ligue 1", category: "Football", always_live: true },
-      { id: "d2", title: "Etoile du Sahel vs CS Sfaxien", league: "Tunisian Ligue 1", category: "Football", starts_at: Math.floor(Date.now() / 1000) + 3600 },
-      { id: "d3", title: "Arsenal vs Liverpool", league: "English Premier League", category: "Football", starts_at: Math.floor(Date.now() / 1000) + 7200 },
-      { id: "d4", title: "Real Madrid vs Barcelona", league: "Spanish La Liga", category: "Football", starts_at: Math.floor(Date.now() / 1000) + 10800 }
-    ];
-
     const ALIASES = {
       taraji: ["esperance", "es tunis", "taraji"],
       esperance: ["esperance", "es tunis", "taraji"],
@@ -499,8 +492,8 @@
       for (const id of ids) {
         try {
           const [nx, ps] = await Promise.all([
-            fetchJsonTimeout(`${SDB_API}/eventsnextleague.php?id=${id}`, 5000).catch(() => ({})),
-            fetchJsonTimeout(`${SDB_API}/eventspastleague.php?id=${id}`, 5000).catch(() => ({}))
+            fetchJsonTimeout(`${SDB_API}/eventsnextleague.php?id=${id}`, 6000).catch(() => ({})),
+            fetchJsonTimeout(`${SDB_API}/eventspastleague.php?id=${id}`, 6000).catch(() => ({}))
           ]);
           for (const ev of [...(nx.events || []), ...(ps.events || [])]) {
             if (ev?.idEvent) out.push(mapEvent(ev, ev.strLeague || "Football"));
@@ -513,9 +506,7 @@
     async function loadMatches(force = false) {
       if (!force && ST.matches.length) { render(); return; }
       document.getElementById("app").innerHTML = `<div class="empty">Loading matches...</div>`;
-
       const today = new Date().toISOString().slice(0, 10);
-
       try {
         const wData = await fetchJsonTimeout(`${WORKER_API}/?date=${today}`, 6000);
         if (wData && Array.isArray(wData.matches) && wData.matches.length) {
@@ -540,9 +531,7 @@
           return;
         }
       } catch {}
-
-      const fallback = await loadFallbackFixtures();
-      ST.matches = fallback.length ? fallback : DEFAULT_MATCHES;
+      ST.matches = await loadFallbackFixtures();
       render();
     }
 
@@ -571,17 +560,13 @@
           }
         } catch {}
       }
-      ST.tnMatches = map.size ? [...map.values()] : DEFAULT_MATCHES.filter(x => x.league.includes("Tunisian"));
+      ST.tnMatches = [...map.values()];
       render();
     }
 
     async function loadLeagueFixtures(filterId) {
       const tab = LEAGUE_TABS.find(t => t.id === filterId);
-      if (!tab || !tab.leagueId) {
-        ST.leagueFixtures = [];
-        render();
-        return;
-      }
+      if (!tab || !tab.leagueId) { ST.leagueFixtures = []; render(); return; }
       const [nx, ps] = await Promise.all([
         fetchJsonTimeout(`${SDB_API}/eventsnextleague.php?id=${tab.leagueId}`).catch(() => ({})),
         fetchJsonTimeout(`${SDB_API}/eventspastleague.php?id=${tab.leagueId}`).catch(() => ({}))
@@ -701,11 +686,9 @@
         const emb = toEmbedUrl(document.getElementById("ytUrlInput").value);
         if (emb) body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
       };
-
       destroyHls();
       document.getElementById("modal").classList.add("open");
       body.innerHTML = `<div style="padding:24px;"><div class="empty">Loading ${esc(tm.name)} matches &amp; replays...</div></div>`;
-
       const liveMatches = ST.matches.filter(m => (m.title || "").toLowerCase().includes(tm.name.toLowerCase()));
       const [nx, ls] = await Promise.all([
         fetchJsonTimeout(`${SDB_API}/eventsnext.php?id=${tm.id}`).catch(() => ({})),
@@ -713,29 +696,17 @@
       ]);
       const upcoming = nx.events || [];
       const past = ls.results || [];
-
       const renderEvRow = (ev, isPast) => {
         const title = ev.strEvent || "Match";
         const score = (ev.intHomeScore != null && ev.intAwayScore != null) ? ` (${ev.intHomeScore}-${ev.intAwayScore})` : "";
         const yt = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + (isPast ? " highlights" : " live"))}`;
-        return `<div class="t-row">
-          <div>
-            <strong>${esc(title)}${esc(score)}</strong>
-            <div class="sub">${esc(ev.dateEvent || "")} • ${esc(ev.strLeague || tm.leagueLabel)}</div>
-          </div>
-          <a class="s-btn active" target="_blank" rel="noopener noreferrer" href="${esc(yt)}">${isPast ? "Replay / Highlights ↗" : "Search ↗"}</a>
-        </div>`;
+        return `<div class="t-row"><div><strong>${esc(title)}${esc(score)}</strong><div class="sub">${esc(ev.dateEvent || "")} • ${esc(ev.strLeague || tm.leagueLabel)}</div></div><a class="s-btn active" target="_blank" rel="noopener noreferrer" href="${esc(yt)}">${isPast ? "Replay / Highlights ↗" : "Search ↗"}</a></div>`;
       };
-
       body.innerHTML = `<div style="padding:18px;">
         <h3 style="margin-bottom:10px;">Live Stream Matches (${liveMatches.length})</h3>
-        ${liveMatches.length
-          ? liveMatches.map(m => `<div class="t-row"><div><strong>${esc(m.title)}</strong><div class="sub">${esc(m.league)}</div></div><button class="s-btn active" onclick='openMatch(${JSON.stringify(m).replace(/'/g, "&#39;")})'>Watch Live ▶</button></div>`).join("")
-          : `<div class="sub" style="margin-bottom:14px;">No active stream in live feed for ${esc(tm.name)} right now.</div>`}
-
+        ${liveMatches.length ? liveMatches.map(m => `<div class="t-row"><div><strong>${esc(m.title)}</strong><div class="sub">${esc(m.league)}</div></div><button class="s-btn active" onclick='openMatch(${JSON.stringify(m).replace(/'/g, "&#39;")})'>Watch Live ▶</button></div>`).join("") : `<div class="sub" style="margin-bottom:14px;">No active stream in live feed for ${esc(tm.name)} right now.</div>`}
         <h3 style="margin:14px 0 10px;">Upcoming (${upcoming.length})</h3>
         ${upcoming.length ? upcoming.slice(0, 8).map(e => renderEvRow(e, false)).join("") : `<div class="sub" style="margin-bottom:14px;">No upcoming fixtures listed.</div>`}
-
         <h3 style="margin:14px 0 10px;">Recent Matches / Replays (${past.length})</h3>
         ${past.length ? past.slice(0, 8).map(e => renderEvRow(e, true)).join("") : `<div class="sub">No recent matches listed.</div>`}
       </div>`;
@@ -786,14 +757,12 @@
       if (m.iframe) sources.push({ label: `${(m.locale || "EN").toUpperCase()} • ${m.source_tag || "Main"}`, url: m.iframe });
       (m.substreams || []).forEach((sub, i) => sub.iframe && sources.push({ label: `${(sub.locale || m.locale || "EN").toUpperCase()} • ${sub.source_tag || sub.name || "Backup " + (i + 1)}`, url: sub.iframe }));
       if (m.videoUrl) sources.push({ label: "Highlight / Video", url: toEmbedUrl(m.videoUrl) });
-
       const body = document.getElementById("mBody");
       const bar = document.getElementById("mBar");
       const ytRow = document.getElementById("mYt");
       document.getElementById("mTitle").textContent = m.title + (m.score ? ` (${m.score})` : "");
       destroyHls();
       document.getElementById("modal").classList.add("open");
-
       ytRow.style.display = "flex";
       document.getElementById("ytSearchLink").href = `https://www.youtube.com/results?search_query=${encodeURIComponent(m.title + " highlights replay")}`;
       const ytInput = document.getElementById("ytUrlInput");
@@ -803,19 +772,16 @@
         if (!emb) return;
         body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
       };
-
       if (!sources.length) {
         bar.style.display = "none";
         body.innerHTML = `<div style="padding:24px;"><div class="empty">No automatic stream URL attached. Use "Search on YouTube" below or paste a YouTube/embed link.</div></div>`;
         return;
       }
-
       const playIdx = (i) => {
         const s = sources[i];
         body.innerHTML = `<div class="stage"><iframe src="${esc(s.url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
         bar.style.display = "flex";
-        bar.innerHTML = sources.map((x, idx) => `<button class="s-btn ${idx === i ? "active" : ""}" data-i="${idx}">${esc(x.label)}</button>`).join("")
-          + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
+        bar.innerHTML = sources.map((x, idx) => `<button class="s-btn ${idx === i ? "active" : ""}" data-i="${idx}">${esc(x.label)}</button>`).join("") + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
         bar.querySelectorAll("[data-i]").forEach(btn => btn.onclick = () => playIdx(+btn.dataset.i));
       };
       playIdx(0);
@@ -829,17 +795,13 @@
       document.getElementById("mTitle").textContent = ch.name;
       destroyHls();
       document.getElementById("modal").classList.add("open");
-
       let idx = 0;
       const run = () => {
         const url = list[idx];
         destroyHls();
         bar.style.display = "flex";
-        bar.innerHTML = `<span style="font-size:12px;color:var(--fg-tertiary);">Source ${idx + 1}/${list.length}</span>`
-          + (list.length > 1 ? `<button class="s-btn active" id="nxSrc">Next Source ↻</button>` : "")
-          + `<a class="s-btn ext" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
+        bar.innerHTML = `<span style="font-size:12px;color:var(--fg-tertiary);">Source ${idx + 1}/${list.length}</span>` + (list.length > 1 ? `<button class="s-btn active" id="nxSrc">Next Source ↻</button>` : "") + `<a class="s-btn ext" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
         document.getElementById("nxSrc")?.addEventListener("click", () => { idx = (idx + 1) % list.length; run(); });
-
         if (/\.m3u8(\?|$)/i.test(url) && window.Hls && Hls.isSupported()) {
           body.innerHTML = `<div class="stage"><video id="vid" controls autoplay playsinline></video></div>`;
           const v = document.getElementById("vid");
@@ -886,7 +848,6 @@
       const nat = p.strNationality || "—";
       const born = p.dateBorn || "—";
       const initials = name.split(" ").slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "PL";
-
       return `<div class="player-card">
         <div class="player-photo-frame">
           ${photo ? `<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy" onerror="this.remove()">` : ""}
@@ -917,9 +878,8 @@
         const live = list.filter(m => statusOf(m, now) === "live");
         const up = list.filter(m => statusOf(m, now) === "upcoming");
         const past = list.filter(m => statusOf(m, now) === "ended");
-        const feat = live[0] || up[0] || past[0] || list[0];
+        const feat = live[0] || up[0] || list[0];
         const fEnc = feat ? encodeURIComponent(JSON.stringify(feat)) : "";
-
         app.innerHTML = `
           ${feat ? `<section class="hero-card">
             ${feat.poster ? `<div class="hero-glow" style="background-image:url('${esc(feat.poster)}')"></div>` : ""}
@@ -931,22 +891,14 @@
               <a href="javascript:void(0)" class="btn-primary" onclick="openMatch(JSON.parse(decodeURIComponent('${fEnc}')))">▶ Open Match</a>
             </div>
           </section>` : ""}
-          <div class="filter-bar">
-            ${SPORTS.map(s => `<button class="chip ${s.tn ? "tn" : ""} ${ST.sport === s.id ? "active" : ""}" data-sp="${esc(s.id)}">${esc(s.label)}</button>`).join("")}
-          </div>
-          ${ST.q ? `<div class="note">
-            <span>Search: <strong>${esc(ST.q)}</strong></span>
-            <div style="display:flex;gap:8px;">
-              <button class="s-btn active" id="onlineMatchSearch">Search Team Online</button>
-              <button class="s-btn" id="clrQ">Clear</button>
-            </div>
-          </div>` : ""}
+          <div class="filter-bar">${SPORTS.map(s => `<button class="chip ${s.tn ? "tn" : ""} ${ST.sport === s.id ? "active" : ""}" data-sp="${esc(s.id)}">${esc(s.label)}</button>`).join("")}</div>
+          ${ST.q ? `<div class="note"><span>Search: <strong>${esc(ST.q)}</strong></span><div style="display:flex;gap:8px;"><button class="s-btn active" id="onlineMatchSearch">Search Team Online</button><button class="s-btn" id="clrQ">Clear</button></div></div>` : ""}
           <h2 class="section-title"><span class="bar"></span> Live Now (${live.length})</h2>
           <div class="grid">${live.length ? live.map(m => matchCard(m, "live")).join("") : `<div class="empty">No live matches right now.</div>`}</div>
           <h2 class="section-title"><span class="bar"></span> Upcoming (${up.length})</h2>
           <div class="grid">${up.length ? up.slice(0, 24).map(m => matchCard(m, "upcoming")).join("") : `<div class="empty">No upcoming matches right now.</div>`}</div>
-          ${past.length ? `<h2 class="section-title"><span class="bar"></span> Recent &amp; Scheduled (${past.length})</h2>
-          <div class="grid">${past.slice(0, 24).map(m => matchCard(m, "ended")).join("")}</div>` : ""}
+          ${isTn ? `<h2 class="section-title"><span class="bar"></span> Recent Results (${past.length})</h2>
+          <div class="grid">${past.length ? past.slice(0, 24).map(m => matchCard(m, "ended")).join("") : `<div class="empty">No recent results returned.</div>`}</div>` : ""}
         `;
         app.querySelectorAll("[data-sp]").forEach(b => b.onclick = () => {
           ST.sport = b.dataset.sp;
@@ -959,7 +911,6 @@
       } else if (ST.tab === "teams") {
         const tList = ST.teams.filter(t => (ST.teamFilter === "all" || t.filterKey === ST.teamFilter) && matchQ(t));
         const fxList = ST.teamFilter === "all" ? [] : ST.leagueFixtures.filter(matchQ);
-
         app.innerHTML = `<h2 class="section-title"><span class="bar"></span> World Teams (${tList.length})</h2>
           <div class="filter-bar">
             ${LEAGUE_TABS.map(l => `<button class="chip ${l.tn ? "tn" : ""} ${ST.teamFilter === l.id ? "active" : ""}" data-tlg="${esc(l.id)}">${esc(l.label)}</button>`).join("")}
@@ -975,12 +926,10 @@
               </div>
             </div>`;
           }).join("") : `<div class="empty">No teams found for this filter. Click "Search Any Team Online".</div>`}</div>
-
           ${ST.teamFilter !== "all" ? `
             <h2 class="section-title"><span class="bar"></span> League Matches &amp; Fixtures (${fxList.length})</h2>
             <div class="grid">${fxList.length ? fxList.slice(0, 24).map(m => matchCard(m, statusOf(m, now))).join("") : `<div class="empty">No matches returned for this league right now.</div>`}</div>
           ` : ""}`;
-
         app.querySelectorAll("[data-tlg]").forEach(b => b.onclick = () => {
           ST.teamFilter = b.dataset.tlg;
           loadLeagueFixtures(ST.teamFilter);
@@ -997,7 +946,6 @@
             <button class="chip active" id="playerApiSearchBtn">🔍 Search Player</button>
           </div>
           <div class="grid">${pList.length ? pList.map(playerCard).join("") : `<div class="empty">No player loaded yet. Type a name and click "Search Player".</div>`}</div>`;
-
         const pInp = document.getElementById("playerSearchInput");
         pInp.oninput = e => { ST.playerQuery = e.target.value; render(); };
         pInp.onkeydown = e => { if (e.key === "Enter") searchPlayerOnline(ST.playerQuery || ST.q); };
