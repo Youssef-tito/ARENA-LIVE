@@ -342,7 +342,6 @@
 
   <script>
     const WORKER_API = "https://arena-live.youssefmehrzi666.workers.dev";
-    const PPV_API = "https://api.ppv.st/api/streams";
     const IPTV_API = "https://iptv-org.github.io/api";
     const SDB_API = "https://www.thesportsdb.com/api/v1/json/3";
 
@@ -535,35 +534,9 @@
         }
       } catch {}
 
-      try {
-        const data = await fetchJsonTimeout(PPV_API, 7000);
-        const out = [];
-        for (const cat of (data.streams || [])) {
-          for (const s of (cat.streams || [])) {
-            out.push({
-              ...s,
-              id: s.id || s.name,
-              title: s.name || "Match",
-              league: s.tag || cat.category || "Sports",
-              category: cat.category || s.category_name || "Sports"
-            });
-          }
-        }
-        if (out.length) {
-          ST.matches = out;
-          render();
-          return;
-        }
-      } catch {}
-
       const fallback = await loadFallbackFixtures();
-      if (fallback.length) {
-        ST.matches = fallback;
-        render();
-        return;
-      }
-
-      document.getElementById("app").innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
+      ST.matches = fallback;
+      render();
     }
 
     async function loadTunisia(force = false) {
