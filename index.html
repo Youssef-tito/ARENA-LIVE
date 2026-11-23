@@ -910,7 +910,7 @@
         const live = list.filter(m => statusOf(m, now) === "live");
         const up = list.filter(m => statusOf(m, now) === "upcoming");
         const past = list.filter(m => statusOf(m, now) === "ended");
-        const feat = live[0] || up[0] || list[0];
+        const feat = live[0] || up[0] || past[0] || list[0];
         const fEnc = feat ? encodeURIComponent(JSON.stringify(feat)) : "";
 
         app.innerHTML = `
@@ -938,8 +938,8 @@
           <div class="grid">${live.length ? live.map(m => matchCard(m, "live")).join("") : `<div class="empty">No live matches right now.</div>`}</div>
           <h2 class="section-title"><span class="bar"></span> Upcoming (${up.length})</h2>
           <div class="grid">${up.length ? up.slice(0, 24).map(m => matchCard(m, "upcoming")).join("") : `<div class="empty">No upcoming matches right now.</div>`}</div>
-          ${isTn ? `<h2 class="section-title"><span class="bar"></span> Recent Results (${past.length})</h2>
-          <div class="grid">${past.length ? past.slice(0, 24).map(m => matchCard(m, "ended")).join("") : `<div class="empty">No recent results returned.</div>`}</div>` : ""}
+          ${past.length ? `<h2 class="section-title"><span class="bar"></span> Recent &amp; Scheduled (${past.length})</h2>
+          <div class="grid">${past.slice(0, 24).map(m => matchCard(m, "ended")).join("")}</div>` : ""}
         `;
         app.querySelectorAll("[data-sp]").forEach(b => b.onclick = () => {
           ST.sport = b.dataset.sp;
