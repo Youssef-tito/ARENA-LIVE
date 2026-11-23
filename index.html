@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Footime — Live Football, Teams & Replays</title>
+  <title>Footime Pro — Live Football, World Teams, Replays & TV Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -19,228 +19,755 @@
       --fg-tertiary: #7b9089;
       --accent: #10b981;
       --accent-bright: #34d399;
+      --accent-deep: #047857;
       --accent-gold: #f59e0b;
       --accent-gold-bright: #fbbf24;
       --accent-soft: rgba(16, 185, 129, 0.14);
       --live-red: #ef4444;
       --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.35);
+      --shadow-glow: 0 8px 24px rgba(16, 185, 129, 0.24);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 14px;
+      --radius-xl: 18px;
+      --radius-hero: 20px;
+      --radius-pill: 999px;
+      --transition-fast: 0.18s ease;
+      --transition-med: 0.25s ease;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background:
-        radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.09), transparent 42%),
-        radial-gradient(circle at 88% 8%, rgba(245, 158, 11, 0.07), transparent 38%),
+        radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.11), transparent 42%),
+        radial-gradient(circle at 88% 8%, rgba(245, 158, 11, 0.08), transparent 38%),
+        radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.05), transparent 50%),
         var(--bg-base);
       color: var(--fg-primary);
       font-family: "Plus Jakarta Sans", sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
+      line-height: 1.45;
     }
-    h1, h2, h3 { font-family: "Outfit", sans-serif; }
-    button, input, select { font-family: inherit; color: inherit; }
-    button { cursor: pointer; background: none; border: none; }
 
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: "Outfit", sans-serif;
+      letter-spacing: -0.01em;
+    }
+
+    button,
+    input,
+    select {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Topbar & Navigation */
     .topbar {
-      position: sticky; top: 0; z-index: 40;
-      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
       padding: 8px 22px;
       background: rgba(6, 10, 9, 0.88);
       backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
     }
-    .arena-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
-    .arena-logo {
-      width: 215px; height: 68px; object-fit: contain; display: block;
-      transition: transform 0.25s ease, filter 0.25s ease;
-      filter: drop-shadow(0 6px 16px rgba(16, 185, 129, 0.22));
+
+    .arena-brand {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      flex-shrink: 0;
     }
+
+    .arena-logo {
+      width: 215px;
+      height: 68px;
+      object-fit: contain;
+      display: block;
+      transition: transform var(--transition-med), filter var(--transition-med);
+      filter: drop-shadow(0 6px 16px rgba(16, 185, 129, 0.24));
+    }
+
     .arena-brand:hover .arena-logo {
       transform: translateY(-1px) scale(1.03);
-      filter: drop-shadow(0 8px 22px rgba(52, 211, 153, 0.42));
+      filter: drop-shadow(0 8px 22px rgba(52, 211, 153, 0.44));
     }
-    @media (max-width: 600px) { .arena-logo { width: 168px; height: 54px; } }
+
+    @media (max-width: 600px) {
+      .arena-logo {
+        width: 168px;
+        height: 54px;
+      }
+    }
 
     .nav-pills {
-      position: relative; display: flex; gap: 4px; padding: 4px;
-      background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 999px;
+      position: relative;
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      scrollbar-width: none;
     }
+
+    .nav-pills::-webkit-scrollbar {
+      display: none;
+    }
+
     .nav-btn {
-      position: relative; z-index: 2; padding: 8px 14px; border-radius: 999px;
-      font-size: 13px; font-weight: 600; color: var(--fg-tertiary); white-space: nowrap;
-      transition: color 0.2s ease;
+      position: relative;
+      z-index: 2;
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg-tertiary);
+      white-space: nowrap;
+      transition: color var(--transition-fast);
     }
-    .nav-btn.active { color: #04130e; }
+
+    .nav-btn:hover {
+      color: var(--fg-secondary);
+    }
+
+    .nav-btn.active {
+      color: #04130e;
+    }
+
     .nav-indicator {
-      position: absolute; top: 4px; left: 4px; height: calc(100% - 8px); border-radius: 999px;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      height: calc(100% - 8px);
+      border-radius: var(--radius-pill);
       background: linear-gradient(135deg, var(--accent-bright), var(--accent));
-      transition: all 0.22s ease; z-index: 1;
+      transition: all var(--transition-med);
+      z-index: 1;
+      box-shadow: 0 2px 12px rgba(16, 185, 129, 0.35);
     }
 
-    .top-actions { display: flex; align-items: center; gap: 8px; }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
     .search-box {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 999px; padding: 8px 13px; width: 215px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 8px 13px;
+      width: 215px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
-    .search-box:focus-within { border-color: var(--accent); }
-    .search-box input { background: transparent; border: none; outline: none; font-size: 13px; width: 100%; }
+
+    .search-box:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 13px;
+      width: 100%;
+    }
+
+    .search-box input::placeholder {
+      color: var(--fg-tertiary);
+    }
+
     .icon-btn {
-      padding: 8px 13px; border-radius: 999px;
-      background: var(--bg-card); border: 1px solid var(--border);
-      font-size: 12.5px; font-weight: 600; color: var(--fg-secondary);
+      padding: 8px 13px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--fg-secondary);
+      transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
     }
-    .icon-btn:hover { border-color: var(--accent); color: var(--fg-primary); }
 
-    .container { max-width: 1360px; margin: 0 auto; padding: 22px; }
+    .icon-btn:hover {
+      border-color: var(--accent);
+      color: var(--fg-primary);
+      background: var(--bg-hover);
+    }
+
+    /* Main Container & Hero */
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
     .hero-card {
-      position: relative; overflow: hidden; border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-hero);
       background: linear-gradient(135deg, #0d261d 0%, #0a120f 55%, #171409 100%);
-      border: 1px solid rgba(16, 185, 129, 0.24); padding: 28px; margin-bottom: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.24);
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-card);
     }
+
     .hero-glow {
-      position: absolute; inset: 0; background-size: cover; background-position: center;
-      opacity: 0.22; filter: blur(18px); pointer-events: none;
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.22;
+      filter: blur(18px);
+      pointer-events: none;
     }
-    .hero-content { position: relative; z-index: 2; max-width: 760px; }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 760px;
+    }
+
     .badge {
-      display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
-      border-radius: 999px; font-size: 11px; font-weight: 700; margin-right: 8px; margin-bottom: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      margin-right: 8px;
+      margin-bottom: 10px;
     }
-    .badge-live { background: rgba(239, 68, 68, 0.16); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; }
-    .badge-up { background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; }
-    .badge-lg { background: var(--accent-soft); color: var(--accent-bright); }
-    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live-red); box-shadow: 0 0 8px var(--live-red); }
-    .hero-title { font-size: clamp(22px, 3.4vw, 36px); font-weight: 800; margin-bottom: 8px; }
-    .hero-sub { color: var(--fg-secondary); font-size: 13.5px; margin-bottom: 16px; }
+
+    .badge-live {
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .badge-up {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fcd34d;
+    }
+
+    .badge-lg {
+      background: var(--accent-soft);
+      color: var(--accent-bright);
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--live-red);
+      box-shadow: 0 0 8px var(--live-red);
+      animation: pulseLive 1.6s infinite;
+    }
+
+    @keyframes pulseLive {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(1.2); }
+    }
+
+    .hero-title {
+      font-size: clamp(22px, 3.4vw, 36px);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .hero-sub {
+      color: var(--fg-secondary);
+      font-size: 13.5px;
+      margin-bottom: 16px;
+    }
+
     .btn-primary {
-      display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
       background: linear-gradient(135deg, var(--accent-bright), var(--accent));
-      color: #03120d; font-weight: 700; font-size: 13px; text-decoration: none;
+      color: #03120d;
+      font-weight: 700;
+      font-size: 13px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
     }
 
-    .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 18px; scrollbar-width: none; }
-    .filter-bar::-webkit-scrollbar { display: none; }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* Filter Chips & Sections */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+      scrollbar-width: none;
+    }
+
+    .filter-bar::-webkit-scrollbar {
+      display: none;
+    }
+
     .chip {
-      padding: 8px 14px; border-radius: 999px; background: var(--bg-card);
-      border: 1px solid var(--border); font-size: 12.5px; font-weight: 600;
-      color: var(--fg-secondary); white-space: nowrap;
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--fg-secondary);
+      white-space: nowrap;
+      transition: all var(--transition-fast);
     }
-    .chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-bright); }
-    .chip.tn.active { background: rgba(245, 158, 11, 0.16); border-color: var(--accent-gold); color: #fcd34d; }
 
-    .section-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; margin: 22px 0 12px; }
-    .bar { width: 4px; height: 18px; border-radius: 999px; background: linear-gradient(180deg, var(--accent-bright), var(--accent-gold)); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 15px; }
+    .chip:hover {
+      border-color: rgba(52, 211, 153, 0.35);
+      color: var(--fg-primary);
+    }
 
+    .chip.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-bright);
+    }
+
+    .chip.tn.active {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: var(--accent-gold);
+      color: #fcd34d;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 22px 0 12px;
+    }
+
+    .bar {
+      width: 4px;
+      height: 18px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(180deg, var(--accent-bright), var(--accent-gold));
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+      gap: 15px;
+    }
+
+    /* Cards */
     .card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
-      overflow: hidden; transition: transform 0.2s, border-color 0.2s;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
-    .card:hover { transform: translateY(-2px); border-color: rgba(16, 185, 129, 0.45); }
-    .banner { position: relative; aspect-ratio: 16 / 9; background: #0b1210; overflow: hidden; cursor: pointer; }
-    .banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.78; }
-    .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 11, 10, 0.15), rgba(7, 11, 10, 0.9)); }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(16, 185, 129, 0.45);
+      box-shadow: var(--shadow-card);
+    }
+
+    .banner {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #0b1210;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.78;
+      transition: transform var(--transition-med), opacity var(--transition-med);
+    }
+
+    .card:hover .banner img {
+      transform: scale(1.03);
+      opacity: 0.9;
+    }
+
+    .scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(7, 11, 10, 0.15), rgba(7, 11, 10, 0.9));
+    }
+
     .pill {
-      position: absolute; top: 10px; left: 10px; z-index: 2; padding: 4px 9px; border-radius: 999px;
-      font-size: 11px; font-weight: 700; background: rgba(7, 11, 10, 0.82);
-      border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 5px;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(7, 11, 10, 0.82);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
+
     .fav {
-      position: absolute; top: 10px; right: 10px; z-index: 3; width: 30px; height: 30px;
-      border-radius: 50%; display: grid; place-items: center;
-      background: rgba(7, 11, 10, 0.82); border: 1px solid var(--border); color: var(--fg-tertiary);
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 3;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(7, 11, 10, 0.82);
+      border: 1px solid var(--border);
+      color: var(--fg-tertiary);
+      transition: all var(--transition-fast);
     }
-    .fav.on { color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.5); }
-    .body { padding: 13px; cursor: pointer; }
-    .lg { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-bright); }
-    .title { font-size: 14.5px; font-weight: 700; margin: 4px 0; }
-    .sub { font-size: 12px; color: var(--fg-tertiary); }
 
-    .team-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;
+    .fav:hover {
+      color: var(--fg-primary);
+      border-color: rgba(245, 158, 11, 0.4);
     }
-    .team-card:hover { border-color: var(--accent); background: var(--bg-hover); }
-    .team-badge {
-      width: 50px; height: 50px; border-radius: 12px; background: var(--bg-elevated);
-      display: grid; place-items: center; overflow: hidden; flex-shrink: 0;
-      font-weight: 800; font-size: 13px; color: var(--accent-bright);
-    }
-    .team-badge img { width: 100%; height: 100%; object-fit: contain; }
 
+    .fav.on {
+      color: var(--accent-gold);
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+
+    .body {
+      padding: 13px;
+      cursor: pointer;
+    }
+
+    .lg {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+    }
+
+    .title {
+      font-size: 14.5px;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+
+    .sub {
+      font-size: 12px;
+      color: var(--fg-tertiary);
+    }
+
+    .team-card,
     .ch-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 13px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
     }
-    .ch-card:hover { border-color: var(--accent); }
+
+    .team-card:hover,
+    .ch-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+      transform: translateY(-1px);
+    }
+
+    .team-badge {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--accent-bright);
+    }
+
+    .team-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
     .ch-logo {
-      width: 54px; height: 38px; border-radius: 8px; background: var(--bg-elevated);
-      display: grid; place-items: center; overflow: hidden; flex-shrink: 0;
-      font-size: 11px; font-weight: 700; color: var(--fg-tertiary);
+      width: 54px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--fg-tertiary);
     }
-    .ch-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-    .tv-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-    .select { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 13px; }
+    .ch-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .tv-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .select:focus {
+      border-color: var(--accent);
+    }
+
     .note {
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-      background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: 12px; padding: 11px 15px; font-size: 12.5px; color: var(--fg-secondary); margin-bottom: 16px;
-    }
-    .empty {
-      grid-column: 1 / -1; text-align: center; padding: 36px 18px;
-      background: var(--bg-card); border: 1px dashed var(--border); border-radius: 14px; color: var(--fg-tertiary);
-    }
-    .stream-fallback {
-      height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 12px; padding: 24px; text-align: center;
-      background: radial-gradient(circle at center, rgba(16, 185, 129, 0.14), #070b0a 72%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--radius-md);
+      padding: 11px 15px;
+      font-size: 12.5px;
+      color: var(--fg-secondary);
+      margin-bottom: 16px;
     }
 
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 36px 18px;
+      background: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+      color: var(--fg-tertiary);
+    }
+
+    /* Modal & Frame Player */
     .modal {
-      position: fixed; inset: 0; z-index: 100; background: rgba(3, 6, 5, 0.86);
-      backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 14px;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(3, 6, 5, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
     }
-    .modal.open { display: flex; }
+
+    .modal.open {
+      display: flex;
+    }
+
     .box {
-      width: 100%; max-width: 940px; background: var(--bg-elevated);
-      border: 1px solid var(--border); border-radius: 18px; overflow: hidden;
-      max-height: 92vh; display: flex; flex-direction: column;
+      width: 100%;
+      max-width: 960px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
     }
-    .m-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); }
-    .m-scroll { overflow-y: auto; }
-    .stage { aspect-ratio: 16 / 9; background: #000; width: 100%; }
-    .stage iframe, .stage video { width: 100%; height: 100%; border: 0; }
+
+    .m-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .m-scroll {
+      overflow-y: auto;
+    }
+
+    .stage {
+      aspect-ratio: 16 / 9;
+      background: #000;
+      width: 100%;
+    }
+
+    .stage iframe,
+    .stage video {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
     .m-bar {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-      padding: 11px 18px; border-top: 1px solid var(--border); background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 11px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-card);
     }
+
     .m-yt {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-      padding: 10px 18px; border-top: 1px solid var(--border); background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 10px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
     }
+
     .yt-in {
-      flex: 1; min-width: 200px; background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 7px 11px; font-size: 12px; outline: none;
+      flex: 1;
+      min-width: 220px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 7px 11px;
+      font-size: 12px;
+      outline: none;
     }
-    .yt-in:focus { border-color: var(--accent); }
+
+    .yt-in:focus {
+      border-color: var(--accent);
+    }
+
     .s-btn {
-      padding: 6px 12px; border-radius: 8px; background: var(--bg-elevated);
-      border: 1px solid var(--border); font-size: 12px; font-weight: 600;
-      color: var(--fg-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all var(--transition-fast);
     }
-    .s-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-bright); }
-    .ext { margin-left: auto; color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.35); }
+
+    .s-btn:hover {
+      border-color: rgba(52, 211, 153, 0.35);
+      color: var(--fg-primary);
+    }
+
+    .s-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-bright);
+    }
+
+    .ext {
+      margin-left: auto;
+      color: var(--accent-gold);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
     .t-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 10px 12px; margin-bottom: 8px; border-radius: 10px;
-      background: var(--bg-card); border: 1px solid var(--border); font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 13px;
     }
 
     @media (max-width: 780px) {
-      .topbar { flex-wrap: wrap; padding: 8px 14px; }
-      .nav-pills { order: 3; width: 100%; overflow-x: auto; }
-      .search-box { width: 160px; }
+      .topbar {
+        flex-wrap: wrap;
+        padding: 8px 14px;
+      }
+
+      .nav-pills {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .search-box {
+        width: 160px;
+      }
     }
   </style>
 </head>
@@ -250,49 +777,35 @@
       <svg class="arena-logo" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="proEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#6ee7b7"/>
-            <stop offset="50%" stop-color="#10b981"/>
-            <stop offset="100%" stop-color="#047857"/>
+            <stop offset="0%" stop-color="#6ee7b7" />
+            <stop offset="50%" stop-color="#10b981" />
+            <stop offset="100%" stop-color="#047857" />
           </linearGradient>
           <linearGradient id="proGold" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#fde68a"/>
-            <stop offset="55%" stop-color="#f59e0b"/>
-            <stop offset="100%" stop-color="#b45309"/>
+            <stop offset="0%" stop-color="#fde68a" />
+            <stop offset="55%" stop-color="#f59e0b" />
+            <stop offset="100%" stop-color="#b45309" />
           </linearGradient>
           <linearGradient id="proShieldBg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#132c23"/>
-            <stop offset="100%" stop-color="#070e0b"/>
+            <stop offset="0%" stop-color="#132c23" />
+            <stop offset="100%" stop-color="#070e0b" />
           </linearGradient>
         </defs>
-
-        <!-- Pro Shield Emblem -->
         <g transform="translate(8, 10)">
           <path d="M38 4 L68 15 L64 49 C61 65 49 74 38 78 C27 74 15 65 12 49 L8 15 Z"
-                fill="url(#proShieldBg)" stroke="url(#proEmerald)" stroke-width="2.4"/>
+                fill="url(#proShieldBg)" stroke="url(#proEmerald)" stroke-width="2.4" />
           <path d="M38 11 L61 19.5 L57.8 47.5 C55.4 60 46.2 67.5 38 71 C29.8 67.5 20.6 60 18.2 47.5 L15 19.5 Z"
-                fill="none" stroke="url(#proGold)" stroke-width="1" opacity="0.65"/>
-          <!-- Dynamic Arena Strike / Crown Chevron -->
-          <path d="M23 51 L38 24 L53 51" fill="none" stroke="url(#proEmerald)" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M26 39 L34 39 L38 33 L42 44 L46 39 L51 39" fill="none" stroke="url(#proGold)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- Live Broadcast Beacon -->
-          <circle cx="63" cy="15" r="6.5" fill="#070e0b"/>
-          <circle cx="63" cy="15" r="4.3" fill="#ef4444"/>
+                fill="none" stroke="url(#proGold)" stroke-width="1" opacity="0.65" />
+          <path d="M23 51 L38 24 L53 51" fill="none" stroke="url(#proEmerald)" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M26 39 L34 39 L38 33 L42 44 L46 39 L51 39" fill="none" stroke="url(#proGold)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="63" cy="15" r="6.5" fill="#070e0b" />
+          <circle cx="63" cy="15" r="4.3" fill="#ef4444" />
         </g>
-
-        <!-- Wordmark -->
-        <text x="88" y="48" fill="#f8fafc" font-family="Outfit, sans-serif" font-size="27" font-weight="900" letter-spacing="0.6">
-          FOOTIME
-        </text>
-        <rect x="218" y="29" width="38" height="18" rx="5" fill="url(#proGold)"/>
-        <text x="237" y="42" text-anchor="middle" fill="#060a09" font-family="Outfit, sans-serif" font-size="11" font-weight="900" letter-spacing="1">
-          PRO
-        </text>
-
-        <!-- Sub-tag & Accent Line -->
-        <line x1="89" y1="57" x2="256" y2="57" stroke="url(#proEmerald)" stroke-width="1.4" opacity="0.55"/>
-        <text x="89" y="73" fill="url(#proEmerald)" font-family="Plus Jakarta Sans, sans-serif" font-size="10.5" font-weight="800" letter-spacing="2.6">
-          ARENA LIVE • SPORTS HUB
-        </text>
+        <text x="88" y="48" fill="#f8fafc" font-family="Outfit, sans-serif" font-size="27" font-weight="900" letter-spacing="0.6">FOOTIME</text>
+        <rect x="218" y="29" width="38" height="18" rx="5" fill="url(#proGold)" />
+        <text x="237" y="42" text-anchor="middle" fill="#060a09" font-family="Outfit, sans-serif" font-size="11" font-weight="900" letter-spacing="1">PRO</text>
+        <line x1="89" y1="57" x2="256" y2="57" stroke="url(#proEmerald)" stroke-width="1.4" opacity="0.55" />
+        <text x="89" y="73" fill="url(#proEmerald)" font-family="Plus Jakarta Sans, sans-serif" font-size="10.5" font-weight="800" letter-spacing="2.6">ARENA LIVE • SPORTS HUB</text>
       </svg>
     </a>
 
@@ -320,15 +833,14 @@
     <div class="box">
       <div class="m-head">
         <strong id="mTitle">Stream</strong>
-        <button id="mClose" style="font-size:18px;padding:4px 8px;">✕</button>
+        <button id="mClose" style="font-size:18px;padding:4px 8px;" aria-label="Close">✕</button>
       </div>
       <div class="m-scroll">
         <div id="mBody"></div>
         <div class="m-bar" id="mBar" style="display:none;"></div>
         <div class="m-yt" id="mYt" style="display:none;">
-          <a class="s-btn active" id="ytSearchLink" target="_blank" rel="noopener noreferrer">▶ Search on YouTube</a>
-          <input class="yt-in" id="ytUrlInput" type="text" placeholder="Paste YouTube or embed link to play here..." />
-          <button class="s-btn active" id="ytPlayBtn">Load Link</button>
+          <input class="yt-in" id="ytUrlInput" type="text" placeholder="Paste YouTube / embed / stream URL to load inside iframe..." />
+          <button class="s-btn active" id="ytPlayBtn">▶ Load in Frame</button>
         </div>
       </div>
     </div>
@@ -338,10 +850,11 @@
     const PPV_API = "https://api.ppv.st/api/streams";
     const IPTV_API = "https://iptv-org.github.io/api";
     const SDB_API = "https://www.thesportsdb.com/api/v1/json/3";
+    const DEFAULT_EMBED_FRAME = "https://www.youtube.com/embed/aqz-KE-bpKQ?autoplay=1";
 
     const ALIASES = {
-      taraji: ["esperance", "es tunis", "taraji"],
-      esperance: ["esperance", "es tunis", "taraji"],
+      taraji: ["esperance", "es tunis", "taraji", "est"],
+      esperance: ["esperance", "es tunis", "taraji", "est"],
       lifri9i: ["club africain", "africain", "ca"],
       africain: ["club africain", "africain", "ca"],
       etoile: ["etoile", "sahel", "ess"],
@@ -362,6 +875,16 @@
       { id: "Motorsport", label: "Motorsport" }
     ];
 
+    const WORLD_LEAGUES = [
+      { id: "all", label: "All Loaded" },
+      { id: "tunisia", label: "🇹🇳 Tunisia", tn: 1 },
+      { id: "English Premier League", label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League" },
+      { id: "Spanish La Liga", label: "🇪🇸 La Liga" },
+      { id: "Italian Serie A", label: "🇮🇹 Serie A" },
+      { id: "German Bundesliga", label: "🇩🇪 Bundesliga" },
+      { id: "French Ligue 1", label: "🇫🇷 Ligue 1" }
+    ];
+
     const FALLBACK_TUNISIA = [
       {
         id: "tn_f1",
@@ -369,7 +892,8 @@
         league: "Tunisian Ligue 1",
         category: "Football",
         starts_at: Math.floor(Date.now() / 1000) + 3600,
-        score: ""
+        score: "",
+        iframe: DEFAULT_EMBED_FRAME
       },
       {
         id: "tn_f2",
@@ -377,7 +901,8 @@
         league: "Tunisian Ligue 1",
         category: "Football",
         starts_at: Math.floor(Date.now() / 1000) + 7200,
-        score: ""
+        score: "",
+        iframe: DEFAULT_EMBED_FRAME
       },
       {
         id: "tn_r1",
@@ -386,7 +911,8 @@
         category: "Football",
         starts_at: Math.floor(Date.now() / 1000) - 86400,
         ends_at: Math.floor(Date.now() / 1000) - 79200,
-        score: "2 - 1"
+        score: "2 - 1",
+        iframe: DEFAULT_EMBED_FRAME
       },
       {
         id: "tn_r2",
@@ -395,7 +921,8 @@
         category: "Football",
         starts_at: Math.floor(Date.now() / 1000) - 172800,
         ends_at: Math.floor(Date.now() / 1000) - 165600,
-        score: "1 - 1"
+        score: "1 - 1",
+        iframe: DEFAULT_EMBED_FRAME
       }
     ];
 
@@ -407,7 +934,8 @@
         category: "Football",
         starts_at: Math.floor(Date.now() / 1000) - 90000,
         ends_at: Math.floor(Date.now() / 1000) - 82800,
-        score: "2 - 2"
+        score: "2 - 2",
+        iframe: DEFAULT_EMBED_FRAME
       },
       {
         id: "rep_2",
@@ -416,7 +944,8 @@
         category: "Football",
         starts_at: Math.floor(Date.now() / 1000) - 176400,
         ends_at: Math.floor(Date.now() / 1000) - 169200,
-        score: "3 - 1"
+        score: "3 - 1",
+        iframe: DEFAULT_EMBED_FRAME
       },
       {
         id: "rep_3",
@@ -425,7 +954,8 @@
         category: "Football",
         starts_at: Math.floor(Date.now() / 1000) - 259200,
         ends_at: Math.floor(Date.now() / 1000) - 252000,
-        score: "2 - 0"
+        score: "2 - 0",
+        iframe: DEFAULT_EMBED_FRAME
       }
     ];
 
@@ -454,7 +984,7 @@
     function toEmbedUrl(raw) {
       const u = (raw || "").trim();
       if (!u) return "";
-      const m1 = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
+      const m1 = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
       if (m1) return `https://www.youtube.com/embed/${m1[1]}?autoplay=1`;
       return u;
     }
@@ -512,7 +1042,8 @@
         starts_at: ts,
         ends_at: ts + 7200,
         score: hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : "FT",
-        videoUrl: ev.strVideo || ""
+        videoUrl: ev.strVideo || "",
+        iframe: toEmbedUrl(ev.strVideo) || DEFAULT_EMBED_FRAME
       };
     }
 
@@ -597,7 +1128,8 @@
           map.set(k, {
             ...m,
             starts_at: m.starts_at || Math.floor((Date.now() - 86400000) / 1000),
-            ends_at: m.ends_at || Math.floor((Date.now() - 79200000) / 1000)
+            ends_at: m.ends_at || Math.floor((Date.now() - 79200000) / 1000),
+            iframe: m.iframe || toEmbedUrl(m.videoUrl) || DEFAULT_EMBED_FRAME
           });
         }
       }
@@ -665,7 +1197,6 @@
       bar.style.display = "none";
       ytRow.style.display = "flex";
       document.getElementById("mTitle").textContent = `${tm.name} (${tm.leagueLabel})`;
-      document.getElementById("ytSearchLink").href = `https://www.youtube.com/results?search_query=${encodeURIComponent(tm.name + " match highlights")}`;
       document.getElementById("ytUrlInput").value = "";
       document.getElementById("ytPlayBtn").onclick = () => {
         const emb = toEmbedUrl(document.getElementById("ytUrlInput").value);
@@ -674,7 +1205,7 @@
 
       destroyHls();
       document.getElementById("modal").classList.add("open");
-      body.innerHTML = `<div style="padding:24px;"><div class="empty">Loading ${esc(tm.name)} live/upcoming &amp; replays...</div></div>`;
+      body.innerHTML = `<div class="stage"><iframe src="${esc(DEFAULT_EMBED_FRAME)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div><div style="padding:18px;"><div class="empty">Loading ${esc(tm.name)} fixtures &amp; replays...</div></div>`;
 
       const liveMatches = ST.matches.filter(m => (m.title || "").toLowerCase().includes(tm.name.toLowerCase()));
       const [nx, ls] = await Promise.all([
@@ -687,17 +1218,24 @@
       const renderEvRow = (ev, isPast) => {
         const title = ev.strEvent || "Match";
         const score = (ev.intHomeScore != null && ev.intAwayScore != null) ? ` (${ev.intHomeScore}-${ev.intAwayScore})` : "";
-        const yt = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + (isPast ? " highlights" : " live"))}`;
+        const itemObj = {
+          id: "ev_" + ev.idEvent,
+          title: title + score,
+          league: ev.strLeague || tm.leagueLabel,
+          iframe: toEmbedUrl(ev.strVideo) || DEFAULT_EMBED_FRAME
+        };
+        const enc = encodeURIComponent(JSON.stringify(itemObj));
         return `<div class="t-row">
           <div>
             <strong>${esc(title)}${esc(score)}</strong>
             <div class="sub">${esc(ev.dateEvent || "")} • ${esc(ev.strLeague || tm.leagueLabel)}</div>
           </div>
-          <a class="s-btn active" target="_blank" rel="noopener noreferrer" href="${esc(yt)}">${isPast ? "Replay / Highlights ↗" : "Search ↗"}</a>
+          <button class="s-btn active" onclick='openMatch(JSON.parse(decodeURIComponent("${enc}")))'>${isPast ? "Play Replay ▶" : "Play in Frame ▶"}</button>
         </div>`;
       };
 
-      body.innerHTML = `<div style="padding:18px;">
+      body.innerHTML = `<div class="stage"><iframe src="${esc(DEFAULT_EMBED_FRAME)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>
+      <div style="padding:18px;">
         <h3 style="margin-bottom:10px;">Live Stream Matches (${liveMatches.length})</h3>
         ${liveMatches.length
           ? liveMatches.map(m => `<div class="t-row"><div><strong>${esc(m.title)}</strong><div class="sub">${esc(m.league)}</div></div><button class="s-btn active" onclick='openMatch(${JSON.stringify(m).replace(/'/g, "&#39;")})'>Watch Live ▶</button></div>`).join("")
@@ -751,27 +1289,12 @@
       document.getElementById("mYt").style.display = "none";
     }
 
-    function renderFallbackPlayerBox(title, url, reasonText) {
-      const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + " highlights live")}`;
-      return `<div class="stage">
-        <div class="stream-fallback">
-          <div style="font-size:15px;font-weight:700;color:var(--fg-primary);">${esc(reasonText)}</div>
-          <div style="font-size:12.5px;color:var(--fg-tertiary);max-width:520px;">
-            Some external stream hosts block embedded playback or have temporary network errors. Open the stream in a new tab, search highlights on YouTube, or paste a working link below.
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
-            ${url ? `<a class="btn-primary" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open Stream in New Tab ↗</a>` : ""}
-            <a class="s-btn active" href="${esc(ytUrl)}" target="_blank" rel="noopener noreferrer">▶ Watch / Search on YouTube</a>
-          </div>
-        </div>
-      </div>`;
-    }
-
     function openMatch(m) {
       const sources = [];
-      if (m.iframe) sources.push({ label: `${(m.locale || "EN").toUpperCase()} • ${m.source_tag || "Main"}`, url: m.iframe });
-      (m.substreams || []).forEach((sub, i) => sub.iframe && sources.push({ label: `${(sub.locale || m.locale || "EN").toUpperCase()} • ${sub.source_tag || sub.name || "Backup " + (i + 1)}`, url: sub.iframe }));
-      if (m.videoUrl) sources.push({ label: "Highlight / Video", url: toEmbedUrl(m.videoUrl) });
+      if (m.iframe) sources.push({ label: `${(m.locale || "EN").toUpperCase()} • ${m.source_tag || "Main Frame"}`, url: toEmbedUrl(m.iframe) });
+      (m.substreams || []).forEach((sub, i) => sub.iframe && sources.push({ label: `${(sub.locale || m.locale || "EN").toUpperCase()} • ${sub.source_tag || sub.name || "Backup " + (i + 1)}`, url: toEmbedUrl(sub.iframe) }));
+      if (m.videoUrl) sources.push({ label: "Video Frame", url: toEmbedUrl(m.videoUrl) });
+      if (!sources.length) sources.push({ label: "Frame Player", url: DEFAULT_EMBED_FRAME });
 
       const body = document.getElementById("mBody");
       const bar = document.getElementById("mBar");
@@ -781,7 +1304,6 @@
       document.getElementById("modal").classList.add("open");
 
       ytRow.style.display = "flex";
-      document.getElementById("ytSearchLink").href = `https://www.youtube.com/results?search_query=${encodeURIComponent(m.title + " highlights replay")}`;
       const ytInput = document.getElementById("ytUrlInput");
       ytInput.value = "";
       document.getElementById("ytPlayBtn").onclick = () => {
@@ -790,35 +1312,35 @@
         body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
       };
 
-      if (!sources.length) {
-        bar.style.display = "none";
-        body.innerHTML = `<div style="padding:18px;">${renderFallbackPlayerBox(m.title, "", "Direct stream not attached for this fixture.")}</div>`;
-        return;
-      }
-
       const playIdx = (i) => {
         const s = sources[i];
         body.innerHTML = `<div class="stage"><iframe src="${esc(s.url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
         bar.style.display = "flex";
         bar.innerHTML = sources.map((x, idx) => `<button class="s-btn ${idx === i ? "active" : ""}" data-i="${idx}">${esc(x.label)}</button>`).join("")
-          + `<button class="s-btn" id="fixEmbedBtn">Can't Play? Options</button>`
           + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
         bar.querySelectorAll("[data-i]").forEach(btn => btn.onclick = () => playIdx(+btn.dataset.i));
-        document.getElementById("fixEmbedBtn")?.addEventListener("click", () => {
-          body.innerHTML = renderFallbackPlayerBox(m.title, s.url, "Stream player fallback options");
-        });
       };
       playIdx(0);
     }
 
     function openChannel(ch) {
-      const list = ch.streams || [ch.url].filter(Boolean);
+      const list = (ch.streams || [ch.url]).filter(Boolean);
+      if (!list.length) list.push(DEFAULT_EMBED_FRAME);
       const body = document.getElementById("mBody");
       const bar = document.getElementById("mBar");
-      document.getElementById("mYt").style.display = "none";
+      document.getElementById("mYt").style.display = "flex";
       document.getElementById("mTitle").textContent = ch.name;
       destroyHls();
       document.getElementById("modal").classList.add("open");
+
+      const ytInput = document.getElementById("ytUrlInput");
+      ytInput.value = "";
+      document.getElementById("ytPlayBtn").onclick = () => {
+        const emb = toEmbedUrl(ytInput.value);
+        if (!emb) return;
+        destroyHls();
+        body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+      };
 
       let idx = 0;
       const run = () => {
@@ -844,12 +1366,12 @@
                 idx++;
                 run();
               } else {
-                body.innerHTML = renderFallbackPlayerBox(ch.name, url, "HLS stream unavailable or blocked by network.");
+                body.innerHTML = `<div class="stage"><iframe src="${esc(DEFAULT_EMBED_FRAME)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
               }
             }
           });
         } else {
-          body.innerHTML = `<div class="stage"><iframe src="${esc(url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+          body.innerHTML = `<div class="stage"><iframe src="${esc(toEmbedUrl(url))}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
         }
       };
       run();
