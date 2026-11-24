@@ -5929,13 +5929,14 @@
   </style>
 
   <script>
-    (function () {
+   (function () {
       const BUNNY_KEYS = [
         "big buck bunny",
         "big_buck_bunny",
         "blender",
         "gtv-videos-bucket",
-        "commondatastorage.googleapis.com"
+        "commondatastorage.googleapis.com",
+        "aqz-ke-bpkq"
       ];
 
       function hasBunnyContent(el) {
@@ -5953,6 +5954,17 @@
           .replace(/\s+/g, " ")
           .trim();
         return cleaned || "Football Match";
+      }
+
+      function toInSiteEmbedUrl(rawUrl) {
+        const u = String(rawUrl || "").trim();
+        if (!u) return "";
+        const ytMatch = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
+        if (ytMatch && ytMatch[1]) {
+          if (ytMatch[1].toLowerCase() === "aqz-ke-bpkq") return "";
+          return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+        }
+        return u;
       }
 
       function swapBunnyForMatchSearch() {
@@ -5980,37 +5992,56 @@
         const matchTitle = getCleanMatchTitleForSearch();
         const dateTag = new Date().toISOString().slice(0, 10);
         const query = `${matchTitle} ${dateTag} highlights replay`.trim();
-        const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 
         const ytInp = document.getElementById("ytUrlInput");
         if (ytInp) {
-          ytInp.value = query;
-          ytInp.placeholder = query;
+          ytInp.value = "";
+          ytInp.placeholder = `ابحث عن: ${query} — ثم الصق الرابط هنا لتشغيله داخل الموقع`;
         }
 
         const swapBox = document.createElement("div");
         swapBox.className = "match-search-swap-box";
         swapBox.innerHTML = `
-          <h4>🔎 تم تحويل المشغل للبحث عن المباراة: ${matchTitle.replace(/</g, "&lt;")}</h4>
+          <h4>🔎 بحث الإعادة داخل الموقع للمباراة: ${matchTitle.replace(/</g, "&lt;")}</h4>
           <p>
-            تم إبعاد الفيديو التجريبي تلقائياً. عبارة البحث الجاهزة بالتاريخ:
+            تم إبعاد الفيديو التجريبي تلقائياً بدون الخروج من الموقع. عبارة البحث بالتاريخ:
             <strong>${query.replace(/</g, "&lt;")}</strong>
           </p>
           <div class="match-search-swap-actions">
-            <a class="s-btn active" href="${ytSearchUrl}" target="_blank" rel="noopener noreferrer">▶ بحث مباشر في YouTube</a>
-            <button type="button" class="s-btn" id="copyMatchSearchQueryBtn">📋 نسخ عبارة البحث</button>
+            <button type="button" class="s-btn active" id="copyMatchSearchQueryBtn">📋 نسخ عبارة البحث بالتاريخ</button>
+            <button type="button" class="s-btn" id="openInSiteLinkBoxBtn">🎬 لصق وتشغيل رابط هنا</button>
+          </div>
+          <div id="inSiteDirectPlayArea" style="display:none;margin-top:12px;">
+            <input type="text" id="inSiteSwapUrlInp" class="insite-url-input" placeholder="الصق رابط الإعادة أو البث هنا..." style="width:100%;margin-bottom:8px;" />
+            <button type="button" class="s-btn active" id="runInSiteSwapPlayBtn">▶ تشغيل داخل الإطار هنا</button>
           </div>
         `;
 
         mBody.prepend(swapBox);
 
-        document.getElementById("copyMatchSearchQueryBtn")?.addEventListener("click", () => {
+        swapBox.querySelector("#copyMatchSearchQueryBtn")?.addEventListener("click", () => {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(query).catch(() => {});
           }
           if (typeof showToast === "function") {
             showToast("✓ تم نسخ عبارة البحث الخاصة بالمباراة");
           }
+        });
+
+        swapBox.querySelector("#openInSiteLinkBoxBtn")?.addEventListener("click", () => {
+          const area = swapBox.querySelector("#inSiteDirectPlayArea");
+          if (area) area.style.display = "block";
+          swapBox.querySelector("#inSiteSwapUrlInp")?.focus();
+        });
+
+        swapBox.querySelector("#runInSiteSwapPlayBtn")?.addEventListener("click", () => {
+          const raw = swapBox.querySelector("#inSiteSwapUrlInp")?.value || "";
+          const embedUrl = toInSiteEmbedUrl(raw);
+          if (!embedUrl || BUNNY_KEYS.some(k => embedUrl.toLowerCase().includes(k))) {
+            if (typeof showToast === "function") showToast("✕ أدخل رابط إعادة صالحاً");
+            return;
+          }
+          mBody.innerHTML = `<div class="stage"><iframe src="${embedUrl.replace(/"/g, "&quot;")}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe></div>`;
         });
       }
 
