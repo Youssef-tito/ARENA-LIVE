@@ -5160,5 +5160,201 @@
       injectEmailGatewaySettings(app);
     };
   </script>
+  <style>
+    /* Channels Layout Organizer & Blocked Channel Filter */
+    #app .tv-grid,
+    #app .channels-grid,
+    #app .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    #app .tv-card img,
+    #app .channel-card img,
+    #app .card img {
+      max-width: 100%;
+      max-height: 92px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 10px;
+      border-radius: 8px;
+    }
+
+    #app .tv-card,
+    #app .channel-card,
+    #app .card {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tv-organizer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 14px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md, 12px);
+      background: var(--bg-card, rgba(255, 255, 255, 0.04));
+      border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
+      font-size: 12.5px;
+    }
+
+    .tv-organizer-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const BLOCKED_CHANNEL_NAMES = ["5max"];
+      const STORAGE_KEY_BLOCKED_TV = "footime_blocked_tv_channels";
+      const STORAGE_KEY_TV_SORT = "footime_tv_sort_mode";
+
+      function getBlockedChannels() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_BLOCKED_TV) || "[]");
+          const merged = new Set([
+            ...BLOCKED_CHANNEL_NAMES.map(x => String(x).toLowerCase().trim()),
+            ...(Array.isArray(saved) ? saved.map(x => String(x).toLowerCase().trim()) : [])
+          ]);
+          return [...merged].filter(Boolean);
+        } catch {
+          return [...BLOCKED_CHANNEL_NAMES];
+        }
+      }
+
+      function isBlockedChannelName(name) {
+        const clean = String(name || "").toLowerCase().trim();
+        if (!clean) return false;
+        return getBlockedChannels().some(b => clean === b || clean.includes(b));
+      }
+
+      function purgeBlockedChannelsFromStateAndDom() {
+        const blocked = getBlockedChannels();
+        if (typeof ST !== "undefined" && Array.isArray(ST.channels)) {
+          ST.channels = ST.channels.filter(ch => !isBlockedChannelName(ch?.name || ch?.title || ""));
+        }
+        if (typeof ST !== "undefined" && ST.favs && Array.isArray(ST.favs.channels)) {
+          ST.favs.channels = ST.favs.channels.filter(ch => !isBlockedChannelName(ch?.name || ch?.title || ""));
+        }
+
+        const app = document.getElementById("app");
+        if (!app) return;
+        app.querySelectorAll(".card, .tv-card, .channel-card").forEach(card => {
+          const txt = (card.textContent || "").toLowerCase();
+          if (blocked.some(b => txt.includes(b))) {
+            card.remove();
+          }
+        });
+      }
+
+      function sortVisibleChannelsGrid(mode) {
+        const app = document.getElementById("app");
+        const grid = app?.querySelector(".grid, .tv-grid, .channels-grid");
+        if (!grid) return;
+        const cards = [...grid.children];
+        if (!cards.length) return;
+
+        cards.sort((a, b) => {
+          const ta = (a.textContent || "").trim().toLowerCase();
+          const tb = (b.textContent || "").trim().toLowerCase();
+          if (mode === "tn_first") {
+            const aTn = /\btn\b|tunisia|watania|hannibal|nessma/i.test(ta) ? 0 : 1;
+            const bTn = /\btn\b|tunisia|watania|hannibal|nessma/i.test(tb) ? 0 : 1;
+            if (aTn !== bTn) return aTn - bTn;
+          }
+          if (mode === "sports_first") {
+            const aSp = /sport|bein|canal\+|football|soccer/i.test(ta) ? 0 : 1;
+            const bSp = /sport|bein|canal\+|football|soccer/i.test(tb) ? 0 : 1;
+            if (aSp !== bSp) return aSp - bSp;
+          }
+          return ta.localeCompare(tb);
+        });
+
+        cards.forEach(c => grid.appendChild(c));
+      }
+
+      function injectChannelsOrganizerBar() {
+        if (typeof ST === "undefined" || ST.tab !== "channels") return;
+        const app = document.getElementById("app");
+        const anchor = document.getElementById("channelKeywordsRow") || app?.querySelector(".tv-bar");
+        if (!app || !anchor || document.getElementById("tvOrganizerBar")) return;
+
+        const savedSort = localStorage.getItem(STORAGE_KEY_TV_SORT) || "default";
+        const bar = document.createElement("div");
+        bar.id = "tvOrganizerBar";
+        bar.className = "tv-organizer-bar";
+        bar.innerHTML = `
+          <div>
+            <strong>📺 Chaînes TV Organisées</strong> • <span>5Max masquée</span>
+          </div>
+          <div class="tv-organizer-actions">
+            <select id="tvSortSelect" class="field-select" style="padding:5px 10px;font-size:12px;">
+              <option value="default" ${savedSort === "default" ? "selected" : ""}>Ordre par défaut</option>
+              <option value="tn_first" ${savedSort === "tn_first" ? "selected" : ""}>🇹🇳 Tunisie en premier</option>
+              <option value="sports_first" ${savedSort === "sports_first" ? "selected" : ""}>⚽ Sports en premier</option>
+              <option value="az" ${savedSort === "az" ? "selected" : ""}>A → Z</option>
+            </select>
+            <button type="button" class="s-btn" id="recleanTvBtn">🧹 Nettoyer Logos</button>
+          </div>
+        `;
+
+        anchor.insertAdjacentElement("afterend", bar);
+
+        document.getElementById("tvSortSelect")?.addEventListener("change", e => {
+          const val = e.target.value;
+          localStorage.setItem(STORAGE_KEY_TV_SORT, val);
+          if (val !== "default") sortVisibleChannelsGrid(val);
+          else if (typeof render === "function") render();
+        });
+
+        document.getElementById("recleanTvBtn")?.addEventListener("click", () => {
+          purgeBlockedChannelsFromStateAndDom();
+          const curSort = localStorage.getItem(STORAGE_KEY_TV_SORT) || "default";
+          if (curSort !== "default") sortVisibleChannelsGrid(curSort);
+          if (typeof showToast === "function") showToast("✓ Chaînes et logos organisés");
+        });
+
+        if (savedSort !== "default") {
+          sortVisibleChannelsGrid(savedSort);
+        }
+      }
+
+      if (typeof render === "function") {
+        const _prevTvRender = render;
+        render = function () {
+          purgeBlockedChannelsFromStateAndDom();
+          _prevTvRender();
+          purgeBlockedChannelsFromStateAndDom();
+          injectChannelsOrganizerBar();
+        };
+      }
+
+      if (typeof openChannel === "function") {
+        const _prevOpenCh = openChannel;
+        openChannel = function (ch) {
+          if (isBlockedChannelName(ch?.name || ch?.title || "")) {
+            if (typeof showToast === "function") showToast("✕ Cette chaîne est masquée");
+            return;
+          }
+          _prevOpenCh(ch);
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        purgeBlockedChannelsFromStateAndDom();
+        injectChannelsOrganizerBar();
+      });
+    })();
+  </script>
 </body>
 </html>
