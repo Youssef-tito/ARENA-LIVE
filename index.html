@@ -5356,5 +5356,426 @@
       });
     })();
   </script>
-</body>
+  <style>
+    /* Replay Date Query Helper & Demo Source Alert */
+    .replay-date-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 9px 16px;
+      background: var(--bg-elevated, #121a17);
+      border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+      font-size: 12px;
+    }
+
+    .replay-date-query-code {
+      font-family: monospace;
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--fg-primary, #f8fafc);
+    }
+  </style>
+
+  <script>
+    (function () {
+      function formatMatchDateStamp(matchObj) {
+        const ts = Number(matchObj?.starts_at || matchObj?.timestamp || 0);
+        const d = ts > 0 ? new Date(ts * 1000) : new Date();
+        if (Number.isNaN(d.getTime())) {
+          return new Date().toISOString().slice(0, 10);
+        }
+        return d.toISOString().slice(0, 10);
+      }
+
+      function buildDatedReplayQuery(matchObj) {
+        const rawTitle = String(matchObj?.title || "Football Match")
+          .replace(/\b(live|stream|highlights|replay|full match)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        const dateStr = formatMatchDateStamp(matchObj);
+        return `${rawTitle} ${dateStr} highlights replay`.trim();
+      }
+
+      function isDemoPlaceholderFrame() {
+        const iframe = document.querySelector("#mBody iframe");
+        const video = document.querySelector("#mBody video");
+        const src = (iframe?.getAttribute("src") || video?.currentSrc || "").toLowerCase();
+        const bodyText = (document.getElementById("mBody")?.textContent || "").toLowerCase();
+        return /big buck bunny|blender|sample|demo|test.*video|commondatastorage/.test(src) ||
+               /big buck bunny|blender foundation/.test(bodyText);
+      }
+
+      function injectReplayDateBar(matchObj) {
+        const bar = document.getElementById("mBar");
+        if (!bar || !matchObj) return;
+        document.getElementById("replayDateHelperBar")?.remove();
+
+        const dateStr = formatMatchDateStamp(matchObj);
+        const queryStr = buildDatedReplayQuery(matchObj);
+        const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(queryStr)}`;
+        const isDemo = isDemoPlaceholderFrame();
+
+        const helper = document.createElement("div");
+        helper.id = "replayDateHelperBar";
+        helper.className = "replay-date-bar";
+        helper.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>${isDemo ? "⚠️ Vidéo démo détectée — recherche datée :" : "📅 Replay avec date exacte :"}</span>
+            <span class="replay-date-query-code">${queryStr.replace(/</g, "&lt;")}</span>
+            <span style="opacity:0.7;">(${dateStr})</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <button type="button" class="s-btn" id="copyDatedQueryBtn">📋 Copier recherche datée</button>
+            <a class="s-btn active" href="${ytSearchUrl}" target="_blank" rel="noopener noreferrer">▶ YouTube (${dateStr})</a>
+          </div>
+        `;
+
+        bar.insertAdjacentElement("afterend", helper);
+
+        document.getElementById("copyDatedQueryBtn")?.addEventListener("click", () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(queryStr).catch(() => {});
+          }
+          const ytInp = document.getElementById("ytUrlInput");
+          if (ytInp) ytInp.value = ytSearchUrl;
+          if (typeof showToast === "function") {
+            showToast(`✓ Recherche avec date (${dateStr}) copiée`);
+          }
+        });
+      }
+
+      if (typeof openMatch === "function") {
+        const _prevOpenMatchDated = openMatch;
+        openMatch = function (m) {
+          _prevOpenMatchDated(m);
+          setTimeout(() => injectReplayDateBar(m), 120);
+        };
+      }
+
+      if (typeof closeModal === "function") {
+        const _prevCloseModalDated = closeModal;
+        closeModal = function () {
+          document.getElementById("replayDateHelperBar")?.remove();
+          _prevCloseModalDated();
+        };
+      }
+    })();
+  </script>
+  <style id="tvGridHardLockStyle">
+    /* Part A: Hard Lock on TV Cards & Channel Logos */
+    [data-tab-view="channels"] .grid,
+    [data-tab-view="channels"] .tv-grid,
+    [data-tab-view="channels"] .channels-grid,
+    #app .tv-grid,
+    #app .channels-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)) !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+      width: 100% !important;
+    }
+
+    #app .card,
+    #app .tv-card,
+    #app .channel-card {
+      position: relative !important;
+      overflow: hidden !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    #app .card img,
+    #app .tv-card img,
+    #app .channel-card img {
+      display: block !important;
+      width: auto !important;
+      height: auto !important;
+      max-width: 100% !important;
+      max-height: 76px !important;
+      min-height: 0 !important;
+      object-fit: contain !important;
+      margin: 0 auto 10px !important;
+      border-radius: 8px !important;
+      pointer-events: none;
+    }
+
+    #app .card img[src=""],
+    #app .card img:not([src]) {
+      display: none !important;
+    }
+
+    .tv-logo-frame-box {
+      width: 100%;
+      height: 88px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(128, 128, 128, 0.16);
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .tv-logo-frame-box img {
+      margin: 0 !important;
+      max-width: 100% !important;
+      max-height: 68px !important;
+      width: auto !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const TV_BLOCK_LIST = ["5max"];
+
+      function isChannelTabActive() {
+        if (typeof ST !== "undefined" && ST.tab === "channels") return true;
+        const activeBtn = document.querySelector('#navPills .nav-btn.active[data-tab="channels"]');
+        return Boolean(activeBtn);
+      }
+
+      function normalizeChannelCardsLogos() {
+        if (!isChannelTabActive()) return;
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        const cards = app.querySelectorAll(".card, .tv-card, .channel-card");
+        cards.forEach(card => {
+          const textLower = (card.textContent || "").toLowerCase();
+          if (TV_BLOCK_LIST.some(bad => textLower.includes(bad))) {
+            card.remove();
+            return;
+          }
+
+          card.style.overflow = "hidden";
+          card.style.position = "relative";
+          card.style.maxWidth = "100%";
+
+          const imgs = [...card.querySelectorAll("img")];
+          imgs.forEach(img => {
+            img.style.maxWidth = "100%";
+            img.style.maxHeight = "70px";
+            img.style.width = "auto";
+            img.style.height = "auto";
+            img.style.objectFit = "contain";
+
+            img.onerror = function () {
+              this.style.display = "none";
+            };
+
+            if (!img.parentElement?.classList.contains("tv-logo-frame-box")) {
+              const wrap = document.createElement("div");
+              wrap.className = "tv-logo-frame-box";
+              img.parentNode.insertBefore(wrap, img);
+              wrap.appendChild(img);
+            }
+          });
+        });
+      }
+
+      const tvObserver = new MutationObserver(() => {
+        normalizeChannelCardsLogos();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        normalizeChannelCardsLogos();
+        const target = document.getElementById("app") || document.body;
+        tvObserver.observe(target, { childList: true, subtree: true });
+      });
+
+      setInterval(normalizeChannelCardsLogos, 900);
+    })();
+  </script>
+  <style>
+    /* Part B: Channel Quick Controls & Hidden Channels Manager */
+    .tv-smart-console {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 14px;
+      margin: 0 0 14px;
+      border-radius: 12px;
+      background: var(--bg-card, rgba(255, 255, 255, 0.04));
+      border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
+      font-size: 12.5px;
+    }
+
+    .tv-console-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .tv-quick-filter-inp {
+      background: var(--bg-input, rgba(0, 0, 0, 0.25));
+      border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: inherit;
+      min-width: 170px;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const HIDDEN_CHANNELS_KEY = "footime_hidden_channels_v2";
+      const DEFAULT_HIDDEN = ["5max"];
+
+      function loadHiddenChannelsSet() {
+        try {
+          const arr = JSON.parse(localStorage.getItem(HIDDEN_CHANNELS_KEY) || "[]");
+          return new Set([
+            ...DEFAULT_HIDDEN,
+            ...(Array.isArray(arr) ? arr.map(s => String(s).toLowerCase().trim()).filter(Boolean) : [])
+          ]);
+        } catch {
+          return new Set(DEFAULT_HIDDEN);
+        }
+      }
+
+      function saveHiddenChannelsSet(setObj) {
+        try {
+          localStorage.setItem(HIDDEN_CHANNELS_KEY, JSON.stringify([...setObj]));
+        } catch {}
+      }
+
+      function applyHiddenChannelsFilter() {
+        const hiddenSet = loadHiddenChannelsSet();
+        if (typeof ST !== "undefined" && Array.isArray(ST.channels)) {
+          ST.channels = ST.channels.filter(ch => {
+            const nm = String(ch?.name || ch?.title || "").toLowerCase().trim();
+            return ![...hiddenSet].some(h => nm === h || nm.includes(h));
+          });
+        }
+
+        const app = document.getElementById("app");
+        if (!app) return;
+        app.querySelectorAll(".card, .tv-card, .channel-card").forEach(card => {
+          const txt = (card.textContent || "").toLowerCase();
+          const shouldHide = [...hiddenSet].some(h => txt.includes(h));
+          if (shouldHide) card.remove();
+        });
+      }
+
+      function filterCardsByKeyword(kw) {
+        const q = String(kw || "").trim().toLowerCase();
+        const app = document.getElementById("app");
+        if (!app) return;
+        app.querySelectorAll(".card, .tv-card, .channel-card").forEach(card => {
+          if (!q) {
+            card.style.display = "";
+            return;
+          }
+          const txt = (card.textContent || "").toLowerCase();
+          card.style.display = txt.includes(q) ? "" : "none";
+        });
+      }
+
+      function injectSmartChannelsConsole() {
+        const isTvTab = (typeof ST !== "undefined" && ST.tab === "channels") ||
+          Boolean(document.querySelector('#navPills .nav-btn.active[data-tab="channels"]'));
+        if (!isTvTab) return;
+
+        const app = document.getElementById("app");
+        if (!app || document.getElementById("tvSmartConsoleBar")) return;
+
+        const hiddenCount = loadHiddenChannelsSet().size;
+        const bar = document.createElement("div");
+        bar.id = "tvSmartConsoleBar";
+        bar.className = "tv-smart-console";
+        bar.innerHTML = `
+          <div class="tv-console-group">
+            <strong>⚡ Contrôle Chaînes</strong>
+            <span class="chip">Masquées : <strong>${hiddenCount}</strong></span>
+            <input type="text" id="tvLocalQuickSearch" class="tv-quick-filter-inp" placeholder="Filtrer chaîne / pays..." />
+          </div>
+          <div class="tv-console-group">
+            <button type="button" class="s-btn" id="tvFilterSportBtn">⚽ Sport</button>
+            <button type="button" class="s-btn" id="tvFilterNewsBtn">📰 News</button>
+            <button type="button" class="s-btn" id="tvFilterTnBtn">🇹🇳 Tunisie</button>
+            <button type="button" class="s-btn" id="tvHideChannelPromptBtn">🚫 Masquer nom</button>
+            <button type="button" class="s-btn" id="tvResetHiddenBtn">↺ Réinitialiser masquées</button>
+          </div>
+        `;
+
+        const topAnchor = document.getElementById("channelsMetaBar") || app.firstElementChild;
+        if (topAnchor) topAnchor.insertAdjacentElement("beforebegin", bar);
+        else app.prepend(bar);
+
+        const qInp = document.getElementById("tvLocalQuickSearch");
+        qInp?.addEventListener("input", () => filterCardsByKeyword(qInp.value));
+
+        document.getElementById("tvFilterSportBtn")?.addEventListener("click", () => {
+          if (qInp) qInp.value = "sport";
+          filterCardsByKeyword("sport");
+        });
+
+        document.getElementById("tvFilterNewsBtn")?.addEventListener("click", () => {
+          if (qInp) qInp.value = "news";
+          filterCardsByKeyword("news");
+        });
+
+        document.getElementById("tvFilterTnBtn")?.addEventListener("click", () => {
+          if (qInp) qInp.value = "tunisia";
+          filterCardsByKeyword("tunisia");
+        });
+
+        document.getElementById("tvHideChannelPromptBtn")?.addEventListener("click", () => {
+          const targetName = prompt("Entre le nom de la chaîne à masquer (ex: 10 bold) :");
+          if (!targetName || !targetName.trim()) return;
+          const s = loadHiddenChannelsSet();
+          s.add(targetName.trim().toLowerCase());
+          saveHiddenChannelsSet(s);
+          applyHiddenChannelsFilter();
+          document.getElementById("tvSmartConsoleBar")?.remove();
+          injectSmartChannelsConsole();
+          if (typeof showToast === "function") showToast(`✓ Chaîne "${targetName.trim()}" masquée`);
+        });
+
+        document.getElementById("tvResetHiddenBtn")?.addEventListener("click", () => {
+          saveHiddenChannelsSet(new Set(DEFAULT_HIDDEN));
+          applyHiddenChannelsFilter();
+          document.getElementById("tvSmartConsoleBar")?.remove();
+          injectSmartChannelsConsole();
+          if (typeof showToast === "function") showToast("✓ Liste des chaînes masquées réinitialisée");
+        });
+      }
+
+      if (typeof render === "function") {
+        const _prevPartBRender = render;
+        render = function () {
+          applyHiddenChannelsFilter();
+          _prevPartBRender();
+          applyHiddenChannelsFilter();
+          injectSmartChannelsConsole();
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        applyHiddenChannelsFilter();
+        injectSmartChannelsConsole();
+      });
+
+      setInterval(() => {
+        applyHiddenChannelsFilter();
+        injectSmartChannelsConsole();
+      }, 1200);
+    })();
+  </script>
+  </body>
 </html>
