@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Footime Pro — Live Football, World Teams, Replays & TV Hub</title>
+  <title>Footime Pro — Live Football, World Teams, Replays & TV Hub | Created by Youssef</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -14,6 +14,7 @@
       --bg-elevated: #0c1311;
       --bg-card: #111b18;
       --bg-hover: #172521;
+      --bg-input: #0a100e;
       --fg-primary: #f5f9f7;
       --fg-secondary: #b9cac4;
       --fg-tertiary: #7b9089;
@@ -25,7 +26,7 @@
       --accent-soft: rgba(16, 185, 129, 0.14);
       --live-red: #ef4444;
       --border: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.14);
+      --border-strong: rgba(255, 255, 255, 0.16);
       --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.35);
       --shadow-glow: 0 8px 24px rgba(16, 185, 129, 0.24);
       --radius-sm: 8px;
@@ -36,6 +37,28 @@
       --radius-pill: 999px;
       --transition-fast: 0.18s ease;
       --transition-med: 0.25s ease;
+    }
+
+    html[data-theme="light"] {
+      --bg-base: #f2f7f5;
+      --bg-elevated: #ffffff;
+      --bg-card: #f8fbfa;
+      --bg-hover: #e8f1ed;
+      --bg-input: #eef4f1;
+      --fg-primary: #0b1612;
+      --fg-secondary: #2e433b;
+      --fg-tertiary: #5d746b;
+      --accent: #059669;
+      --accent-bright: #10b981;
+      --accent-deep: #065f46;
+      --accent-gold: #d97706;
+      --accent-gold-bright: #f59e0b;
+      --accent-soft: rgba(5, 150, 105, 0.12);
+      --live-red: #dc2626;
+      --border: rgba(11, 22, 18, 0.1);
+      --border-strong: rgba(11, 22, 18, 0.2);
+      --shadow-card: 0 10px 24px rgba(11, 22, 18, 0.08);
+      --shadow-glow: 0 8px 20px rgba(5, 150, 105, 0.18);
     }
 
     *,
@@ -61,6 +84,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       line-height: 1.45;
+      transition: background-color var(--transition-med), color var(--transition-med);
     }
 
     h1,
@@ -73,7 +97,8 @@
 
     button,
     input,
-    select {
+    select,
+    textarea {
       font-family: inherit;
       color: inherit;
     }
@@ -103,6 +128,10 @@
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
+    }
+
+    html[data-theme="light"] .topbar {
+      background: rgba(255, 255, 255, 0.9);
     }
 
     .arena-brand {
@@ -141,6 +170,7 @@
       background: var(--bg-elevated);
       border: 1px solid var(--border);
       border-radius: var(--radius-pill);
+      overflow-x: auto;
       scrollbar-width: none;
     }
 
@@ -224,6 +254,7 @@
       font-size: 12.5px;
       font-weight: 600;
       color: var(--fg-secondary);
+      white-space: nowrap;
       transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
     }
 
@@ -233,7 +264,7 @@
       background: var(--bg-hover);
     }
 
-    /* Main Container & Hero */
+    /* Layout & Cards */
     .container {
       max-width: 1360px;
       margin: 0 auto;
@@ -251,6 +282,11 @@
       box-shadow: var(--shadow-card);
     }
 
+    html[data-theme="light"] .hero-card {
+      background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 55%, #fef3c7 100%);
+      border-color: rgba(5, 150, 105, 0.25);
+    }
+
     .hero-glow {
       position: absolute;
       inset: 0;
@@ -264,7 +300,7 @@
     .hero-content {
       position: relative;
       z-index: 2;
-      max-width: 760px;
+      max-width: 780px;
     }
 
     .badge {
@@ -285,15 +321,27 @@
       color: #fca5a5;
     }
 
+    html[data-theme="light"] .badge-live {
+      color: #991b1b;
+    }
+
     .badge-up {
       background: rgba(245, 158, 11, 0.16);
       border: 1px solid rgba(245, 158, 11, 0.4);
       color: #fcd34d;
     }
 
+    html[data-theme="light"] .badge-up {
+      color: #92400e;
+    }
+
     .badge-lg {
       background: var(--accent-soft);
       color: var(--accent-bright);
+    }
+
+    html[data-theme="light"] .badge-lg {
+      color: var(--accent-deep);
     }
 
     .live-dot {
@@ -340,7 +388,6 @@
       box-shadow: var(--shadow-glow);
     }
 
-    /* Filter Chips & Sections */
     .filter-bar {
       display: flex;
       gap: 8px;
@@ -383,6 +430,10 @@
       color: #fcd34d;
     }
 
+    html[data-theme="light"] .chip.tn.active {
+      color: #92400e;
+    }
+
     .section-title {
       display: flex;
       align-items: center;
@@ -405,7 +456,6 @@
       gap: 15px;
     }
 
-    /* Cards */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -457,7 +507,8 @@
       font-size: 11px;
       font-weight: 700;
       background: rgba(7, 11, 10, 0.82);
-      border: 1px solid var(--border);
+      color: #f5f9f7;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -474,19 +525,19 @@
       display: grid;
       place-items: center;
       background: rgba(7, 11, 10, 0.82);
-      border: 1px solid var(--border);
-      color: var(--fg-tertiary);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #9fb3ac;
       transition: all var(--transition-fast);
     }
 
     .fav:hover {
-      color: var(--fg-primary);
-      border-color: rgba(245, 158, 11, 0.4);
+      color: #ffffff;
+      border-color: rgba(245, 158, 11, 0.45);
     }
 
     .fav.on {
       color: var(--accent-gold);
-      border-color: rgba(245, 158, 11, 0.5);
+      border-color: rgba(245, 158, 11, 0.55);
     }
 
     .body {
@@ -501,6 +552,10 @@
       color: var(--accent-bright);
     }
 
+    html[data-theme="light"] .lg {
+      color: var(--accent-deep);
+    }
+
     .title {
       font-size: 14.5px;
       font-weight: 700;
@@ -512,112 +567,123 @@
       color: var(--fg-tertiary);
     }
 
-    .team-card,
-    .ch-card {
+    /* Settings & Account Panel */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .panel-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 13px 14px;
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .panel-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .team-card:hover,
-    .ch-card:hover {
-      border-color: var(--accent);
-      background: var(--bg-hover);
-      transform: translateY(-1px);
-    }
-
-    .team-badge {
-      width: 50px;
-      height: 50px;
-      border-radius: var(--radius-md);
-      background: var(--bg-elevated);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      flex-shrink: 0;
-      font-weight: 800;
-      font-size: 13px;
-      color: var(--accent-bright);
-    }
-
-    .team-badge img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .ch-logo {
-      width: 54px;
-      height: 38px;
-      border-radius: var(--radius-sm);
-      background: var(--bg-elevated);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      flex-shrink: 0;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--fg-tertiary);
-    }
-
-    .ch-logo img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .tv-bar {
-      display: flex;
-      flex-wrap: wrap;
+      justify-content: space-between;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .select {
-      background: var(--bg-card);
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg-secondary);
+      margin-bottom: 6px;
+    }
+
+    .field-input,
+    .field-select {
+      width: 100%;
+      background: var(--bg-input);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
       font-size: 13px;
       outline: none;
     }
 
-    .select:focus {
+    .field-input:focus,
+    .field-select:focus {
       border-color: var(--accent);
     }
 
-    .note {
+    .switch-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .switch-row:last-child {
+      border-bottom: none;
+    }
+
+    .about-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(245, 158, 11, 0.08));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      margin-top: 12px;
+    }
+
+    .creator-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--accent-gold-bright);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    html[data-theme="light"] .creator-pill {
+      color: #92400e;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 10px;
-      background: rgba(16, 185, 129, 0.08);
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      margin-top: 14px;
+      list-style: none;
+    }
+
+    .feature-list li {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 11px 15px;
+      padding: 11px 13px;
       font-size: 12.5px;
       color: var(--fg-secondary);
-      margin-bottom: 16px;
     }
 
-    .empty {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 36px 18px;
-      background: var(--bg-card);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-lg);
-      color: var(--fg-tertiary);
-    }
-
-    /* Modal & Frame Player */
+    /* Modal & Frame Stage */
     .modal {
       position: fixed;
       inset: 0;
@@ -697,7 +763,7 @@
     .yt-in {
       flex: 1;
       min-width: 220px;
-      background: var(--bg-card);
+      background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 7px 11px;
@@ -740,17 +806,14 @@
       border-color: rgba(245, 158, 11, 0.35);
     }
 
-    .t-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      margin-bottom: 8px;
-      border-radius: 10px;
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 36px 18px;
       background: var(--bg-card);
-      border: 1px solid var(--border);
-      font-size: 13px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+      color: var(--fg-tertiary);
     }
 
     @media (max-width: 780px) {
@@ -762,7 +825,6 @@
       .nav-pills {
         order: 3;
         width: 100%;
-        overflow-x: auto;
       }
 
       .search-box {
@@ -816,6 +878,7 @@
       <button class="nav-btn" data-tab="replays">Replays &amp; Highlights</button>
       <button class="nav-btn" data-tab="channels">Live Channels</button>
       <button class="nav-btn" data-tab="favorites">Favorites (<span id="favCount">0</span>)</button>
+      <button class="nav-btn" data-tab="settings">Paramètres</button>
     </nav>
 
     <div class="top-actions">
@@ -852,6 +915,155 @@
     const SDB_API = "https://www.thesportsdb.com/api/v1/json/3";
     const DEFAULT_EMBED_FRAME = "https://www.youtube.com/embed/aqz-KE-bpKQ?autoplay=1";
 
+    const DEFAULT_PREFS = {
+      theme: "dark",
+      lang: "fr",
+      autoplay: true,
+      defaultSport: "Football",
+      account: {
+        name: "Youssef",
+        handle: "@youssef_pro",
+        role: "Founder & Creator",
+        bio: "Created by Youssef — Footime Pro hub for live football, replays, teams & TV."
+      }
+    };
+
+    const ST = {
+      tab: "matches",
+      sport: "Football",
+      q: "",
+      matches: [],
+      channels: [],
+      favs: JSON.parse(localStorage.getItem("footime_favs") || '{"matches":[],"channels":[]}'),
+      prefs: Object.assign({}, DEFAULT_PREFS, JSON.parse(localStorage.getItem("footime_prefs") || "{}")),
+      hls: null
+    };
+    ST.prefs.account = Object.assign({}, DEFAULT_PREFS.account, ST.prefs.account || {});
+    ST.sport = ST.prefs.defaultSport || "Football";
+
+    function applyThemeAndLang() {
+      document.documentElement.setAttribute("data-theme", ST.prefs.theme === "light" ? "light" : "dark");
+      document.documentElement.setAttribute("lang", ST.prefs.lang || "en");
+      document.documentElement.setAttribute("dir", ST.prefs.lang === "ar" ? "rtl" : "ltr");
+      localStorage.setItem("footime_prefs", JSON.stringify(ST.prefs));
+    }
+
+    function renderSettingsView(app) {
+      const acc = ST.prefs.account;
+      app.innerHTML = `
+        <h2 class="section-title"><span class="bar"></span> Paramètres — Compte, Mode &amp; Langue</h2>
+        <div class="settings-grid">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">👤 Compte &amp; Profil</h3>
+              <span class="badge badge-lg">${esc(acc.role)}</span>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="accName">Nom du compte</label>
+              <input class="field-input" id="accName" type="text" value="${esc(acc.name)}" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="accHandle">Identifiant (@handle)</label>
+              <input class="field-input" id="accHandle" type="text" value="${esc(acc.handle)}" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="accBio">Notes / Statut du compte</label>
+              <input class="field-input" id="accBio" type="text" value="${esc(acc.bio)}" />
+            </div>
+            <button class="btn-primary" id="saveAccountBtn">💾 Enregistrer le compte</button>
+            <span id="accSavedMsg" class="sub" style="margin-left:10px;"></span>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">🎨 Mode Sombre / Clair &amp; Langue</h3>
+              <span class="badge badge-up">${esc((ST.prefs.theme || "dark").toUpperCase())}</span>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="themeSelect">Mode d'affichage</label>
+              <select class="field-select" id="themeSelect">
+                <option value="dark" ${ST.prefs.theme === "dark" ? "selected" : ""}>🌙 Mode Sombre (Dark Pro)</option>
+                <option value="light" ${ST.prefs.theme === "light" ? "selected" : ""}>☀️ Mode Clair (Light Clean)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="langSelect">Langue de l'interface</label>
+              <select class="field-select" id="langSelect">
+                <option value="fr" ${ST.prefs.lang === "fr" ? "selected" : ""}>🇫🇷 Français</option>
+                <option value="en" ${ST.prefs.lang === "en" ? "selected" : ""}>🇬🇧 English</option>
+                <option value="ar" ${ST.prefs.lang === "ar" ? "selected" : ""}>🇹🇳 العربية</option>
+              </select>
+            </div>
+            <div class="switch-row">
+              <span>Lecture automatique dans l'iframe</span>
+              <input type="checkbox" id="autoplayCheck" ${ST.prefs.autoplay ? "checked" : ""} />
+            </div>
+            <div style="margin-top:12px;">
+              <button class="s-btn active" id="resetPrefsBtn">↺ Réinitialiser Paramètres</button>
+            </div>
+          </div>
+        </div>
+
+        <section class="about-box">
+          <div class="creator-pill">⚡ Created by Youssef • Footime Pro</div>
+          <h3 style="font-size:20px;margin-bottom:8px;">وظيفة موقع Footime Pro</h3>
+          <p class="hero-sub" style="margin-bottom:0;">
+            <strong>Footime Pro</strong> هو منصة رياضية متكاملة لمتابعة المباريات المباشرة، الدوري التونسي، الفرق العالمية، الإعادات والملخصات، والقنوات التلفزيونية داخل مشغّل <code>&lt;iframe&gt;</code> موحّد وسريع مع دعم المفضلة، البحث، وتخصيص الحساب والوضع الداكن واللغة — <strong>Created by Youssef</strong>.
+          </p>
+          <ul class="feature-list">
+            <li><strong>📺 مشغّل مدمج (Iframe &amp; HLS):</strong> فتح المباريات والإعادات والقنوات مباشرة داخل إطار 16:9 مع تبديل المصادر.</li>
+            <li><strong>⚽ مباريات وإعادات:</strong> متابعة البث المباشر، المباريات القادمة، وملخصات وإعادات المباريات السابقة.</li>
+            <li><strong>🌍 فرق العالم وتونس:</strong> استعراض الفرق والبحث السريع والاطلاع على جدول المباريات والنتائج.</li>
+            <li><strong>⚙️ حساب ووضع داكن ولغة:</strong> حفظ إعدادات الحساب، الوضع الداكن أو الفاتح، واللغة محلياً على المتصفح.</li>
+          </ul>
+        </section>
+      `;
+
+      document.getElementById("saveAccountBtn").onclick = () => {
+        ST.prefs.account = {
+          name: document.getElementById("accName").value.trim() || "Youssef",
+          handle: document.getElementById("accHandle").value.trim() || "@youssef_pro",
+          role: acc.role,
+          bio: document.getElementById("accBio").value.trim() || DEFAULT_PREFS.account.bio
+        };
+        applyThemeAndLang();
+        document.getElementById("accSavedMsg").textContent = "✓ Saved";
+      };
+
+      document.getElementById("themeSelect").onchange = e => {
+        ST.prefs.theme = e.target.value;
+        applyThemeAndLang();
+        renderSettingsView(app);
+      };
+
+      document.getElementById("langSelect").onchange = e => {
+        ST.prefs.lang = e.target.value;
+        applyThemeAndLang();
+      };
+
+      document.getElementById("autoplayCheck").onchange = e => {
+        ST.prefs.autoplay = e.target.checked;
+        applyThemeAndLang();
+      };
+
+      document.getElementById("resetPrefsBtn").onclick = () => {
+        ST.prefs = JSON.parse(JSON.stringify(DEFAULT_PREFS));
+        applyThemeAndLang();
+        renderSettingsView(app);
+      };
+    }
+
+    function esc(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    applyThemeAndLang();
+  </script>
+  <script>
     const ALIASES = {
       taraji: ["esperance", "es tunis", "taraji", "est"],
       esperance: ["esperance", "es tunis", "taraji", "est"],
@@ -959,33 +1171,16 @@
       }
     ];
 
-    const ST = {
-      tab: "matches",
-      sport: "Football",
-      teamLeague: "all",
-      q: "",
-      matches: [],
-      tnMatches: [],
-      replays: [],
-      teams: [],
-      channels: [],
-      country: "all",
-      cat: "all",
-      favs: JSON.parse(localStorage.getItem("footime_favs") || '{"matches":[],"channels":[]}'),
-      hls: null
-    };
-
-    const esc = s => String(s ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    ST.teamLeague = "all";
+    ST.tnMatches = [];
+    ST.replays = [];
+    ST.teams = [];
 
     function toEmbedUrl(raw) {
       const u = (raw || "").trim();
       if (!u) return "";
       const m1 = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
-      if (m1) return `https://www.youtube.com/embed/${m1[1]}?autoplay=1`;
+      if (m1) return `https://www.youtube.com/embed/${m1[1]}?autoplay=${ST.prefs.autoplay ? 1 : 0}`;
       return u;
     }
 
@@ -994,30 +1189,6 @@
       if (!q) return true;
       const hay = `${item.title || ""} ${item.name || ""} ${item.league || ""} ${item.strLeague || ""} ${item.category || ""}`.toLowerCase();
       return [q, ...(ALIASES[q] || [])].some(t => hay.includes(t));
-    }
-
-    function saveFavs() {
-      localStorage.setItem("footime_favs", JSON.stringify(ST.favs));
-      document.getElementById("favCount").textContent = ST.favs.matches.length + ST.favs.channels.length;
-    }
-
-    function toggleFav(type, obj) {
-      const list = ST.favs[type];
-      const key = String(obj.id ?? obj.title);
-      const i = list.findIndex(x => String(x.id ?? x.title) === key);
-      if (i > -1) list.splice(i, 1);
-      else list.push(obj);
-      saveFavs();
-      render();
-    }
-
-    function moveInd() {
-      const b = document.querySelector("#navPills .nav-btn.active");
-      const ind = document.getElementById("navInd");
-      if (b && ind) {
-        ind.style.left = b.offsetLeft + "px";
-        ind.style.width = b.offsetWidth + "px";
-      }
     }
 
     function statusOf(s, now = Date.now()) {
@@ -1031,7 +1202,9 @@
     }
 
     function mapEventToMatch(ev, prefix = "ev", fallbackLeague = "Football") {
-      const ts = ev.strTimestamp ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000) : Math.floor((Date.now() - 86400000) / 1000);
+      const ts = ev.strTimestamp
+        ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000)
+        : Math.floor((Date.now() - 86400000) / 1000);
       const hasScore = ev.intHomeScore != null && ev.intAwayScore != null;
       return {
         id: `${prefix}_${ev.idEvent}`,
@@ -1048,7 +1221,10 @@
     }
 
     async function loadMatches(force = false) {
-      if (!force && ST.matches.length) { render(); return; }
+      if (!force && ST.matches.length) {
+        render();
+        return;
+      }
       document.getElementById("app").innerHTML = `<div class="empty">Loading matches...</div>`;
       try {
         const data = await (await fetch(PPV_API)).json();
@@ -1072,7 +1248,10 @@
     }
 
     async function loadTunisia(force = false) {
-      if (!force && ST.tnMatches.length) { render(); return; }
+      if (!force && ST.tnMatches.length) {
+        render();
+        return;
+      }
       const teams = ["Esperance", "Club Africain", "Etoile du Sahel", "CS Sfaxien", "US Monastir"];
       const map = new Map();
 
@@ -1082,7 +1261,9 @@
           fetch(`${SDB_API}/eventspastleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
         ]);
         for (const ev of [...(leagueCalls[0].events || []), ...(leagueCalls[1].events || [])]) {
-          if (ev?.idEvent && !map.has(ev.idEvent)) map.set(ev.idEvent, mapEventToMatch(ev, "tn", "Tunisian Ligue 1"));
+          if (ev?.idEvent && !map.has(ev.idEvent)) {
+            map.set(ev.idEvent, mapEventToMatch(ev, "tn", "Tunisian Ligue 1"));
+          }
         }
 
         for (const t of teams) {
@@ -1095,7 +1276,9 @@
               fetch(`${SDB_API}/eventslast.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
             ]);
             for (const ev of [...(nx.events || []), ...(ls.results || [])]) {
-              if (ev?.idEvent && !map.has(ev.idEvent)) map.set(ev.idEvent, mapEventToMatch(ev, "tn", `${t} • Tunisia`));
+              if (ev?.idEvent && !map.has(ev.idEvent)) {
+                map.set(ev.idEvent, mapEventToMatch(ev, "tn", `${t} • Tunisia`));
+              }
             }
           } catch {}
         }
@@ -1106,7 +1289,10 @@
     }
 
     async function loadReplays(force = false) {
-      if (!force && ST.replays.length) { render(); return; }
+      if (!force && ST.replays.length) {
+        render();
+        return;
+      }
       const map = new Map();
       const leagueIds = ["4445", "4328", "4335", "4332", "4331", "4334"];
 
@@ -1139,7 +1325,10 @@
     }
 
     async function loadTeams(force = false) {
-      if (!force && ST.teams.length) { render(); return; }
+      if (!force && ST.teams.length) {
+        render();
+        return;
+      }
       document.getElementById("app").innerHTML = `<div class="empty">Loading world teams...</div>`;
       const leagues = [
         "English Premier League", "Spanish La Liga", "Italian Serie A",
@@ -1200,7 +1389,9 @@
       document.getElementById("ytUrlInput").value = "";
       document.getElementById("ytPlayBtn").onclick = () => {
         const emb = toEmbedUrl(document.getElementById("ytUrlInput").value);
-        if (emb) body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+        if (emb) {
+          body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+        }
       };
 
       destroyHls();
@@ -1248,9 +1439,38 @@
         ${past.length ? past.slice(0, 8).map(e => renderEvRow(e, true)).join("") : `<div class="sub">No recent matches listed.</div>`}
       </div>`;
     }
+  </script>
+  <script>
+    function saveFavs() {
+      localStorage.setItem("footime_favs", JSON.stringify(ST.favs));
+      const el = document.getElementById("favCount");
+      if (el) el.textContent = ST.favs.matches.length + ST.favs.channels.length;
+    }
+
+    function toggleFav(type, obj) {
+      const list = ST.favs[type];
+      const key = String(obj.id ?? obj.title);
+      const i = list.findIndex(x => String(x.id ?? x.title) === key);
+      if (i > -1) list.splice(i, 1);
+      else list.push(obj);
+      saveFavs();
+      render();
+    }
+
+    function moveInd() {
+      const b = document.querySelector("#navPills .nav-btn.active");
+      const ind = document.getElementById("navInd");
+      if (b && ind) {
+        ind.style.left = b.offsetLeft + "px";
+        ind.style.width = b.offsetWidth + "px";
+      }
+    }
 
     async function loadChannels(force = false) {
-      if (!force && ST.channels.length) { render(); return; }
+      if (!force && ST.channels.length) {
+        render();
+        return;
+      }
       document.getElementById("app").innerHTML = `<div class="empty">Loading channels...</div>`;
       try {
         const [chs, sts, lgs] = await Promise.all([
@@ -1259,28 +1479,38 @@
           fetch(`${IPTV_API}/logos.json`).then(r => r.ok ? r.json() : []).catch(() => [])
         ]);
         const logoMap = new Map();
-        for (const l of lgs) if (l.channel && l.url && !logoMap.has(l.channel)) logoMap.set(l.channel, l.url);
+        for (const l of lgs) {
+          if (l.channel && l.url && !logoMap.has(l.channel)) logoMap.set(l.channel, l.url);
+        }
         const stMap = new Map();
         for (const s of sts) {
           if (!s.channel || !s.url || (s.status && s.status !== "online")) continue;
           if (!stMap.has(s.channel)) stMap.set(s.channel, []);
           stMap.get(s.channel).push(s.url);
         }
-        ST.channels = chs.filter(c => c.id && stMap.has(c.id)).map(c => ({
-          id: c.id,
-          name: c.name || c.id,
-          logo: logoMap.get(c.id) || "",
-          streams: stMap.get(c.id),
-          country: (c.country || "").toUpperCase(),
-          category: Array.isArray(c.categories) ? (c.categories[0] || "general") : (c.category || "general")
-        }));
+        ST.channels = chs
+          .filter(c => c.id && stMap.has(c.id))
+          .map(c => ({
+            id: c.id,
+            name: c.name || c.id,
+            logo: logoMap.get(c.id) || "",
+            streams: stMap.get(c.id),
+            country: (c.country || "").toUpperCase(),
+            category: Array.isArray(c.categories) ? (c.categories[0] || "general") : (c.category || "general")
+          }));
         render();
       } catch {
         document.getElementById("app").innerHTML = `<div class="empty">Failed to load channels. <button class="btn-primary" onclick="loadChannels(true)">Retry</button></div>`;
       }
     }
 
-    function destroyHls() { if (ST.hls) { ST.hls.destroy(); ST.hls = null; } }
+    function destroyHls() {
+      if (ST.hls) {
+        ST.hls.destroy();
+        ST.hls = null;
+      }
+    }
+
     function closeModal() {
       destroyHls();
       document.getElementById("modal").classList.remove("open");
@@ -1291,10 +1521,26 @@
 
     function openMatch(m) {
       const sources = [];
-      if (m.iframe) sources.push({ label: `${(m.locale || "EN").toUpperCase()} • ${m.source_tag || "Main Frame"}`, url: toEmbedUrl(m.iframe) });
-      (m.substreams || []).forEach((sub, i) => sub.iframe && sources.push({ label: `${(sub.locale || m.locale || "EN").toUpperCase()} • ${sub.source_tag || sub.name || "Backup " + (i + 1)}`, url: toEmbedUrl(sub.iframe) }));
-      if (m.videoUrl) sources.push({ label: "Video Frame", url: toEmbedUrl(m.videoUrl) });
-      if (!sources.length) sources.push({ label: "Frame Player", url: DEFAULT_EMBED_FRAME });
+      if (m.iframe) {
+        sources.push({
+          label: `${(m.locale || "EN").toUpperCase()} • ${m.source_tag || "Main Frame"}`,
+          url: toEmbedUrl(m.iframe)
+        });
+      }
+      (m.substreams || []).forEach((sub, i) => {
+        if (sub.iframe) {
+          sources.push({
+            label: `${(sub.locale || m.locale || "EN").toUpperCase()} • ${sub.source_tag || sub.name || "Backup " + (i + 1)}`,
+            url: toEmbedUrl(sub.iframe)
+          });
+        }
+      });
+      if (m.videoUrl) {
+        sources.push({ label: "Video Frame", url: toEmbedUrl(m.videoUrl) });
+      }
+      if (!sources.length) {
+        sources.push({ label: "Frame Player", url: DEFAULT_EMBED_FRAME });
+      }
 
       const body = document.getElementById("mBody");
       const bar = document.getElementById("mBar");
@@ -1316,9 +1562,12 @@
         const s = sources[i];
         body.innerHTML = `<div class="stage"><iframe src="${esc(s.url)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
         bar.style.display = "flex";
-        bar.innerHTML = sources.map((x, idx) => `<button class="s-btn ${idx === i ? "active" : ""}" data-i="${idx}">${esc(x.label)}</button>`).join("")
-          + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
-        bar.querySelectorAll("[data-i]").forEach(btn => btn.onclick = () => playIdx(+btn.dataset.i));
+        bar.innerHTML = sources
+          .map((x, idx) => `<button class="s-btn ${idx === i ? "active" : ""}" data-i="${idx}">${esc(x.label)}</button>`)
+          .join("") + `<a class="s-btn ext" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
+        bar.querySelectorAll("[data-i]").forEach(btn => {
+          btn.onclick = () => playIdx(+btn.dataset.i);
+        });
       };
       playIdx(0);
     }
@@ -1350,7 +1599,10 @@
         bar.innerHTML = `<span style="font-size:12px;color:var(--fg-tertiary);">Source ${idx + 1}/${list.length}</span>`
           + (list.length > 1 ? `<button class="s-btn active" id="nxSrc">Next Source ↻</button>` : "")
           + `<a class="s-btn ext" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open in Tab ↗</a>`;
-        document.getElementById("nxSrc")?.addEventListener("click", () => { idx = (idx + 1) % list.length; run(); });
+        document.getElementById("nxSrc")?.addEventListener("click", () => {
+          idx = (idx + 1) % list.length;
+          run();
+        });
 
         if (/\.m3u8(\?|$)/i.test(url) && window.Hls && Hls.isSupported()) {
           body.innerHTML = `<div class="stage"><video id="vid" controls autoplay playsinline></video></div>`;
@@ -1359,7 +1611,9 @@
           ST.hls = hls;
           hls.loadSource(url);
           hls.attachMedia(v);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(() => {}));
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            if (ST.prefs.autoplay) v.play().catch(() => {});
+          });
           hls.on(Hls.Events.ERROR, (_, d) => {
             if (d.fatal) {
               if (idx < list.length - 1) {
@@ -1379,9 +1633,15 @@
 
     function matchCard(m, st) {
       const isFav = ST.favs.matches.some(x => String(x.id ?? x.title) === String(m.id ?? m.title));
-      const dt = m.starts_at ? new Date(m.starts_at * 1000).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD";
+      const dt = m.starts_at
+        ? new Date(m.starts_at * 1000).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+        : "TBD";
       const enc = encodeURIComponent(JSON.stringify(m));
-      const pill = st === "live" ? '<span class="live-dot"></span> LIVE' : st === "ended" ? (m.score ? `FT • ${esc(m.score)}` : "FINISHED") : esc(dt);
+      const pill = st === "live"
+        ? '<span class="live-dot"></span> LIVE'
+        : st === "ended"
+          ? (m.score ? `FT • ${esc(m.score)}` : "FINISHED")
+          : esc(dt);
       return `<div class="card">
         <div class="banner" onclick="openMatch(JSON.parse(decodeURIComponent('${enc}')))">
           ${m.poster ? `<img src="${esc(m.poster)}" loading="lazy" onerror="this.style.display='none'">` : ""}
@@ -1401,9 +1661,16 @@
       const app = document.getElementById("app");
       const now = Date.now();
 
+      if (ST.tab === "settings") {
+        renderSettingsView(app);
+        return;
+      }
+
       if (ST.tab === "matches") {
         const isTn = ST.sport === "tunisia";
-        const base = isTn ? ST.tnMatches : ST.matches.filter(m => ST.sport === "all" || (m.category || "").toLowerCase() === ST.sport.toLowerCase());
+        const base = isTn
+          ? ST.tnMatches
+          : ST.matches.filter(m => ST.sport === "all" || (m.category || "").toLowerCase() === ST.sport.toLowerCase());
         const list = base.filter(matchQ);
         const live = list.filter(m => statusOf(m, now) === "live");
         const up = list.filter(m => statusOf(m, now) === "upcoming");
@@ -1417,7 +1684,7 @@
               <span class="badge ${statusOf(feat, now) === "live" ? "badge-live" : "badge-up"}">${statusOf(feat, now) === "live" ? "LIVE NOW" : "FEATURED"}</span>
               <span class="badge badge-lg">${esc(feat.league || feat.category)}</span>
               <h1 class="hero-title">${esc(feat.title)}</h1>
-              <p class="hero-sub">Footime Pro — Live football, Tunisian Ligue 1, world teams, replays, and channels.</p>
+              <p class="hero-sub">Footime Pro — Created by Youssef • Live football, Tunisian Ligue 1, world teams, replays &amp; channels.</p>
               <a href="javascript:void(0)" class="btn-primary" onclick="openMatch(JSON.parse(decodeURIComponent('${fEnc}')))">▶ Open Match</a>
             </div>
           </section>` : ""}
@@ -1430,12 +1697,18 @@
           ${isTn ? `<h2 class="section-title"><span class="bar"></span> Recent Results (${past.length})</h2>
           <div class="grid">${past.length ? past.slice(0, 24).map(m => matchCard(m, "ended")).join("") : `<div class="empty">No recent results returned.</div>`}</div>` : ""}
         `;
-        app.querySelectorAll("[data-sp]").forEach(b => b.onclick = () => {
-          ST.sport = b.dataset.sp;
-          if (ST.sport === "tunisia") loadTunisia();
+        app.querySelectorAll("[data-sp]").forEach(b => {
+          b.onclick = () => {
+            ST.sport = b.dataset.sp;
+            if (ST.sport === "tunisia") loadTunisia();
+            render();
+          };
+        });
+        document.getElementById("clrQ")?.addEventListener("click", () => {
+          ST.q = "";
+          document.getElementById("searchInput").value = "";
           render();
         });
-        document.getElementById("clrQ")?.addEventListener("click", () => { ST.q = ""; document.getElementById("searchInput").value = ""; render(); });
 
       } else if (ST.tab === "teams") {
         const list = ST.teams.filter(t => (ST.teamLeague === "all" || t.league === ST.teamLeague) && matchQ(t));
@@ -1448,7 +1721,12 @@
               <div style="flex:1;min-width:0;"><div class="title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(tm.name)}</div><div class="sub">${esc(tm.leagueLabel)} ${tm.country ? "• " + esc(tm.country) : ""}</div></div>
             </div>`;
           }).join("") : `<div class="empty">No teams found. Type any team name in search and press Enter.</div>`}</div>`;
-        app.querySelectorAll("[data-tlg]").forEach(b => b.onclick = () => { ST.teamLeague = b.dataset.tlg; render(); });
+        app.querySelectorAll("[data-tlg]").forEach(b => {
+          b.onclick = () => {
+            ST.teamLeague = b.dataset.tlg;
+            render();
+          };
+        });
 
       } else if (ST.tab === "replays") {
         const list = (ST.replays.length ? ST.replays : FALLBACK_REPLAYS).filter(matchQ);
@@ -1459,7 +1737,9 @@
         const q = ST.q.trim().toLowerCase();
         const countries = [...new Set(ST.channels.map(c => c.country).filter(Boolean))].sort();
         const cats = [...new Set(ST.channels.map(c => c.category).filter(Boolean))].sort();
-        const chs = ST.channels.filter(c => (ST.country === "all" || c.country === ST.country) && (ST.cat === "all" || c.category === ST.cat) && (!q || (c.name || "").toLowerCase().includes(q))).slice(0, 90);
+        const chs = ST.channels
+          .filter(c => (ST.country === "all" || c.country === ST.country) && (ST.cat === "all" || c.category === ST.cat) && (!q || (c.name || "").toLowerCase().includes(q)))
+          .slice(0, 90);
         app.innerHTML = `<h2 class="section-title"><span class="bar"></span> Live Channels</h2>
           <div class="tv-bar">
             <select class="select" id="selC"><option value="all">All Countries</option>${countries.map(c => `<option value="${esc(c)}" ${ST.country === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
@@ -1496,32 +1776,3389 @@
       }
     }
 
-    document.querySelectorAll("#navPills .nav-btn").forEach(b => b.onclick = () => {
-      ST.tab = b.dataset.tab;
-      document.querySelectorAll("#navPills .nav-btn").forEach(x => x.classList.toggle("active", x === b));
-      moveInd();
-      render();
-      if (ST.tab === "teams" && !ST.teams.length) loadTeams();
-      if (ST.tab === "replays" && !ST.replays.length) loadReplays();
-      if (ST.tab === "channels" && !ST.channels.length) loadChannels();
-      if (ST.sport === "tunisia" && !ST.tnMatches.length) loadTunisia();
+    document.querySelectorAll("#navPills .nav-btn").forEach(b => {
+      b.onclick = () => {
+        ST.tab = b.dataset.tab;
+        document.querySelectorAll("#navPills .nav-btn").forEach(x => x.classList.toggle("active", x === b));
+        moveInd();
+        render();
+        if (ST.tab === "teams" && !ST.teams.length) loadTeams();
+        if (ST.tab === "replays" && !ST.replays.length) loadReplays();
+        if (ST.tab === "channels" && !ST.channels.length) loadChannels();
+        if (ST.sport === "tunisia" && !ST.tnMatches.length) loadTunisia();
+      };
     });
-    document.getElementById("brandHome").onclick = e => { e.preventDefault(); document.querySelector('[data-tab="matches"]').click(); };
-    document.getElementById("searchInput").oninput = e => { ST.q = e.target.value; render(); };
-    document.getElementById("searchInput").onkeydown = e => { if (e.key === "Enter" && ST.tab === "teams") searchAnyTeam(ST.q); };
+
+    document.getElementById("brandHome").onclick = e => {
+      e.preventDefault();
+      document.querySelector('[data-tab="matches"]').click();
+    };
+    document.getElementById("searchInput").oninput = e => {
+      ST.q = e.target.value;
+      render();
+    };
+    document.getElementById("searchInput").onkeydown = e => {
+      if (e.key === "Enter" && ST.tab === "teams") searchAnyTeam(ST.q);
+    };
     document.getElementById("refreshBtn").onclick = () => {
       if (ST.tab === "channels") loadChannels(true);
       else if (ST.tab === "teams") loadTeams(true);
       else if (ST.tab === "replays") loadReplays(true);
-      else { loadMatches(true); if (ST.sport === "tunisia") loadTunisia(true); }
+      else {
+        loadMatches(true);
+        if (ST.sport === "tunisia") loadTunisia(true);
+      }
     };
     document.getElementById("mClose").onclick = closeModal;
-    document.getElementById("modal").onclick = e => { if (e.target.id === "modal") closeModal(); };
+    document.getElementById("modal").onclick = e => {
+      if (e.target.id === "modal") closeModal();
+    };
     window.onresize = moveInd;
 
     saveFavs();
     moveInd();
     loadMatches();
+  </script>
+  <style>
+    /* Pro Extensions: Theater Mode, Toast Notifications & Stats Strip */
+    .stats-ribbon {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .stat-tile {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .stat-tile strong {
+      font-family: "Outfit", sans-serif;
+      font-size: 19px;
+      color: var(--accent-bright);
+    }
+
+    html[data-theme="light"] .stat-tile strong {
+      color: var(--accent-deep);
+    }
+
+    .stat-tile span {
+      font-size: 12px;
+      color: var(--fg-tertiary);
+      font-weight: 600;
+    }
+
+    .modal.theater .box {
+      max-width: 98vw;
+      width: 98vw;
+      max-height: 97vh;
+    }
+
+    .modal.theater .stage {
+      aspect-ratio: 21 / 9;
+      max-height: 76vh;
+    }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      background: var(--bg-elevated);
+      color: var(--fg-primary);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-card);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: all var(--transition-fast);
+    }
+
+    .toast-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .history-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .footer-pro {
+      margin-top: 38px;
+      padding: 22px 0 34px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12.5px;
+      color: var(--fg-tertiary);
+    }
+
+    .footer-pro strong {
+      color: var(--accent-bright);
+    }
+
+    html[data-theme="light"] .footer-pro strong {
+      color: var(--accent-deep);
+    }
+  </style>
+
+  <div class="toast-banner" id="proToast"></div>
+
+  <footer class="container footer-pro">
+    <div>
+      <strong>FOOTIME PRO</strong> • Arena Live Sports Hub — Created by <strong>Youssef</strong>
+    </div>
+    <div>
+      Live Matches • Tunisian Ligue 1 • World Teams • Replays &amp; Highlights • Live Channels • Paramètres
+    </div>
+  </footer>
+
+  <script>
+    const I18N_DICT = {
+      fr: {
+        nav_matches: "Matchs & Direct",
+        nav_teams: "Équipes du Monde",
+        nav_replays: "Replays & Résumés",
+        nav_channels: "Chaînes TV",
+        nav_favorites: "Favoris",
+        nav_settings: "Paramètres",
+        search_ph: "Rechercher match, équipe, chaîne...",
+        refresh: "↻ Actualiser"
+      },
+      en: {
+        nav_matches: "Matches & Live",
+        nav_teams: "World Teams",
+        nav_replays: "Replays & Highlights",
+        nav_channels: "Live Channels",
+        nav_favorites: "Favorites",
+        nav_settings: "Paramètres",
+        search_ph: "Search match, team, channel...",
+        refresh: "↻ Refresh"
+      },
+      ar: {
+        nav_matches: "المباريات والبث",
+        nav_teams: "فرق العالم",
+        nav_replays: "الإعادات والملخصات",
+        nav_channels: "القنوات المباشرة",
+        nav_favorites: "المفضلة",
+        nav_settings: "Paramètres",
+        search_ph: "ابحث عن مباراة، فريق، قناة...",
+        refresh: "↻ تحديث"
+      }
+    };
+
+    ST.history = JSON.parse(localStorage.getItem("footime_history") || "[]");
+    ST.theater = false;
+
+    function showToast(msg) {
+      const t = document.getElementById("proToast");
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(ST._toastTimer);
+      ST._toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+    }
+
+    function pushWatchHistory(entry) {
+      if (!entry || !entry.title) return;
+      const clean = {
+        id: entry.id || entry.title,
+        title: entry.title,
+        league: entry.league || entry.category || "Stream",
+        at: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      };
+      ST.history = [clean, ...ST.history.filter(x => x.title !== clean.title)].slice(0, 12);
+      localStorage.setItem("footime_history", JSON.stringify(ST.history));
+    }
+
+    function applyLanguageLabels() {
+      const lang = ST.prefs.lang || "fr";
+      const dict = I18N_DICT[lang] || I18N_DICT.fr;
+      const map = {
+        matches: dict.nav_matches,
+        teams: dict.nav_teams,
+        replays: dict.nav_replays,
+        channels: dict.nav_channels,
+        settings: dict.nav_settings
+      };
+      document.querySelectorAll("#navPills .nav-btn").forEach(btn => {
+        const tab = btn.dataset.tab;
+        if (tab === "favorites") {
+          const count = ST.favs.matches.length + ST.favs.channels.length;
+          btn.innerHTML = `${dict.nav_favorites} (<span id="favCount">${count}</span>)`;
+        } else if (map[tab]) {
+          btn.textContent = map[tab];
+        }
+      });
+      const si = document.getElementById("searchInput");
+      if (si) si.placeholder = dict.search_ph;
+      const rb = document.getElementById("refreshBtn");
+      if (rb) rb.textContent = dict.refresh;
+      moveInd();
+    }
+
+    function toggleTheaterMode() {
+      ST.theater = !ST.theater;
+      const modal = document.getElementById("modal");
+      if (modal) modal.classList.toggle("theater", ST.theater);
+      const btn = document.getElementById("theaterToggleBtn");
+      if (btn) btn.classList.toggle("active", ST.theater);
+    }
+
+    function injectTheaterButton() {
+      const head = document.querySelector(".m-head");
+      if (!head || document.getElementById("theaterToggleBtn")) return;
+      const wrap = document.createElement("div");
+      wrap.style.display = "flex";
+      wrap.style.alignItems = "center";
+      wrap.style.gap = "8px";
+      const closeBtn = document.getElementById("mClose");
+      const thBtn = document.createElement("button");
+      thBtn.id = "theaterToggleBtn";
+      thBtn.className = "s-btn" + (ST.theater ? " active" : "");
+      thBtn.textContent = "⛶ Theater";
+      thBtn.onclick = toggleTheaterMode;
+      head.insertBefore(wrap, closeBtn);
+      wrap.appendChild(thBtn);
+      wrap.appendChild(closeBtn);
+    }
+
+    function exportUserBackup() {
+      const payload = {
+        app: "Footime Pro",
+        creator: "Youssef",
+        exportedAt: new Date().toISOString(),
+        prefs: ST.prefs,
+        favs: ST.favs,
+        history: ST.history
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "footime-pro-backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("✓ Backup JSON téléchargé");
+    }
+
+    const _origOpenMatch = openMatch;
+    openMatch = function (m) {
+      pushWatchHistory(m);
+      _origOpenMatch(m);
+      injectTheaterButton();
+    };
+
+    const _origOpenChannel = openChannel;
+    openChannel = function (ch) {
+      pushWatchHistory({ id: ch.id, title: ch.name, league: ch.country || "TV" });
+      _origOpenChannel(ch);
+      injectTheaterButton();
+    };
+
+    const _origRenderSettingsView = renderSettingsView;
+    renderSettingsView = function (app) {
+      _origRenderSettingsView(app);
+      applyLanguageLabels();
+      const extra = document.createElement("div");
+      extra.className = "panel-card";
+      extra.style.marginTop = "16px";
+      extra.innerHTML = `
+        <div class="panel-header">
+          <h3 class="panel-title">🕒 Historique récent &amp; Sauvegarde du compte</h3>
+          <button class="s-btn active" id="exportBackupBtn">⬇ Exporter Backup JSON</button>
+        </div>
+        <div class="sub">Derniers flux ouverts dans le lecteur :</div>
+        <div class="history-chip-row">
+          ${ST.history.length
+            ? ST.history.map(h => `<span class="chip">${esc(h.title)} • ${esc(h.at)}</span>`).join("")
+            : `<span class="sub">Aucun historique enregistré pour le moment.</span>`}
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="s-btn" id="clearHistoryBtn">🗑 Vider l'historique</button>
+        </div>
+      `;
+      app.appendChild(extra);
+      document.getElementById("exportBackupBtn")?.addEventListener("click", exportUserBackup);
+      document.getElementById("clearHistoryBtn")?.addEventListener("click", () => {
+        ST.history = [];
+        localStorage.removeItem("footime_history");
+        showToast("✓ Historique vidé");
+        render();
+      });
+    };
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeModal();
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT") {
+        e.preventDefault();
+        document.getElementById("searchInput")?.focus();
+      }
+    });
+
+    applyLanguageLabels();
+  </script>
+  <style>
+    /* Part 5: Live Stats Ribbon, Quick Presets & JSON Import */
+    .pro-stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .pro-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: border-color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .pro-stat-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .pro-stat-label {
+      font-size: 11.5px;
+      color: var(--fg-tertiary);
+      font-weight: 600;
+    }
+
+    .pro-stat-val {
+      font-family: "Outfit", sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent-bright);
+    }
+
+    html[data-theme="light"] .pro-stat-val {
+      color: var(--accent-deep);
+    }
+
+    .preset-strip {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      width: 100%;
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .preset-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--fg-tertiary);
+      margin-right: 4px;
+    }
+  </style>
+
+  <script>
+    const QUICK_STREAM_PRESETS = [
+      {
+        label: "Demo Embed 1",
+        url: "https://www.youtube.com/embed/aqz-KE-bpKQ?autoplay=1"
+      },
+      {
+        label: "Demo Embed 2",
+        url: "https://www.youtube.com/embed/M7lc1UVf-VE?autoplay=1"
+      },
+      {
+        label: "Sample HLS (.m3u8)",
+        url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+      }
+    ];
+
+    function buildStatsRibbonHtml() {
+      const matchesCount = Array.isArray(ST.matches) ? ST.matches.length : 0;
+      const tnCount = Array.isArray(ST.tnMatches) ? ST.tnMatches.length : 0;
+      const teamsCount = Array.isArray(ST.teams) ? ST.teams.length : 0;
+      const replaysCount = Array.isArray(ST.replays) ? ST.replays.length : 0;
+      const favCount = (ST.favs?.matches?.length || 0) + (ST.favs?.channels?.length || 0);
+
+      return `
+        <div class="pro-stats-bar" id="proStatsBar">
+          <div class="pro-stat-card">
+            <span class="pro-stat-label">Matches Feed</span>
+            <span class="pro-stat-val">${matchesCount}</span>
+          </div>
+          <div class="pro-stat-card">
+            <span class="pro-stat-label">🇹🇳 Tunisia</span>
+            <span class="pro-stat-val">${tnCount}</span>
+          </div>
+          <div class="pro-stat-card">
+            <span class="pro-stat-label">World Teams</span>
+            <span class="pro-stat-val">${teamsCount}</span>
+          </div>
+          <div class="pro-stat-card">
+            <span class="pro-stat-label">Replays</span>
+            <span class="pro-stat-val">${replaysCount}</span>
+          </div>
+          <div class="pro-stat-card">
+            <span class="pro-stat-label">Favorites</span>
+            <span class="pro-stat-val">${favCount}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function injectStatsIntoApp() {
+      const app = document.getElementById("app");
+      if (!app || document.getElementById("proStatsBar")) return;
+      app.insertAdjacentHTML("afterbegin", buildStatsRibbonHtml());
+    }
+
+    function injectStreamPresets() {
+      const ytRow = document.getElementById("mYt");
+      if (!ytRow || document.getElementById("quickPresetStrip")) return;
+      const strip = document.createElement("div");
+      strip.id = "quickPresetStrip";
+      strip.className = "preset-strip";
+      strip.innerHTML = `<span class="preset-label">Presets:</span>` + QUICK_STREAM_PRESETS.map(p =>
+        `<button type="button" class="s-btn" data-preset="${esc(p.url)}">${esc(p.label)}</button>`
+      ).join("");
+
+      strip.querySelectorAll("[data-preset]").forEach(btn => {
+        btn.onclick = () => {
+          const inp = document.getElementById("ytUrlInput");
+          if (inp) {
+            inp.value = btn.dataset.preset;
+            document.getElementById("ytPlayBtn")?.click();
+          }
+        };
+      });
+      ytRow.appendChild(strip);
+    }
+
+    function handleImportBackupFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || "{}"));
+          if (parsed.prefs && typeof parsed.prefs === "object") {
+            ST.prefs = Object.assign({}, DEFAULT_PREFS, parsed.prefs);
+            ST.prefs.account = Object.assign({}, DEFAULT_PREFS.account, parsed.prefs.account || {});
+          }
+          if (parsed.favs && typeof parsed.favs === "object") {
+            ST.favs = {
+              matches: Array.isArray(parsed.favs.matches) ? parsed.favs.matches : [],
+              channels: Array.isArray(parsed.favs.channels) ? parsed.favs.channels : []
+            };
+          }
+          if (Array.isArray(parsed.history)) {
+            ST.history = parsed.history.slice(0, 12);
+            localStorage.setItem("footime_history", JSON.stringify(ST.history));
+          }
+          localStorage.setItem("footime_favs", JSON.stringify(ST.favs));
+          applyThemeAndLang();
+          applyLanguageLabels();
+          saveFavs();
+          showToast("✓ Backup JSON restauré avec succès");
+          render();
+        } catch {
+          showToast("✕ Fichier JSON invalide");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    const _p5Render = render;
+    render = function () {
+      _p5Render();
+      injectStatsIntoApp();
+      applyLanguageLabels();
+    };
+
+    const _p5OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p5OpenMatch(m);
+      injectStreamPresets();
+    };
+
+    const _p5OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p5OpenChannel(ch);
+      injectStreamPresets();
+    };
+
+    const _p5RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p5RenderSettings(app);
+      const backupCard = [...app.querySelectorAll(".panel-card")].find(c => c.querySelector("#exportBackupBtn"));
+      if (backupCard && !document.getElementById("importBackupInput")) {
+        const box = document.createElement("div");
+        box.style.marginTop = "10px";
+        box.innerHTML = `
+          <label class="s-btn" for="importBackupInput" style="cursor:pointer;">⬆ Importer Backup JSON</label>
+          <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" />
+        `;
+        const actionsRow = backupCard.querySelector("div[style*='margin-top:12px']") || backupCard;
+        actionsRow.appendChild(box);
+        document.getElementById("importBackupInput").onchange = e => {
+          handleImportBackupFile(e.target.files?.[0]);
+          e.target.value = "";
+        };
+      }
+    };
+
+    injectStatsIntoApp();
+  </script>
+  <style>
+    /* Part 6: Status Filter Bar, Sync Telemetry & Quick Notes */
+    .status-filter-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+
+    .sync-meta-pill {
+      margin-left: auto;
+      font-size: 11.5px;
+      color: var(--fg-tertiary);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 5px 12px;
+      font-weight: 600;
+    }
+
+    .notes-box {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .notes-box label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--fg-secondary);
+      margin-bottom: 6px;
+    }
+
+    .notes-textarea {
+      width: 100%;
+      min-height: 64px;
+      resize: vertical;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 11px;
+      font-size: 12.5px;
+      outline: none;
+    }
+
+    .notes-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .notes-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+    }
+  </style>
+
+  <script>
+    ST.statusFilter = ST.statusFilter || "all";
+    ST.lastSyncAt = ST.lastSyncAt || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    ST.itemNotes = JSON.parse(localStorage.getItem("footime_item_notes") || "{}");
+    ST._activeNoteKey = "";
+
+    function markSyncedNow() {
+      ST.lastSyncAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function applyMatchStatusFilter() {
+      if (ST.tab !== "matches") return;
+      const app = document.getElementById("app");
+      const filterBar = app?.querySelector(".filter-bar");
+      if (!filterBar || document.getElementById("statusFilterRow")) return;
+
+      const row = document.createElement("div");
+      row.id = "statusFilterRow";
+      row.className = "status-filter-row";
+      row.innerHTML = `
+        <button type="button" class="chip ${ST.statusFilter === "all" ? "active" : ""}" data-stf="all">All Status</button>
+        <button type="button" class="chip ${ST.statusFilter === "live" ? "active" : ""}" data-stf="live"><span class="live-dot"></span> Live Only</button>
+        <button type="button" class="chip ${ST.statusFilter === "upcoming" ? "active" : ""}" data-stf="upcoming">Upcoming Only</button>
+        <span class="sync-meta-pill" id="syncMetaPill">Last sync: ${esc(ST.lastSyncAt)}</span>
+      `;
+
+      filterBar.insertAdjacentElement("afterend", row);
+
+      row.querySelectorAll("[data-stf]").forEach(btn => {
+        btn.onclick = () => {
+          ST.statusFilter = btn.dataset.stf;
+          render();
+        };
+      });
+
+      if (ST.statusFilter !== "all") {
+        const sections = [...app.querySelectorAll("h2.section-title")];
+        sections.forEach(sec => {
+          const txt = sec.textContent || "";
+          const grid = sec.nextElementSibling;
+          const isLiveSec = txt.includes("Live Now");
+          const isUpSec = txt.includes("Upcoming");
+          const shouldHide =
+            (ST.statusFilter === "live" && isUpSec) ||
+            (ST.statusFilter === "upcoming" && isLiveSec);
+          if (shouldHide) {
+            sec.style.display = "none";
+            if (grid && grid.classList.contains("grid")) grid.style.display = "none";
+          }
+        });
+      }
+    }
+
+    function injectItemNotesBox(itemKey, labelText) {
+      const scrollArea = document.querySelector("#modal .m-scroll");
+      if (!scrollArea || !itemKey) return;
+      document.getElementById("itemNotesBox")?.remove();
+
+      ST._activeNoteKey = String(itemKey);
+      const savedVal = ST.itemNotes[ST._activeNoteKey] || "";
+
+      const box = document.createElement("div");
+      box.id = "itemNotesBox";
+      box.className = "notes-box";
+      box.innerHTML = `
+        <label for="itemNoteInput">📝 Note personnelle — ${esc(labelText || "Stream")}</label>
+        <textarea id="itemNoteInput" class="notes-textarea" placeholder="Écris une remarque sur ce match, chaîne ou équipe...">${esc(savedVal)}</textarea>
+        <div class="notes-actions">
+          <span class="sub" id="noteSavedStatus">${savedVal ? "Enregistrée localement" : "Aucune note"}</span>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="s-btn" id="clearItemNoteBtn">Effacer</button>
+            <button type="button" class="s-btn active" id="saveItemNoteBtn">💾 Sauvegarder Note</button>
+          </div>
+        </div>
+      `;
+
+      scrollArea.appendChild(box);
+
+      document.getElementById("saveItemNoteBtn").onclick = () => {
+        const val = (document.getElementById("itemNoteInput")?.value || "").trim();
+        if (val) ST.itemNotes[ST._activeNoteKey] = val;
+        else delete ST.itemNotes[ST._activeNoteKey];
+        localStorage.setItem("footime_item_notes", JSON.stringify(ST.itemNotes));
+        const stEl = document.getElementById("noteSavedStatus");
+        if (stEl) stEl.textContent = val ? "✓ Note sauvegardée" : "Note supprimée";
+        showToast("✓ Note mise à jour");
+      };
+
+      document.getElementById("clearItemNoteBtn").onclick = () => {
+        const ta = document.getElementById("itemNoteInput");
+        if (ta) ta.value = "";
+        delete ST.itemNotes[ST._activeNoteKey];
+        localStorage.setItem("footime_item_notes", JSON.stringify(ST.itemNotes));
+        const stEl = document.getElementById("noteSavedStatus");
+        if (stEl) stEl.textContent = "Note supprimée";
+      };
+    }
+
+    const _p6Render = render;
+    render = function () {
+      _p6Render();
+      applyMatchStatusFilter();
+    };
+
+    const _p6OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p6OpenMatch(m);
+      injectItemNotesBox(m?.id || m?.title, m?.title);
+    };
+
+    const _p6OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p6OpenChannel(ch);
+      injectItemNotesBox(ch?.id || ch?.name, ch?.name);
+    };
+
+    const _p6OpenTeam = openTeamDetails;
+    openTeamDetails = async function (tm) {
+      await _p6OpenTeam(tm);
+      injectItemNotesBox("team_" + (tm?.id || tm?.name), tm?.name);
+    };
+
+    const _p6LoadMatches = loadMatches;
+    loadMatches = async function (force = false) {
+      await _p6LoadMatches(force);
+      markSyncedNow();
+      const pill = document.getElementById("syncMetaPill");
+      if (pill) pill.textContent = `Last sync: ${ST.lastSyncAt}`;
+    };
+  </script>
+  <style>
+    /* Part 7: Copy URL Button, Quick TV Shortcuts & Auto-Refresh Controls */
+    .tv-shortcuts-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .countdown-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-gold-bright);
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: var(--radius-pill);
+      padding: 2px 8px;
+      margin-left: 6px;
+    }
+
+    html[data-theme="light"] .countdown-tag {
+      color: #92400e;
+    }
+  </style>
+
+  <script>
+    ST.prefs.autoRefresh = Boolean(ST.prefs.autoRefresh);
+    ST._autoRefreshTimer = null;
+
+    function formatTimeRemaining(startsAtSec) {
+      const diffMs = (startsAtSec * 1000) - Date.now();
+      if (diffMs <= 0) return "";
+      const mins = Math.floor(diffMs / 60000);
+      if (mins < 60) return `in ${mins}m`;
+      const hrs = Math.floor(mins / 60);
+      const remM = mins % 60;
+      if (hrs < 24) return `in ${hrs}h ${remM}m`;
+      const days = Math.floor(hrs / 24);
+      return `in ${days}d ${hrs % 24}h`;
+    }
+
+    function copyCurrentFrameUrl() {
+      const iframe = document.querySelector("#mBody iframe");
+      const video = document.querySelector("#mBody video");
+      const targetUrl = iframe?.getAttribute("src") || video?.currentSrc || "";
+      if (!targetUrl) {
+        showToast("✕ Aucun lien actif à copier");
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(targetUrl)
+          .then(() => showToast("✓ Lien du lecteur copié"))
+          .catch(() => showToast("✕ Impossible de copier le lien"));
+      } else {
+        const tmp = document.createElement("input");
+        tmp.value = targetUrl;
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand("copy");
+        tmp.remove();
+        showToast("✓ Lien du lecteur copié");
+      }
+    }
+
+    function injectCopyButtonInBar() {
+      const bar = document.getElementById("mBar");
+      if (!bar || bar.style.display === "none" || document.getElementById("copyFrameUrlBtn")) return;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "copyFrameUrlBtn";
+      btn.className = "s-btn";
+      btn.textContent = "📋 Copy Frame URL";
+      btn.onclick = copyCurrentFrameUrl;
+      bar.appendChild(btn);
+    }
+
+    function injectTvShortcuts() {
+      if (ST.tab !== "channels") return;
+      const app = document.getElementById("app");
+      const tvBar = app?.querySelector(".tv-bar");
+      if (!tvBar || document.getElementById("tvShortcutsRow")) return;
+
+      const row = document.createElement("div");
+      row.id = "tvShortcutsRow";
+      row.className = "tv-shortcuts-row";
+      const presets = [
+        { label: "All TV", country: "all", cat: "all" },
+        { label: "🇹🇳 Tunisia TV", country: "TN", cat: "all" },
+        { label: "⚽ Global Sports", country: "all", cat: "sports" },
+        { label: "📰 News Live", country: "all", cat: "news" },
+        { label: "🇫🇷 France TV", country: "FR", cat: "all" },
+        { label: "🇬🇧 UK TV", country: "GB", cat: "all" }
+      ];
+
+      row.innerHTML = presets.map((p, idx) =>
+        `<button type="button" class="chip" data-tvp="${idx}">${esc(p.label)}</button>`
+      ).join("");
+
+      tvBar.insertAdjacentElement("beforebegin", row);
+
+      row.querySelectorAll("[data-tvp]").forEach(btn => {
+        btn.onclick = () => {
+          const item = presets[+btn.dataset.tvp];
+          if (!item) return;
+          ST.country = item.country;
+          ST.cat = item.cat;
+          render();
+        };
+      });
+    }
+
+    function setupAutoRefreshLoop() {
+      clearInterval(ST._autoRefreshTimer);
+      if (!ST.prefs.autoRefresh) return;
+      ST._autoRefreshTimer = setInterval(() => {
+        if (ST.tab === "matches") {
+          loadMatches(true);
+          if (ST.sport === "tunisia") loadTunisia(true);
+        }
+      }, 120000);
+    }
+
+    const _p7MatchCard = matchCard;
+    matchCard = function (m, st) {
+      let html = _p7MatchCard(m, st);
+      if (st === "upcoming" && m.starts_at) {
+        const rem = formatTimeRemaining(m.starts_at);
+        if (rem) {
+          html = html.replace(
+            /(<div class="sub">[^<]*)(<\/div>)/,
+            `$1 <span class="countdown-tag">⏳ ${esc(rem)}</span>$2`
+          );
+        }
+      }
+      return html;
+    };
+
+    const _p7Render = render;
+    render = function () {
+      _p7Render();
+      injectTvShortcuts();
+    };
+
+    const _p7OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p7OpenMatch(m);
+      injectCopyButtonInBar();
+    };
+
+    const _p7OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p7OpenChannel(ch);
+      injectCopyButtonInBar();
+    };
+
+    const _p7RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p7RenderSettings(app);
+      const themeCard = [...app.querySelectorAll(".panel-card")].find(c => c.querySelector("#themeSelect"));
+      if (themeCard && !document.getElementById("autoRefreshCheck")) {
+        const row = document.createElement("div");
+        row.className = "switch-row";
+        row.innerHTML = `
+          <span>Actualisation automatique des matchs (2 min)</span>
+          <input type="checkbox" id="autoRefreshCheck" ${ST.prefs.autoRefresh ? "checked" : ""} />
+        `;
+        const resetWrap = themeCard.querySelector("div[style*='margin-top:12px']");
+        if (resetWrap) themeCard.insertBefore(row, resetWrap);
+        else themeCard.appendChild(row);
+
+        document.getElementById("autoRefreshCheck").onchange = e => {
+          ST.prefs.autoRefresh = e.target.checked;
+          applyThemeAndLang();
+          setupAutoRefreshLoop();
+          showToast(ST.prefs.autoRefresh ? "✓ Auto-refresh activé" : "Auto-refresh désactivé");
+        };
+      }
+    };
+
+    setupAutoRefreshLoop();
+  </script>
+  <style>
+    /* Part 8: League Quick Pills, Tunisian Clubs Spotlight & Player Telemetry */
+    .league-quick-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: -6px 0 16px;
+    }
+
+    .club-spotlight-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(16, 185, 129, 0.08));
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .club-spotlight-title {
+      font-family: "Outfit", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--fg-primary);
+    }
+
+    .club-pills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .telemetry-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--accent-bright);
+    }
+
+    html[data-theme="light"] .telemetry-tag {
+      color: var(--accent-deep);
+    }
+  </style>
+
+  <script>
+    const QUICK_LEAGUE_FILTERS = [
+      { label: "All Leagues", query: "" },
+      { label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League", query: "Premier League" },
+      { label: "🇪🇸 La Liga", query: "La Liga" },
+      { label: "🇮🇹 Serie A", query: "Serie A" },
+      { label: "🇩🇪 Bundesliga", query: "Bundesliga" },
+      { label: "🇫🇷 Ligue 1", query: "Ligue 1" },
+      { label: "🏆 Champions League", query: "Champions League" }
+    ];
+
+    const TUNISIAN_CLUB_CHIPS = [
+      { label: "Espérance (EST)", q: "esperance" },
+      { label: "Club Africain (CA)", q: "africain" },
+      { label: "Étoile du Sahel (ESS)", q: "etoile" },
+      { label: "CS Sfaxien (CSS)", q: "sfaxien" },
+      { label: "US Monastir (USMO)", q: "monastir" },
+      { label: "CA Bizertin (CAB)", q: "bizerte" }
+    ];
+
+    function injectLeagueQuickRow() {
+      if (ST.tab !== "matches") return;
+      const app = document.getElementById("app");
+      const statusRow = document.getElementById("statusFilterRow") || app?.querySelector(".filter-bar");
+      if (!statusRow || document.getElementById("leagueQuickRow")) return;
+
+      const row = document.createElement("div");
+      row.id = "leagueQuickRow";
+      row.className = "league-quick-row";
+      row.innerHTML = QUICK_LEAGUE_FILTERS.map((lf, i) =>
+        `<button type="button" class="chip ${ST.q === lf.query && lf.query ? "active" : ""}" data-lqf="${i}">${esc(lf.label)}</button>`
+      ).join("");
+
+      statusRow.insertAdjacentElement("afterend", row);
+
+      row.querySelectorAll("[data-lqf]").forEach(btn => {
+        btn.onclick = () => {
+          const item = QUICK_LEAGUE_FILTERS[+btn.dataset.lqf];
+          if (!item) return;
+          ST.q = item.query;
+          const si = document.getElementById("searchInput");
+          if (si) si.value = item.query;
+          render();
+        };
+      });
+    }
+
+    function injectTunisiaSpotlight() {
+      if (ST.tab !== "matches" || ST.sport !== "tunisia") return;
+      const app = document.getElementById("app");
+      const leagueRow = document.getElementById("leagueQuickRow");
+      if (!leagueRow || document.getElementById("tunisiaSpotlightCard")) return;
+
+      const card = document.createElement("div");
+      card.id = "tunisiaSpotlightCard";
+      card.className = "club-spotlight-card";
+      card.innerHTML = `
+        <div class="club-spotlight-title">🇹🇳 Tunisian Ligue 1 — Quick Club Filter</div>
+        <div class="club-pills-wrap">
+          ${TUNISIAN_CLUB_CHIPS.map(c =>
+            `<button type="button" class="chip tn ${ST.q.toLowerCase() === c.q ? "active" : ""}" data-tnq="${esc(c.q)}">${esc(c.label)}</button>`
+          ).join("")}
+        </div>
+      `;
+
+      leagueRow.insertAdjacentElement("afterend", card);
+
+      card.querySelectorAll("[data-tnq]").forEach(btn => {
+        btn.onclick = () => {
+          const nextQ = btn.dataset.tnq;
+          ST.q = ST.q.toLowerCase() === nextQ ? "" : nextQ;
+          const si = document.getElementById("searchInput");
+          if (si) si.value = ST.q;
+          render();
+        };
+      });
+    }
+
+    function injectPlayerTelemetry() {
+      const bar = document.getElementById("mBar");
+      if (!bar || bar.style.display === "none" || document.getElementById("playerTelemetryBadge")) return;
+      const hasVideo = Boolean(document.querySelector("#mBody video"));
+      const badge = document.createElement("span");
+      badge.id = "playerTelemetryBadge";
+      badge.className = "telemetry-tag";
+      badge.textContent = hasVideo ? "Engine: HLS / HTML5" : "Engine: Frame Embed";
+      bar.prepend(badge);
+    }
+
+    const _p8Render = render;
+    render = function () {
+      _p8Render();
+      injectLeagueQuickRow();
+      injectTunisiaSpotlight();
+    };
+
+    const _p8OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p8OpenMatch(m);
+      injectPlayerTelemetry();
+    };
+
+    const _p8OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p8OpenChannel(ch);
+      injectPlayerTelemetry();
+    };
+
+    const _p8CloseModal = closeModal;
+    closeModal = function () {
+      _p8CloseModal();
+      const modal = document.getElementById("modal");
+      if (modal) modal.classList.remove("theater");
+      ST.theater = false;
+    };
+  </script>
+  <style>
+    /* Part 9: Top Progress Bar, Search Suggestions & Favorites Toolbar */
+    .top-progress-line {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      z-index: 90;
+      background: linear-gradient(90deg, var(--accent-bright), var(--accent-gold));
+      transition: width 0.28s ease, opacity 0.28s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .top-progress-line.active {
+      opacity: 1;
+      width: 78%;
+    }
+
+    .top-progress-line.done {
+      opacity: 0;
+      width: 100%;
+    }
+
+    .search-suggest-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .search-suggest-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--fg-tertiary);
+    }
+
+    .fav-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 11px 15px;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+      color: var(--fg-secondary);
+    }
+  </style>
+
+  <div class="top-progress-line" id="topProgressLine"></div>
+
+  <script>
+    const QUICK_SEARCH_TERMS = [
+      "Esperance",
+      "Club Africain",
+      "Etoile",
+      "Sfaxien",
+      "Monastir",
+      "Arsenal",
+      "Real Madrid",
+      "Sports"
+    ];
+
+    function setTopProgress(state) {
+      const bar = document.getElementById("topProgressLine");
+      if (!bar) return;
+      if (state === "start") {
+        bar.classList.remove("done");
+        bar.classList.add("active");
+      } else if (state === "end") {
+        bar.classList.remove("active");
+        bar.classList.add("done");
+        setTimeout(() => bar.classList.remove("done"), 320);
+      }
+    }
+
+    function injectSearchSuggestions() {
+      if (ST.tab !== "matches" && ST.tab !== "teams" && ST.tab !== "replays") return;
+      const app = document.getElementById("app");
+      const anchor = document.getElementById("tunisiaSpotlightCard")
+        || document.getElementById("leagueQuickRow")
+        || app?.querySelector(".filter-bar");
+      if (!anchor || document.getElementById("searchSuggestRow")) return;
+
+      const row = document.createElement("div");
+      row.id = "searchSuggestRow";
+      row.className = "search-suggest-row";
+      row.innerHTML = `<span class="search-suggest-label">Quick Search:</span>` + QUICK_SEARCH_TERMS.map(term =>
+        `<button type="button" class="chip" data-qs="${esc(term)}">${esc(term)}</button>`
+      ).join("");
+
+      anchor.insertAdjacentElement("afterend", row);
+
+      row.querySelectorAll("[data-qs]").forEach(btn => {
+        btn.onclick = () => {
+          const val = btn.dataset.qs;
+          ST.q = ST.q.toLowerCase() === val.toLowerCase() ? "" : val;
+          const si = document.getElementById("searchInput");
+          if (si) si.value = ST.q;
+          render();
+          if (ST.tab === "teams" && ST.q) searchAnyTeam(ST.q);
+        };
+      });
+    }
+
+    function injectFavoritesToolbar() {
+      if (ST.tab !== "favorites") return;
+      const app = document.getElementById("app");
+      if (!app || document.getElementById("favToolbar")) return;
+
+      const mCount = ST.favs?.matches?.length || 0;
+      const cCount = ST.favs?.channels?.length || 0;
+      const bar = document.createElement("div");
+      bar.id = "favToolbar";
+      bar.className = "fav-toolbar";
+      bar.innerHTML = `
+        <div>
+          Saved Matches: <strong>${mCount}</strong> • Saved Channels: <strong>${cCount}</strong>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="s-btn" id="exportFavsQuickBtn">⬇ Export JSON</button>
+          <button type="button" class="s-btn" id="clearAllFavsBtn">🗑 Clear Favorites</button>
+        </div>
+      `;
+
+      app.prepend(bar);
+
+      document.getElementById("exportFavsQuickBtn")?.addEventListener("click", () => {
+        if (typeof exportUserBackup === "function") exportUserBackup();
+      });
+
+      document.getElementById("clearAllFavsBtn")?.addEventListener("click", () => {
+        ST.favs = { matches: [], channels: [] };
+        saveFavs();
+        showToast("✓ Favoris effacés");
+        render();
+      });
+    }
+
+    function injectCustomUrlToggle() {
+      const head = document.querySelector(".m-head");
+      const ytRow = document.getElementById("mYt");
+      if (!head || !ytRow || document.getElementById("toggleCustomUrlBtn")) return;
+
+      const closeBtn = document.getElementById("mClose");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "toggleCustomUrlBtn";
+      btn.className = "s-btn";
+      btn.textContent = "🔗 URL Bar";
+      btn.onclick = () => {
+        const isHidden = ytRow.style.display === "none";
+        ytRow.style.display = isHidden ? "flex" : "none";
+        btn.classList.toggle("active", isHidden);
+      };
+
+      if (closeBtn && closeBtn.parentElement) {
+        closeBtn.parentElement.insertBefore(btn, closeBtn);
+      } else {
+        head.appendChild(btn);
+      }
+    }
+
+    const _p9Render = render;
+    render = function () {
+      _p9Render();
+      injectSearchSuggestions();
+      injectFavoritesToolbar();
+    };
+
+    const _p9OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p9OpenMatch(m);
+      injectCustomUrlToggle();
+    };
+
+    const _p9OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p9OpenChannel(ch);
+      injectCustomUrlToggle();
+    };
+
+    const _p9LoadMatches = loadMatches;
+    loadMatches = async function (force = false) {
+      setTopProgress("start");
+      try {
+        await _p9LoadMatches(force);
+      } finally {
+        setTopProgress("end");
+      }
+    };
+  </script>
+  <style>
+    /* Part 10: Session Summary Card, Reset Filters Pill & Teams League Bar */
+    .session-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .session-kv {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .session-kv small {
+      display: block;
+      font-size: 11px;
+      color: var(--fg-tertiary);
+      margin-bottom: 3px;
+    }
+
+    .session-kv strong {
+      font-size: 13.5px;
+      color: var(--fg-primary);
+    }
+
+    .teams-quick-stats {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+    }
+  </style>
+
+  <script>
+    function resetAllDiscoveryFilters() {
+      ST.q = "";
+      ST.sport = ST.prefs?.defaultSport || "Football";
+      ST.statusFilter = "all";
+      ST.teamLeague = "all";
+      ST.country = "all";
+      ST.cat = "all";
+      const si = document.getElementById("searchInput");
+      if (si) si.value = "";
+      showToast("✓ Tous les filtres réinitialisés");
+      render();
+    }
+
+    function injectResetFilterAction() {
+      if (ST.tab !== "matches" && ST.tab !== "teams" && ST.tab !== "replays" && ST.tab !== "channels") return;
+      const app = document.getElementById("app");
+      const anchor = document.getElementById("searchSuggestRow")
+        || document.getElementById("tunisiaSpotlightCard")
+        || document.getElementById("leagueQuickRow")
+        || app?.querySelector(".tv-bar")
+        || app?.querySelector(".filter-bar");
+      if (!anchor || document.getElementById("resetFiltersRow")) return;
+
+      const row = document.createElement("div");
+      row.id = "resetFiltersRow";
+      row.style.cssText = "display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:14px;";
+      row.innerHTML = `<button type="button" class="s-btn" id="resetAllFiltersBtn">↺ Reset Filters</button>`;
+      anchor.insertAdjacentElement("afterend", row);
+
+      document.getElementById("resetAllFiltersBtn")?.addEventListener("click", resetAllDiscoveryFilters);
+    }
+
+    function injectTeamsQuickStats() {
+      if (ST.tab !== "teams") return;
+      const app = document.getElementById("app");
+      const filterBar = app?.querySelector(".filter-bar");
+      if (!filterBar || document.getElementById("teamsQuickStats")) return;
+
+      const totalTeams = Array.isArray(ST.teams) ? ST.teams.length : 0;
+      const tnTeams = Array.isArray(ST.teams) ? ST.teams.filter(t => t.league === "tunisia").length : 0;
+
+      const bar = document.createElement("div");
+      bar.id = "teamsQuickStats";
+      bar.className = "teams-quick-stats";
+      bar.innerHTML = `
+        <span class="chip">Total Clubs: <strong>${totalTeams}</strong></span>
+        <span class="chip tn">🇹🇳 Tunisian Clubs: <strong>${tnTeams}</strong></span>
+        <span class="sub">Astuce: tape un nom d'équipe puis appuie sur Entrée.</span>
+      `;
+
+      filterBar.insertAdjacentElement("afterend", bar);
+    }
+
+    function injectSessionSummaryInSettings(app) {
+      if (!app || document.getElementById("sessionSummaryCard")) return;
+      const notesCount = Object.keys(ST.itemNotes || {}).length;
+      const histCount = Array.isArray(ST.history) ? ST.history.length : 0;
+      const favTotal = (ST.favs?.matches?.length || 0) + (ST.favs?.channels?.length || 0);
+
+      const card = document.createElement("div");
+      card.id = "sessionSummaryCard";
+      card.className = "panel-card";
+      card.style.marginTop = "16px";
+      card.innerHTML = `
+        <div class="panel-header">
+          <h3 class="panel-title">📊 Résumé de session — Footime Pro</h3>
+          <span class="badge badge-lg">Created by Youssef</span>
+        </div>
+        <div class="session-summary-grid">
+          <div class="session-kv">
+            <small>Compte actif</small>
+            <strong>${esc(ST.prefs?.account?.name || "Youssef")}</strong>
+          </div>
+          <div class="session-kv">
+            <small>Thème &amp; Langue</small>
+            <strong>${esc((ST.prefs?.theme || "dark").toUpperCase())} • ${esc((ST.prefs?.lang || "fr").toUpperCase())}</strong>
+          </div>
+          <div class="session-kv">
+            <small>Favoris sauvegardés</small>
+            <strong>${favTotal}</strong>
+          </div>
+          <div class="session-kv">
+            <small>Historique / Notes</small>
+            <strong>${histCount} / ${notesCount}</strong>
+          </div>
+        </div>
+      `;
+
+      app.appendChild(card);
+    }
+
+    function bindCustomUrlEnterKey() {
+      const inp = document.getElementById("ytUrlInput");
+      if (!inp || inp.dataset.enterBound === "1") return;
+      inp.dataset.enterBound = "1";
+      inp.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          document.getElementById("ytPlayBtn")?.click();
+        }
+      });
+    }
+
+    const _p10Render = render;
+    render = function () {
+      _p10Render();
+      injectTeamsQuickStats();
+      injectResetFilterAction();
+    };
+
+    const _p10RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p10RenderSettings(app);
+      injectSessionSummaryInSettings(app);
+    };
+
+    const _p10OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p10OpenMatch(m);
+      bindCustomUrlEnterKey();
+    };
+
+    const _p10OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p10OpenChannel(ch);
+      bindCustomUrlEnterKey();
+    };
+  </script>
+  <style>
+    /* Part 11: Reload Frame Action, Default Sport Setting & Quick Jump Strip */
+    .quick-jump-strip {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .shortcut-pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+  </style>
+
+  <script>
+    ST.prefs.defaultSport = ST.prefs.defaultSport || "Football";
+
+    function reloadCurrentPlayerFrame() {
+      const iframe = document.querySelector("#mBody iframe");
+      const video = document.querySelector("#mBody video");
+
+      if (iframe && iframe.src) {
+        const currentSrc = iframe.src;
+        iframe.src = "";
+        setTimeout(() => {
+          iframe.src = currentSrc;
+        }, 60);
+        showToast("↻ Frame rechargé");
+        return;
+      }
+
+      if (video) {
+        video.load();
+        if (ST.prefs.autoplay) video.play().catch(() => {});
+        showToast("↻ Lecteur vidéo rechargé");
+        return;
+      }
+
+      showToast("✕ Aucun flux actif à recharger");
+    }
+
+    function injectReloadFrameButton() {
+      const bar = document.getElementById("mBar");
+      if (!bar || bar.style.display === "none" || document.getElementById("reloadFrameBtn")) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "reloadFrameBtn";
+      btn.className = "s-btn";
+      btn.textContent = "↻ Reload Frame";
+      btn.onclick = reloadCurrentPlayerFrame;
+      bar.appendChild(btn);
+    }
+
+    function injectQuickJumpStrip() {
+      if (ST.tab !== "matches" && ST.tab !== "replays") return;
+      const app = document.getElementById("app");
+      const anchor = document.getElementById("resetFiltersRow")
+        || document.getElementById("searchSuggestRow")
+        || app?.querySelector(".filter-bar");
+      if (!anchor || document.getElementById("quickJumpStrip")) return;
+
+      const tnCount = Array.isArray(ST.tnMatches) ? ST.tnMatches.length : 0;
+      const repCount = Array.isArray(ST.replays) ? ST.replays.length : 0;
+
+      const strip = document.createElement("div");
+      strip.id = "quickJumpStrip";
+      strip.className = "quick-jump-strip";
+      strip.innerHTML = `
+        <button type="button" class="chip tn" id="jumpTunisiaBtn">🇹🇳 Tunisian Ligue 1 (${tnCount || "Live"})</button>
+        <button type="button" class="chip" id="jumpReplaysTabBtn">⏪ Replays &amp; Highlights (${repCount || "Archive"})</button>
+        <button type="button" class="chip" id="jumpChannelsTabBtn">📺 Live Channels</button>
+      `;
+
+      anchor.insertAdjacentElement("afterend", strip);
+
+      document.getElementById("jumpTunisiaBtn")?.addEventListener("click", () => {
+        document.querySelector('#navPills .nav-btn[data-tab="matches"]')?.click();
+        ST.sport = "tunisia";
+        loadTunisia();
+        render();
+      });
+
+      document.getElementById("jumpReplaysTabBtn")?.addEventListener("click", () => {
+        document.querySelector('#navPills .nav-btn[data-tab="replays"]')?.click();
+      });
+
+      document.getElementById("jumpChannelsTabBtn")?.addEventListener("click", () => {
+        document.querySelector('#navPills .nav-btn[data-tab="channels"]')?.click();
+      });
+    }
+
+    function injectDefaultSportSetting(app) {
+      const themeCard = [...app.querySelectorAll(".panel-card")].find(c => c.querySelector("#themeSelect"));
+      if (!themeCard || document.getElementById("defaultSportSelect")) return;
+
+      const group = document.createElement("div");
+      group.className = "field-group";
+      group.innerHTML = `
+        <label class="field-label" for="defaultSportSelect">Sport par défaut au démarrage</label>
+        <select class="field-select" id="defaultSportSelect">
+          <option value="Football" ${ST.prefs.defaultSport === "Football" ? "selected" : ""}>Football</option>
+          <option value="tunisia" ${ST.prefs.defaultSport === "tunisia" ? "selected" : ""}>🇹🇳 Tunisian League</option>
+          <option value="all" ${ST.prefs.defaultSport === "all" ? "selected" : ""}>All Sports</option>
+        </select>
+      `;
+
+      const langGroup = themeCard.querySelector("#langSelect")?.closest(".field-group");
+      if (langGroup && langGroup.nextSibling) {
+        themeCard.insertBefore(group, langGroup.nextSibling);
+      } else {
+        themeCard.appendChild(group);
+      }
+
+      document.getElementById("defaultSportSelect").onchange = e => {
+        ST.prefs.defaultSport = e.target.value;
+        ST.sport = e.target.value;
+        applyThemeAndLang();
+        showToast("✓ Sport par défaut enregistré");
+      };
+
+      if (!document.getElementById("shortcutsInfoBox")) {
+        const info = document.createElement("div");
+        info.id = "shortcutsInfoBox";
+        info.style.marginTop = "12px";
+        info.innerHTML = `
+          <div class="sub">Raccourcis clavier :</div>
+          <div class="shortcut-pill-list">
+            <span class="chip">/ : Focus Recherche</span>
+            <span class="chip">Esc : Fermer Lecteur</span>
+            <span class="chip">Entrée : Charger lien ou équipe</span>
+          </div>
+        `;
+        themeCard.appendChild(info);
+      }
+    }
+
+    const _p11Render = render;
+    render = function () {
+      _p11Render();
+      injectQuickJumpStrip();
+    };
+
+    const _p11OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p11OpenMatch(m);
+      injectReloadFrameButton();
+    };
+
+    const _p11OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p11OpenChannel(ch);
+      injectReloadFrameButton();
+    };
+
+    const _p11RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p11RenderSettings(app);
+      injectDefaultSportSetting(app);
+    };
+  </script>
+  <style>
+    /* Part 12: Channels Stats Strip, Quick Channel Keywords & Modal Size Helper */
+    .channels-meta-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+    }
+
+    .channel-keywords-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .channel-kw-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--fg-tertiary);
+    }
+  </style>
+
+  <script>
+    const QUICK_CHANNEL_KEYWORDS = [
+      { label: "All Channels", q: "", country: "all", cat: "all" },
+      { label: "🇹🇳 Watania / Tunisia", q: "tunisia", country: "all", cat: "all" },
+      { label: "⚽ BeIN / Sport", q: "sport", country: "all", cat: "all" },
+      { label: "📰 News", q: "news", country: "all", cat: "all" },
+      { label: "🎬 Movies", q: "movie", country: "all", cat: "all" },
+      { label: "🎵 Music", q: "music", country: "all", cat: "all" }
+    ];
+
+    function injectChannelsMetaAndKeywords() {
+      if (ST.tab !== "channels") return;
+      const app = document.getElementById("app");
+      const tvBar = app?.querySelector(".tv-bar");
+      if (!tvBar) return;
+
+      if (!document.getElementById("channelsMetaBar")) {
+        const totalCh = Array.isArray(ST.channels) ? ST.channels.length : 0;
+        const totalCountries = new Set((ST.channels || []).map(c => c.country).filter(Boolean)).size;
+        const totalCats = new Set((ST.channels || []).map(c => c.category).filter(Boolean)).size;
+
+        const meta = document.createElement("div");
+        meta.id = "channelsMetaBar";
+        meta.className = "channels-meta-bar";
+        meta.innerHTML = `
+          <span class="chip">Online Channels: <strong>${totalCh}</strong></span>
+          <span class="chip">Countries: <strong>${totalCountries}</strong></span>
+          <span class="chip">Categories: <strong>${totalCats}</strong></span>
+        `;
+        tvBar.insertAdjacentElement("beforebegin", meta);
+      }
+
+      if (!document.getElementById("channelKeywordsRow")) {
+        const kwRow = document.createElement("div");
+        kwRow.id = "channelKeywordsRow";
+        kwRow.className = "channel-keywords-row";
+        kwRow.innerHTML = `<span class="channel-kw-label">TV Topics:</span>` + QUICK_CHANNEL_KEYWORDS.map((item, idx) =>
+          `<button type="button" class="chip" data-ckw="${idx}">${esc(item.label)}</button>`
+        ).join("");
+
+        tvBar.insertAdjacentElement("afterend", kwRow);
+
+        kwRow.querySelectorAll("[data-ckw]").forEach(btn => {
+          btn.onclick = () => {
+            const spec = QUICK_CHANNEL_KEYWORDS[+btn.dataset.ckw];
+            if (!spec) return;
+            ST.q = spec.q;
+            ST.country = spec.country;
+            ST.cat = spec.cat;
+            const si = document.getElementById("searchInput");
+            if (si) si.value = spec.q;
+            render();
+          };
+        });
+      }
+    }
+
+    function injectCompactFrameToggle() {
+      const bar = document.getElementById("mBar");
+      if (!bar || bar.style.display === "none" || document.getElementById("compactFrameBtn")) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "compactFrameBtn";
+      btn.className = "s-btn";
+      btn.textContent = "📐 Fit Frame";
+      btn.onclick = () => {
+        const stage = document.querySelector("#mBody .stage");
+        if (!stage) return;
+        const isTall = stage.style.maxHeight === "52vh";
+        stage.style.maxHeight = isTall ? "" : "52vh";
+        btn.classList.toggle("active", !isTall);
+        showToast(!isTall ? "✓ Cadre ajusté" : "✓ Cadre normal");
+      };
+
+      bar.appendChild(btn);
+    }
+
+    const _p12Render = render;
+    render = function () {
+      _p12Render();
+      injectChannelsMetaAndKeywords();
+    };
+
+    const _p12OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p12OpenMatch(m);
+      injectCompactFrameToggle();
+    };
+
+    const _p12OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p12OpenChannel(ch);
+      injectCompactFrameToggle();
+    };
+  </script>
+  <style>
+    /* Part 13: Replays Quick Filters, Notes Manager & Dim Backdrop */
+    .replays-filter-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .modal.dim-extra {
+      background: rgba(1, 3, 2, 0.95);
+    }
+
+    .notes-manager-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+
+  <script>
+    const REPLAY_FILTER_CHIPS = [
+      { label: "All Replays", q: "" },
+      { label: "🇹🇳 Tunisia Replays", q: "Tunisian" },
+      { label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League", q: "Premier League" },
+      { label: "🇪🇸 La Liga", q: "La Liga" },
+      { label: "🇮🇹 Serie A", q: "Serie A" },
+      { label: "🏆 Highlights", q: "Highlights" }
+    ];
+
+    function injectReplaysFilterRow() {
+      if (ST.tab !== "replays") return;
+      const app = document.getElementById("app");
+      const jumpStrip = document.getElementById("quickJumpStrip") || app?.querySelector("h2.section-title");
+      if (!jumpStrip || document.getElementById("replaysFilterRow")) return;
+
+      const row = document.createElement("div");
+      row.id = "replaysFilterRow";
+      row.className = "replays-filter-row";
+      row.innerHTML = REPLAY_FILTER_CHIPS.map((rf, idx) =>
+        `<button type="button" class="chip ${ST.q.toLowerCase() === rf.q.toLowerCase() && rf.q ? "active" : ""}" data-rpf="${idx}">${esc(rf.label)}</button>`
+      ).join("");
+
+      jumpStrip.insertAdjacentElement("afterend", row);
+
+      row.querySelectorAll("[data-rpf]").forEach(btn => {
+        btn.onclick = () => {
+          const spec = REPLAY_FILTER_CHIPS[+btn.dataset.rpf];
+          if (!spec) return;
+          ST.q = spec.q;
+          const si = document.getElementById("searchInput");
+          if (si) si.value = spec.q;
+          render();
+        };
+      });
+    }
+
+    function injectDimBackdropToggle() {
+      const bar = document.getElementById("mBar");
+      if (!bar || bar.style.display === "none" || document.getElementById("dimBackdropBtn")) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "dimBackdropBtn";
+      btn.className = "s-btn";
+      btn.textContent = "🌑 Dim BG";
+      btn.onclick = () => {
+        const modal = document.getElementById("modal");
+        if (!modal) return;
+        const nextDim = !modal.classList.contains("dim-extra");
+        modal.classList.toggle("dim-extra", nextDim);
+        btn.classList.toggle("active", nextDim);
+        showToast(nextDim ? "✓ Arrière-plan assombri" : "✓ Arrière-plan normal");
+      };
+
+      bar.appendChild(btn);
+    }
+
+    function injectNotesManagerInSettings(app) {
+      const sessionCard = document.getElementById("sessionSummaryCard") || [...app.querySelectorAll(".panel-card")].pop();
+      if (!sessionCard || document.getElementById("notesManagerStrip")) return;
+
+      const count = Object.keys(ST.itemNotes || {}).length;
+      const strip = document.createElement("div");
+      strip.id = "notesManagerStrip";
+      strip.className = "notes-manager-strip";
+      strip.innerHTML = `
+        <div class="sub">Notes personnelles enregistrées : <strong>${count}</strong></div>
+        <button type="button" class="s-btn" id="clearAllNotesBtn">🗑 Supprimer toutes les notes</button>
+      `;
+
+      sessionCard.appendChild(strip);
+
+      document.getElementById("clearAllNotesBtn")?.addEventListener("click", () => {
+        ST.itemNotes = {};
+        localStorage.removeItem("footime_item_notes");
+        showToast("✓ Toutes les notes ont été supprimées");
+        render();
+      });
+    }
+
+    const _p13Render = render;
+    render = function () {
+      _p13Render();
+      injectReplaysFilterRow();
+    };
+
+    const _p13OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p13OpenMatch(m);
+      injectDimBackdropToggle();
+    };
+
+    const _p13OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p13OpenChannel(ch);
+      injectDimBackdropToggle();
+    };
+
+    const _p13RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p13RenderSettings(app);
+      injectNotesManagerInSettings(app);
+    };
+
+    const _p13CloseModal = closeModal;
+    closeModal = function () {
+      _p13CloseModal();
+      const modal = document.getElementById("modal");
+      if (modal) modal.classList.remove("dim-extra");
+    };
+  </script>
+  <style>
+    /* Part 14: Favorites Quick Preview, Team League Jump & Modal Stats Pill */
+    .fav-preview-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+    }
+
+    .team-league-jump-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .team-stats-banner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+  </style>
+
+  <script>
+    const TEAM_QUICK_JUMPS = [
+      { label: "All Teams", id: "all" },
+      { label: "🇹🇳 Tunisia", id: "tunisia" },
+      { label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 EPL", id: "English Premier League" },
+      { label: "🇪🇸 La Liga", id: "Spanish La Liga" },
+      { label: "🇮🇹 Serie A", id: "Italian Serie A" },
+      { label: "🇩🇪 Bundesliga", id: "German Bundesliga" },
+      { label: "🇫🇷 Ligue 1", id: "French Ligue 1" }
+    ];
+
+    function injectFavoritesPreviewStrip() {
+      if (ST.tab === "favorites" || ST.tab === "settings") return;
+      const app = document.getElementById("app");
+      const statsBar = document.getElementById("proStatsBar");
+      if (!app || !statsBar || document.getElementById("favPreviewStrip")) return;
+
+      const mLen = ST.favs?.matches?.length || 0;
+      const cLen = ST.favs?.channels?.length || 0;
+      const strip = document.createElement("div");
+      strip.id = "favPreviewStrip";
+      strip.className = "fav-preview-strip";
+      strip.innerHTML = `
+        <div>
+          ★ Favorites Vault: <strong>${mLen}</strong> Matches • <strong>${cLen}</strong> Channels
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${ST.q ? `<button type="button" class="s-btn" id="quickClearSearchBtn">✕ Clear "${esc(ST.q)}"</button>` : ""}
+          <button type="button" class="s-btn active" id="openFavTabQuickBtn">Open Favorites →</button>
+        </div>
+      `;
+
+      statsBar.insertAdjacentElement("afterend", strip);
+
+      document.getElementById("quickClearSearchBtn")?.addEventListener("click", () => {
+        ST.q = "";
+        const si = document.getElementById("searchInput");
+        if (si) si.value = "";
+        render();
+      });
+
+      document.getElementById("openFavTabQuickBtn")?.addEventListener("click", () => {
+        document.querySelector('#navPills .nav-btn[data-tab="favorites"]')?.click();
+      });
+    }
+
+    function injectTeamLeagueJumpRow() {
+      if (ST.tab !== "teams") return;
+      const app = document.getElementById("app");
+      const statsEl = document.getElementById("teamsQuickStats");
+      if (!statsEl || document.getElementById("teamLeagueJumpRow")) return;
+
+      const row = document.createElement("div");
+      row.id = "teamLeagueJumpRow";
+      row.className = "team-league-jump-row";
+      row.innerHTML = TEAM_QUICK_JUMPS.map(item =>
+        `<button type="button" class="chip ${item.id === "tunisia" ? "tn" : ""} ${ST.teamLeague === item.id ? "active" : ""}" data-tlj="${esc(item.id)}">${esc(item.label)}</button>`
+      ).join("");
+
+      statsEl.insertAdjacentElement("afterend", row);
+
+      row.querySelectorAll("[data-tlj]").forEach(btn => {
+        btn.onclick = () => {
+          ST.teamLeague = btn.dataset.tlj;
+          render();
+        };
+      });
+    }
+
+    function enhanceTeamModalSummary() {
+      const body = document.getElementById("mBody");
+      if (!body || document.getElementById("teamStatsBanner")) return;
+      const headings = [...body.querySelectorAll("h3")];
+      if (!headings.length) return;
+
+      const banner = document.createElement("div");
+      banner.id = "teamStatsBanner";
+      banner.className = "team-stats-banner";
+      banner.innerHTML = headings.map(h =>
+        `<span class="chip">${esc(h.textContent || "")}</span>`
+      ).join("");
+
+      headings[0].insertAdjacentElement("beforebegin", banner);
+    }
+
+    const _p14Render = render;
+    render = function () {
+      _p14Render();
+      injectFavoritesPreviewStrip();
+      injectTeamLeagueJumpRow();
+    };
+
+    const _p14OpenTeam = openTeamDetails;
+    openTeamDetails = async function (tm) {
+      await _p14OpenTeam(tm);
+      enhanceTeamModalSummary();
+    };
+  </script>
+  <style>
+    /* Part 15: Exclusive Match Spotlight Lobby (Player Art, Live Countdown & Carousel) */
+    .exclusive-lobby-stage {
+      position: relative;
+      border-radius: var(--radius-hero);
+      overflow: hidden;
+      min-height: 430px;
+      aspect-ratio: 16 / 9;
+      max-height: 560px;
+      background: #070b0a;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.62);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .lobby-player-photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 18%;
+      filter: contrast(1.06) saturate(1.12);
+      transform: scale(1.01);
+      transition: transform 0.6s ease, opacity 0.35s ease;
+    }
+
+    .exclusive-lobby-stage:hover .lobby-player-photo {
+      transform: scale(1.03);
+    }
+
+    .lobby-vignette {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(4, 7, 6, 0.92) 0%, rgba(4, 7, 6, 0.56) 46%, rgba(4, 7, 6, 0.22) 100%),
+        linear-gradient(180deg, rgba(4, 7, 6, 0.28) 0%, rgba(4, 7, 6, 0.12) 45%, rgba(4, 7, 6, 0.94) 100%);
+      pointer-events: none;
+    }
+
+    .lobby-comp-badge {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      border-radius: var(--radius-md);
+      background: rgba(8, 13, 11, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(8px);
+      font-family: "Outfit", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: #f8fafc;
+    }
+
+    .lobby-info-stack {
+      position: relative;
+      z-index: 3;
+      padding: 24px 26px 26px;
+      max-width: 560px;
+    }
+
+    .lobby-countdown-box {
+      font-family: "Outfit", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: #fde68a;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      margin-bottom: 6px;
+    }
+
+    .lobby-submeta-line {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 14px;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+    }
+
+    .lobby-teams-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .lobby-team-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      font-family: "Outfit", sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+    }
+
+    .lobby-team-crest {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 2px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .lobby-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .lobby-side-tag {
+      position: absolute;
+      right: 18px;
+      bottom: 20px;
+      z-index: 3;
+      background: rgba(8, 13, 11, 0.84);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      text-align: right;
+      font-family: "Outfit", sans-serif;
+      line-height: 1.15;
+    }
+
+    .lobby-side-tag strong {
+      display: block;
+      font-size: 13px;
+      color: #ffffff;
+    }
+
+    .lobby-side-tag span {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent-bright);
+      letter-spacing: 0.06em;
+    }
+
+    .lobby-carousel-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 2px 16px;
+    }
+
+    .lobby-dots-wrap {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .lobby-dot-btn {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-pill);
+      background: var(--fg-tertiary);
+      opacity: 0.45;
+      transition: all var(--transition-fast);
+      padding: 0;
+    }
+
+    .lobby-dot-btn.active {
+      width: 24px;
+      opacity: 1;
+      background: var(--fg-primary);
+    }
+
+    .lobby-arrows-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lobby-arrow-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--fg-primary);
+      font-weight: 700;
+      transition: all var(--transition-fast);
+    }
+
+    .lobby-arrow-btn:hover {
+      border-color: var(--accent-bright);
+      background: var(--bg-hover);
+    }
+
+    @media (max-width: 720px) {
+      .exclusive-lobby-stage {
+        min-height: 320px;
+        aspect-ratio: 16 / 10;
+      }
+
+      .lobby-team-row {
+        font-size: 15px;
+      }
+
+      .lobby-info-stack {
+        padding: 16px;
+      }
+    }
+  </style>
+
+  <script>
+    const EXCLUSIVE_PLAYER_PROFILES = [
+      {
+        keys: ["arsenal", "saka", "odegaard"],
+        playerLabel: "BUKAYO SAKA • ARSENAL",
+        photo: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1400&q=80",
+        crest: "https://www.thesportsdb.com/images/media/team/badge/uytruw1473503417.png"
+      },
+      {
+        keys: ["real madrid", "madrid", "vinicius", "mbappe", "bellingham"],
+        playerLabel: "REAL MADRID • EXCLUSIVE",
+        photo: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1400&q=80",
+        crest: "https://www.thesportsdb.com/images/media/team/badge/vwvwrv1473502960.png"
+      },
+      {
+        keys: ["galatasaray", "aston villa", "villa"],
+        playerLabel: "EXCLUSIVE EUROPEAN NIGHT",
+        photo: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1400&q=80",
+        crest: "https://www.thesportsdb.com/images/media/team/badge/ryppuy1473502607.png"
+      },
+      {
+        keys: ["barcelona", "barca", "lamine", "yamal"],
+        playerLabel: "FC BARCELONA • SPOTLIGHT",
+        photo: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=1400&q=80",
+        crest: "https://www.thesportsdb.com/images/media/team/badge/wqryvq1473502612.png"
+      },
+      {
+        keys: ["liverpool", "salah"],
+        playerLabel: "LIVERPOOL FC • MATCHDAY",
+        photo: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1400&q=80",
+        crest: "https://www.thesportsdb.com/images/media/team/badge/uvxuqq1448813372.png"
+      },
+      {
+        keys: ["esperance", "taraji", "club africain", "etoile", "sfaxien", "monastir", "tunisia"],
+        playerLabel: "TUNISIAN LIGUE 1 • DERBY",
+        photo: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=1400&q=80",
+        crest: "https://www.thesportsdb.com/images/media/team/badge/wqyvpt1473503702.png"
+      }
+    ];
+
+    const DEFAULT_LOBBY_ART = {
+      playerLabel: "EXCLUSIVE MATCH • FOOTIME PRO",
+      photo: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1400&q=80",
+      crest: "https://www.thesportsdb.com/images/media/team/badge/uytruw1473503417.png"
+    };
+
+    ST.lobbyIndex = ST.lobbyIndex || 0;
+    ST._lobbyTimer = ST._lobbyTimer || null;
+
+    function detectMatchPlayerProfile(matchObj) {
+      const hay = `${matchObj?.title || ""} ${matchObj?.league || ""} ${matchObj?.category || ""}`.toLowerCase();
+      for (const prof of EXCLUSIVE_PLAYER_PROFILES) {
+        if (prof.keys.some(k => hay.includes(k))) {
+          return prof;
+        }
+      }
+      return {
+        ...DEFAULT_LOBBY_ART,
+        photo: matchObj?.poster || DEFAULT_LOBBY_ART.photo
+      };
+    }
+
+    function parseMatchTeamsPair(titleStr) {
+      const clean = String(titleStr || "Exclusive Match").trim();
+      const parts = clean.split(/\s+(?:vs\.?|v|-)\s+/i);
+      if (parts.length >= 2) {
+        return [parts[0].trim(), parts.slice(1).join(" vs ").trim()];
+      }
+      return [clean, "LIVE ARENA"];
+    }
+
+    function formatDetailedCountdown(startsAtSec) {
+      const targetMs = startsAtSec ? startsAtSec * 1000 : (Date.now() + 5820000);
+      const diff = Math.max(0, targetMs - Date.now());
+      const totalSec = Math.floor(diff / 1000);
+      const days = Math.floor(totalSec / 86400);
+      const hrs = Math.floor((totalSec % 86400) / 3600);
+      const mins = Math.floor((totalSec % 3600) / 60);
+      const secs = totalSec % 60;
+      const pad = n => String(n).padStart(2, "0");
+      return `${pad(days)} DAYS ${pad(hrs)} HRS ${pad(mins)} MIN ${pad(secs)} SEC`;
+    }
+
+    function getExclusiveLobbyCandidates() {
+      const pool = [];
+      if (Array.isArray(ST.tnMatches)) pool.push(...ST.tnMatches);
+      if (Array.isArray(ST.matches)) pool.push(...ST.matches);
+      if (!pool.length) {
+        pool.push(...(typeof FALLBACK_TUNISIA !== "undefined" ? FALLBACK_TUNISIA : []));
+      }
+      const exclusive = pool.filter(m => {
+        const t = `${m.title || ""} ${m.league || ""}`.toLowerCase();
+        return /arsenal|real madrid|barcelona|liverpool|galatasaray|aston villa|esperance|club africain|etoile|sfaxien|champions|premier|la liga/.test(t);
+      });
+      const finalList = exclusive.length ? exclusive.slice(0, 14) : pool.slice(0, 12);
+      if (!finalList.length) {
+        return [{
+          id: "ex_ars_rma",
+          title: "Arsenal vs Real Madrid",
+          league: "UEFA Champions League • Exclusive Match",
+          category: "Football",
+          starts_at: Math.floor(Date.now() / 1000) + 5820,
+          iframe: DEFAULT_EMBED_FRAME
+        }];
+      }
+      return finalList;
+    }
+
+    function startLobbyCountdownLoop() {
+      clearInterval(ST._lobbyTimer);
+      ST._lobbyTimer = setInterval(() => {
+        const el = document.getElementById("lobbyLiveCountdown");
+        if (!el) return;
+        const sec = Number(el.dataset.startsAt || 0);
+        el.textContent = formatDetailedCountdown(sec);
+      }, 1000);
+    }
+
+    function renderExclusiveMatchLobby() {
+      if (ST.tab !== "matches") return;
+      const app = document.getElementById("app");
+      const hero = app?.querySelector(".hero-card");
+      if (!app || !hero || document.getElementById("exclusiveLobbyWrapper")) return;
+
+      const list = getExclusiveLobbyCandidates();
+      if (ST.lobbyIndex >= list.length) ST.lobbyIndex = 0;
+      const current = list[ST.lobbyIndex];
+      const profile = detectMatchPlayerProfile(current);
+      const [teamA, teamB] = parseMatchTeamsPair(current.title);
+      const isLive = statusOf(current) === "live";
+      const enc = encodeURIComponent(JSON.stringify(current));
+      const matchTimeLabel = current.starts_at
+        ? new Date(current.starts_at * 1000).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })
+        : "Exclusive Tonight";
+
+      const wrapper = document.createElement("section");
+      wrapper.id = "exclusiveLobbyWrapper";
+      wrapper.innerHTML = `
+        <div class="exclusive-lobby-stage">
+          <img class="lobby-player-photo" src="${esc(profile.photo)}" alt="${esc(current.title)}" onerror="this.src='${esc(DEFAULT_LOBBY_ART.photo)}'" />
+          <div class="lobby-vignette"></div>
+          <div class="lobby-comp-badge">🏆 ${esc((current.league || "EXCLUSIVE MATCH").toUpperCase())}</div>
+          <div class="lobby-info-stack">
+            <div class="lobby-countdown-box" id="lobbyLiveCountdown" data-starts-at="${esc(current.starts_at || 0)}">
+              ${isLive ? "● LIVE MATCH IN PROGRESS" : esc(formatDetailedCountdown(current.starts_at))}
+            </div>
+            <div class="lobby-submeta-line">${esc(current.league || "Exclusive Match")} • ${esc(matchTimeLabel)}</div>
+            <div class="lobby-teams-list">
+              <div class="lobby-team-row">
+                <img class="lobby-team-crest" src="${esc(profile.crest)}" alt="${esc(teamA)}" onerror="this.style.display='none'" />
+                <span>${esc(teamA)}</span>
+              </div>
+              <div class="lobby-team-row">
+                <img class="lobby-team-crest" src="${esc(DEFAULT_LOBBY_ART.crest)}" alt="${esc(teamB)}" onerror="this.style.display='none'" />
+                <span>${esc(teamB)}</span>
+              </div>
+            </div>
+            <div class="lobby-actions-row">
+              <button type="button" class="btn-primary" id="lobbyWatchFrameBtn">▶ Watch Exclusive in Frame</button>
+              <button type="button" class="s-btn" id="lobbyFavToggleBtn">★ Save Match</button>
+            </div>
+          </div>
+          <div class="lobby-side-tag">
+            <strong>${esc(profile.playerLabel)}</strong>
+            <span>FOOTIME PRO • BY YOUSSEF</span>
+          </div>
+        </div>
+        <div class="lobby-carousel-bar">
+          <div class="lobby-dots-wrap">
+            ${list.map((_, idx) =>
+              `<button type="button" class="lobby-dot-btn ${idx === ST.lobbyIndex ? "active" : ""}" data-ldot="${idx}" aria-label="Exclusive ${idx + 1}"></button>`
+            ).join("")}
+          </div>
+          <div class="lobby-arrows-wrap">
+            <button type="button" class="lobby-arrow-btn" id="lobbyPrevBtn" aria-label="Previous exclusive">&lt;</button>
+            <button type="button" class="lobby-arrow-btn" id="lobbyNextBtn" aria-label="Next exclusive">&gt;</button>
+          </div>
+        </div>
+      `;
+
+      hero.replaceWith(wrapper);
+      startLobbyCountdownLoop();
+
+      document.getElementById("lobbyWatchFrameBtn")?.addEventListener("click", () => {
+        openMatch(JSON.parse(decodeURIComponent(enc)));
+      });
+
+      document.getElementById("lobbyFavToggleBtn")?.addEventListener("click", () => {
+        toggleFav("matches", JSON.parse(decodeURIComponent(enc)));
+        showToast("✓ Mise à jour des favoris");
+      });
+
+      wrapper.querySelectorAll("[data-ldot]").forEach(btn => {
+        btn.onclick = () => {
+          ST.lobbyIndex = Number(btn.dataset.ldot || 0);
+          render();
+        };
+      });
+
+      document.getElementById("lobbyPrevBtn")?.addEventListener("click", () => {
+        ST.lobbyIndex = (ST.lobbyIndex - 1 + list.length) % list.length;
+        render();
+      });
+
+      document.getElementById("lobbyNextBtn")?.addEventListener("click", () => {
+        ST.lobbyIndex = (ST.lobbyIndex + 1) % list.length;
+        render();
+      });
+    }
+
+    const _p15Render = render;
+    render = function () {
+      _p15Render();
+      renderExclusiveMatchLobby();
+    };
+  </script>
+  <style>
+    /* Part 16: Universal World Teams Visual Engine for Lobby & Match Cards */
+    .world-team-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent-bright);
+      margin-bottom: 10px;
+    }
+
+    html[data-theme="light"] .world-team-tag-pill {
+      color: var(--accent-deep);
+    }
+  </style>
+
+  <script>
+    const WORLD_SPORTS_ART_POOL = [
+      "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&w=1400&q=80"
+    ];
+
+    ST.teamVisualCache = JSON.parse(localStorage.getItem("footime_team_art_cache") || "{}");
+    ST._fetchingTeams = ST._fetchingTeams || new Set();
+
+    function hashStringToIndex(str, len) {
+      const s = String(str || "world");
+      let h = 2166136261;
+      for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return Math.abs(h) % Math.max(1, len);
+    }
+
+    function findCachedTeamRecord(teamName) {
+      const target = String(teamName || "").trim().toLowerCase();
+      if (!target) return null;
+
+      if (Array.isArray(ST.teams) && ST.teams.length) {
+        const exact = ST.teams.find(t => (t.name || "").toLowerCase() === target);
+        if (exact) return exact;
+        const partial = ST.teams.find(t =>
+          (t.name || "").toLowerCase().includes(target) || target.includes((t.name || "").toLowerCase())
+        );
+        if (partial) return partial;
+      }
+
+      if (ST.teamVisualCache[target]) {
+        return ST.teamVisualCache[target];
+      }
+      return null;
+    }
+
+    function resolveWorldTeamVisual(teamName, matchObj) {
+      const cleanName = String(teamName || "").trim();
+      const cached = findCachedTeamRecord(cleanName);
+      const artIdx = hashStringToIndex(cleanName || matchObj?.title || "team", WORLD_SPORTS_ART_POOL.length);
+      const fallbackPhoto = matchObj?.poster || cached?.banner || cached?.fanart || WORLD_SPORTS_ART_POOL[artIdx];
+
+      return {
+        teamName: cleanName || "World Club",
+        photo: fallbackPhoto,
+        badge: cached?.badge || DEFAULT_LOBBY_ART.crest,
+        league: cached?.leagueLabel || matchObj?.league || "World Football"
+      };
+    }
+
+    async function fetchLiveTeamVisualFromApi(teamName) {
+      const clean = String(teamName || "").trim();
+      if (!clean || clean.length < 2) return null;
+      const key = clean.toLowerCase();
+      if (ST.teamVisualCache[key]?.fetched) return ST.teamVisualCache[key];
+      if (ST._fetchingTeams.has(key)) return null;
+
+      ST._fetchingTeams.add(key);
+      try {
+        const res = await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(clean)}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const tm = (data?.teams || []).find(item =>
+          (item.strSport || "Soccer").toLowerCase().includes("soccer")
+        ) || data?.teams?.[0];
+
+        if (tm) {
+          const bestPhoto = tm.strBanner || tm.strFanart1 || tm.strThumb || "";
+          const entry = {
+            name: tm.strTeam || clean,
+            badge: tm.strBadge || "",
+            banner: bestPhoto,
+            fanart: tm.strFanart1 || "",
+            leagueLabel: tm.strLeague || "World Football",
+            fetched: true
+          };
+          ST.teamVisualCache[key] = entry;
+          try {
+            localStorage.setItem("footime_team_art_cache", JSON.stringify(ST.teamVisualCache));
+          } catch {}
+          return entry;
+        }
+      } catch {} finally {
+        ST._fetchingTeams.delete(key);
+      }
+      return null;
+    }
+
+    function enrichLobbyWithAnyWorldTeam() {
+      const wrapper = document.getElementById("exclusiveLobbyWrapper");
+      if (!wrapper) return;
+
+      const list = typeof getExclusiveLobbyCandidates === "function" ? getExclusiveLobbyCandidates() : [];
+      if (!list.length) return;
+      const idx = Math.min(Number(ST.lobbyIndex || 0), list.length - 1);
+      const current = list[idx];
+      if (!current) return;
+
+      const [homeTeam, awayTeam] = parseMatchTeamsPair(current.title);
+      const homeVis = resolveWorldTeamVisual(homeTeam, current);
+      const awayVis = resolveWorldTeamVisual(awayTeam, current);
+
+      const photoEl = wrapper.querySelector(".lobby-player-photo");
+      if (photoEl && homeVis.photo) {
+        photoEl.src = homeVis.photo;
+      }
+
+      const crestEls = wrapper.querySelectorAll(".lobby-team-crest");
+      if (crestEls[0] && homeVis.badge) crestEls[0].src = homeVis.badge;
+      if (crestEls[1] && awayVis.badge) crestEls[1].src = awayVis.badge;
+
+      const sideTag = wrapper.querySelector(".lobby-side-tag strong");
+      if (sideTag) {
+        sideTag.textContent = `${homeVis.teamName.toUpperCase()} • WORLD MATCH`;
+      }
+
+      const infoStack = wrapper.querySelector(".lobby-info-stack");
+      if (infoStack && !wrapper.querySelector(".world-team-tag-pill")) {
+        const pill = document.createElement("div");
+        pill.className = "world-team-tag-pill";
+        pill.textContent = `🌍 ${homeVis.teamName} vs ${awayVis.teamName}`;
+        infoStack.prepend(pill);
+      }
+
+      Promise.all([
+        fetchLiveTeamVisualFromApi(homeTeam),
+        fetchLiveTeamVisualFromApi(awayTeam)
+      ]).then(([hApi, aApi]) => {
+        const activeList = typeof getExclusiveLobbyCandidates === "function" ? getExclusiveLobbyCandidates() : [];
+        if (activeList[ST.lobbyIndex]?.id !== current.id) return;
+        const nextPhoto = hApi?.banner || hApi?.fanart || aApi?.banner || "";
+        if (nextPhoto && photoEl) {
+          photoEl.src = nextPhoto;
+        }
+        if (hApi?.badge && crestEls[0]) crestEls[0].src = hApi.badge;
+        if (aApi?.badge && crestEls[1]) crestEls[1].src = aApi.badge;
+      });
+    }
+
+    const _p16Render = render;
+    render = function () {
+      _p16Render();
+      enrichLobbyWithAnyWorldTeam();
+    };
+  </script>
+  <style>
+    /* Part 17: Replay & Live Stream Quality Badges and Source Mode Strip */
+    .quality-ribbon-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: "Outfit", sans-serif;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(16, 185, 129, 0.38);
+      color: var(--accent-bright);
+      margin-left: 6px;
+    }
+
+    html[data-theme="light"] .quality-ribbon-tag {
+      color: var(--accent-deep);
+    }
+
+    .quality-ribbon-tag.replay-tag {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.42);
+      color: var(--accent-gold-bright);
+    }
+
+    html[data-theme="light"] .quality-ribbon-tag.replay-tag {
+      color: #92400e;
+    }
+
+    .stream-mode-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 8px 16px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .stream-mode-label {
+      font-weight: 700;
+      color: var(--fg-tertiary);
+      margin-right: 4px;
+    }
+  </style>
+
+  <script>
+    ST.preferredSources = JSON.parse(localStorage.getItem("footime_best_sources") || "{}");
+
+    function scoreStreamCandidate(srcObj) {
+      if (!srcObj || !srcObj.url) return -1;
+      const u = String(srcObj.url).toLowerCase();
+      const lbl = String(srcObj.label || "").toLowerCase();
+      let score = 10;
+      if (u.includes(".m3u8")) score += 25;
+      if (lbl.includes("1080") || lbl.includes("hd")) score += 20;
+      if (lbl.includes("main") || lbl.includes("primary")) score += 12;
+      if (lbl.includes("en") || lbl.includes("fr") || lbl.includes("ar")) score += 8;
+      if (u.includes("embed") || u.includes("player") || u.includes("stream")) score += 10;
+      return score;
+    }
+
+    function rankSourcesByQuality(rawSources) {
+      if (!Array.isArray(rawSources) || !rawSources.length) return [];
+      const seen = new Set();
+      const cleaned = [];
+      for (const s of rawSources) {
+        if (!s || !s.url) continue;
+        const normUrl = String(s.url).trim();
+        if (!normUrl || seen.has(normUrl)) continue;
+        seen.add(normUrl);
+        cleaned.push({
+          label: s.label || "Stream Source",
+          url: normUrl,
+          _qScore: scoreStreamCandidate(s)
+        });
+      }
+      return cleaned.sort((a, b) => b._qScore - a._qScore);
+    }
+
+    function injectStreamModeStrip(itemKey, itemTitle) {
+      const bar = document.getElementById("mBar");
+      if (!bar || document.getElementById("streamModeStrip")) return;
+
+      const strip = document.createElement("div");
+      strip.id = "streamModeStrip";
+      strip.className = "stream-mode-bar";
+      strip.innerHTML = `
+        <span class="stream-mode-label">Quality &amp; Mode:</span>
+        <button type="button" class="s-btn active" data-qmode="auto">⚡ Best Quality</button>
+        <button type="button" class="s-btn" data-qmode="replay">⏪ Replay / Highlights Search</button>
+        <button type="button" class="s-btn" data-qmode="live">● Live Priority</button>
+      `;
+
+      bar.insertAdjacentElement("beforebegin", strip);
+
+      strip.querySelectorAll("[data-qmode]").forEach(btn => {
+        btn.onclick = () => {
+          strip.querySelectorAll("[data-qmode]").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const mode = btn.dataset.qmode;
+
+          if (mode === "replay") {
+            const ytInp = document.getElementById("ytUrlInput");
+            const cleanQuery = `${itemTitle || ""} highlights replay`.trim();
+            if (ytInp && !ytInp.value) {
+              ytInp.placeholder = `Paste replay link or search "${cleanQuery}"...`;
+            }
+            showToast("✓ Mode Replay prêt : choisis une source ou colle un lien replay");
+          } else if (mode === "live") {
+            const firstLiveBtn = [...bar.querySelectorAll("[data-i]")].find(b =>
+              !/replay|highlight/i.test(b.textContent || "")
+            );
+            if (firstLiveBtn) firstLiveBtn.click();
+            showToast("✓ Priorité au flux direct");
+          } else {
+            const bestBtn = bar.querySelector("[data-i]");
+            if (bestBtn) bestBtn.click();
+            showToast("✓ Meilleure qualité sélectionnée");
+          }
+        };
+      });
+
+      if (itemKey && ST.preferredSources[String(itemKey)]) {
+        const savedUrl = ST.preferredSources[String(itemKey)];
+        const matchBtn = [...bar.querySelectorAll("[data-i]")].find(b => {
+          const idx = Number(b.dataset.i);
+          const linkEl = bar.querySelector("a.s-btn.ext");
+          return idx === 0 || (linkEl && linkEl.href === savedUrl);
+        });
+        if (matchBtn) matchBtn.classList.add("active");
+      }
+    }
+
+    const _p17MatchCard = matchCard;
+    matchCard = function (m, st) {
+      let html = _p17MatchCard(m, st);
+      const qLabel = st === "ended"
+        ? `<span class="quality-ribbon-tag replay-tag">REPLAY HD</span>`
+        : st === "live"
+          ? `<span class="quality-ribbon-tag">LIVE HD</span>`
+          : `<span class="quality-ribbon-tag">STREAM READY</span>`;
+      html = html.replace(/(<div class="sub">[^<]*)(<\/div>)/, `$1 ${qLabel}$2`);
+      return html;
+    };
+
+    const _p17OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p17OpenMatch(m);
+      const bar = document.getElementById("mBar");
+      if (bar) {
+        const extLinks = [...bar.querySelectorAll("a.s-btn.ext")];
+        extLinks.forEach(a => {
+          a.onclick = () => {
+            if (m?.id || m?.title) {
+              ST.preferredSources[String(m.id || m.title)] = a.href;
+              try {
+                localStorage.setItem("footime_best_sources", JSON.stringify(ST.preferredSources));
+              } catch {}
+            }
+          };
+        });
+      }
+      injectStreamModeStrip(m?.id || m?.title, m?.title);
+    };
+
+    const _p17OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p17OpenChannel(ch);
+      injectStreamModeStrip(ch?.id || ch?.name, ch?.name);
+    };
+  </script>
+  <style>
+    /* Part 18: Player Stability, Cinema Aspect Ratio & Failover Banner */
+    .modal.cinema-wide .stage {
+      aspect-ratio: 16 / 9;
+      max-height: 70vh;
+    }
+
+    .player-failover-notice {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 16px;
+      background: rgba(245, 158, 11, 0.12);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+      font-size: 12px;
+      color: var(--fg-primary);
+    }
+  </style>
+
+  <script>
+    ST.cinemaWide = Boolean(ST.cinemaWide);
+
+    function toggleCinemaAspectMode() {
+      ST.cinemaWide = !ST.cinemaWide;
+      const modal = document.getElementById("modal");
+      if (modal) modal.classList.toggle("cinema-wide", ST.cinemaWide);
+      const btn = document.getElementById("cinemaRatioBtn");
+      if (btn) btn.classList.toggle("active", ST.cinemaWide);
+      showToast(ST.cinemaWide ? "✓ Mode Cinéma 16:9 activé" : "✓ Mode standard activé");
+    }
+
+    function injectCinemaRatioButton() {
+      const bar = document.getElementById("mBar");
+      if (!bar || bar.style.display === "none" || document.getElementById("cinemaRatioBtn")) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "cinemaRatioBtn";
+      btn.className = "s-btn" + (ST.cinemaWide ? " active" : "");
+      btn.textContent = "🎬 16:9 Cinema";
+      btn.onclick = toggleCinemaAspectMode;
+      bar.appendChild(btn);
+    }
+
+    function injectFailoverHelperBanner() {
+      const mScroll = document.querySelector("#modal .m-scroll");
+      const mBody = document.getElementById("mBody");
+      if (!mScroll || !mBody || document.getElementById("playerFailoverBanner")) return;
+
+      const banner = document.createElement("div");
+      banner.id = "playerFailoverBanner";
+      banner.className = "player-failover-notice";
+      banner.innerHTML = `
+        <span>💡 Astuce Live &amp; Replay : si un serveur bloque l'iframe, clique sur la source suivante ou ouvre dans un nouvel onglet.</span>
+        <button type="button" class="s-btn active" id="tryNextSourceQuickBtn">Next Source ↻</button>
+      `;
+
+      mBody.insertAdjacentElement("afterend", banner);
+
+      document.getElementById("tryNextSourceQuickBtn")?.addEventListener("click", () => {
+        const nextTv = document.getElementById("nxSrc");
+        if (nextTv) {
+          nextTv.click();
+          return;
+        }
+        const bar = document.getElementById("mBar");
+        const srcBtns = bar ? [...bar.querySelectorAll("[data-i]")] : [];
+        if (srcBtns.length > 1) {
+          const curIdx = srcBtns.findIndex(b => b.classList.contains("active"));
+          const target = srcBtns[(curIdx + 1) % srcBtns.length];
+          target?.click();
+          return;
+        }
+        if (typeof reloadCurrentPlayerFrame === "function") {
+          reloadCurrentPlayerFrame();
+        }
+      });
+    }
+
+    function watchIframeLoadHealth() {
+      const iframe = document.querySelector("#mBody iframe");
+      if (!iframe) return;
+      let loadedOk = false;
+      iframe.addEventListener("load", () => {
+        loadedOk = true;
+      });
+      setTimeout(() => {
+        if (!loadedOk && document.getElementById("modal")?.classList.contains("open")) {
+          const bar = document.getElementById("mBar");
+          const srcBtns = bar ? [...bar.querySelectorAll("[data-i]")] : [];
+          if (srcBtns.length > 1) {
+            const curIdx = srcBtns.findIndex(b => b.classList.contains("active"));
+            if (curIdx === 0 && srcBtns[1]) {
+              srcBtns[1].click();
+              showToast("↻ Bascule automatique vers serveur de secours");
+            }
+          }
+        }
+      }, 6500);
+    }
+
+    const _p18OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p18OpenMatch(m);
+      injectCinemaRatioButton();
+      injectFailoverHelperBanner();
+      watchIframeLoadHealth();
+    };
+
+    const _p18OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p18OpenChannel(ch);
+      injectCinemaRatioButton();
+      injectFailoverHelperBanner();
+      watchIframeLoadHealth();
+    };
+
+    const _p18CloseModal = closeModal;
+    closeModal = function () {
+      _p18CloseModal();
+      document.getElementById("playerFailoverBanner")?.remove();
+      document.getElementById("streamModeStrip")?.remove();
+    };
+  </script>
+  <style>
+    /* Part 20: Stream Health Telemetry & Clean Final Layout Guard */
+    .stream-health-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent-bright);
+    }
+
+    html[data-theme="light"] .stream-health-pill {
+      color: var(--accent-deep);
+    }
+  </style>
+
+  <script>
+    function inspectActivePlayerStream() {
+      const iframe = document.querySelector("#mBody iframe");
+      const video = document.querySelector("#mBody video");
+      const src = iframe?.getAttribute("src") || video?.currentSrc || "";
+      if (!src) return { kind: "None", secure: false, label: "No Stream" };
+      const secure = /^https:\/\//i.test(src) || src.startsWith("/") || src.startsWith("./");
+      const isHls = /\.m3u8(\?|$)/i.test(src) || Boolean(video);
+      return {
+        kind: isHls ? "HLS / Live Video" : "Embed Frame",
+        secure,
+        label: secure ? `${isHls ? "HLS" : "Embed"} • HTTPS Ready` : `${isHls ? "HLS" : "Embed"} • Check Link`
+      };
+    }
+
+    function injectStreamHealthBadge() {
+      const bar = document.getElementById("mBar");
+      if (!bar || bar.style.display === "none") return;
+      document.getElementById("streamHealthBadge")?.remove();
+
+      const info = inspectActivePlayerStream();
+      const pill = document.createElement("span");
+      pill.id = "streamHealthBadge";
+      pill.className = "stream-health-pill";
+      pill.textContent = `● ${info.label}`;
+      bar.prepend(pill);
+    }
+
+    function ensureSingleActionButtonsInBar() {
+      const bar = document.getElementById("mBar");
+      if (!bar) return;
+      const seenIds = new Set();
+      [...bar.children].forEach(el => {
+        if (!el.id) return;
+        if (seenIds.has(el.id)) el.remove();
+        else seenIds.add(el.id);
+      });
+    }
+
+    const _p20OpenMatch = openMatch;
+    openMatch = function (m) {
+      _p20OpenMatch(m);
+      ensureSingleActionButtonsInBar();
+      injectStreamHealthBadge();
+    };
+
+    const _p20OpenChannel = openChannel;
+    openChannel = function (ch) {
+      _p20OpenChannel(ch);
+      ensureSingleActionButtonsInBar();
+      injectStreamHealthBadge();
+    };
+
+    const _p20Render = render;
+    render = function () {
+      _p20Render();
+      const app = document.getElementById("app");
+      if (app && !app.innerHTML.trim()) {
+        app.innerHTML = `<div class="empty">Ready — use Refresh or choose a tab above.</div>`;
+      }
+    };
+  </script>
+  <style>
+    /* Part 21: Email Verification Card inside Paramètres */
+    .email-verify-card {
+      margin-top: 16px;
+    }
+
+    .verify-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+
+    .verify-status-pill.verified {
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(16, 185, 129, 0.42);
+      color: var(--accent-bright);
+    }
+
+    .verify-status-pill.pending {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--accent-gold-bright);
+    }
+
+    html[data-theme="light"] .verify-status-pill.verified {
+      color: var(--accent-deep);
+    }
+
+    html[data-theme="light"] .verify-status-pill.pending {
+      color: #92400e;
+    }
+
+    .verify-inline-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .verify-code-input {
+      flex: 1;
+      min-width: 170px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-family: "Outfit", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      outline: none;
+    }
+
+    .verify-code-input:focus {
+      border-color: var(--accent);
+    }
+
+    .otp-preview-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      border: 1px dashed var(--border-strong);
+      font-size: 12px;
+      color: var(--fg-secondary);
+    }
+  </style>
+
+  <script>
+    ST.emailAuth = Object.assign({
+      email: ST.prefs?.account?.email || "",
+      verified: false,
+      pendingCode: "",
+      expiresAt: 0,
+      lastSentTo: ""
+    }, JSON.parse(localStorage.getItem("footime_email_auth") || "{}"));
+
+    function persistEmailAuthState() {
+      try {
+        localStorage.setItem("footime_email_auth", JSON.stringify({
+          email: ST.emailAuth.email,
+          verified: Boolean(ST.emailAuth.verified),
+          lastSentTo: ST.emailAuth.lastSentTo || ""
+        }));
+      } catch {}
+    }
+
+    function generateSixDigitOtp() {
+      const n = Math.floor(100000 + Math.random() * 900000);
+      return String(n);
+    }
+
+    async function dispatchVerificationEmail(targetEmail, codeStr) {
+      const cfg = ST.emailGateway || {};
+      if (cfg.serviceId && cfg.templateId && cfg.publicKey) {
+        try {
+          const resp = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              service_id: cfg.serviceId,
+              template_id: cfg.templateId,
+              user_id: cfg.publicKey,
+              template_params: {
+                to_email: targetEmail,
+                user_name: ST.prefs?.account?.name || "Youssef",
+                verification_code: codeStr,
+                app_name: "Footime Pro"
+              }
+            })
+          });
+          if (resp.ok) {
+            return { sentExternal: true, note: `Code envoyé vers ${targetEmail}` };
+          }
+        } catch {}
+      }
+      return {
+        sentExternal: false,
+        note: `Mode test local : code généré pour ${targetEmail} (configure EmailJS en Partie 23 pour envoi SMTP direct)`
+      };
+    }
+
+    async function handleSendVerificationCode() {
+      const emailInp = document.getElementById("verifyTargetEmailInput") || document.getElementById("accEmail");
+      const rawEmail = (emailInp?.value || ST.emailAuth.email || "").trim();
+      if (!rawEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+        showToast("✕ Entre une adresse email valide");
+        return;
+      }
+
+      const code = generateSixDigitOtp();
+      ST.emailAuth.email = rawEmail;
+      ST.emailAuth.pendingCode = code;
+      ST.emailAuth.expiresAt = Date.now() + 10 * 60 * 1000;
+      ST.emailAuth.lastSentTo = rawEmail;
+
+      if (ST.prefs?.account) {
+        ST.prefs.account.email = rawEmail;
+        applyThemeAndLang();
+      }
+      persistEmailAuthState();
+
+      const res = await dispatchVerificationEmail(rawEmail, code);
+      showToast(res.sentExternal ? `✓ Code envoyé à ${rawEmail}` : `✓ Code de test généré : ${code}`);
+
+      const box = document.getElementById("otpTestPreviewBox");
+      if (box) {
+        box.style.display = "block";
+        box.innerHTML = `${esc(res.note)}<br>Code de vérification (valide 10 min) : <strong>${esc(code)}</strong>`;
+      }
+    }
+
+    function handleVerifySubmittedCode() {
+      const codeInp = document.getElementById("verifyCodeInput");
+      const entered = (codeInp?.value || "").trim();
+      if (!entered) {
+        showToast("✕ Saisis le code à 6 chiffres");
+        return;
+      }
+      if (!ST.emailAuth.pendingCode || Date.now() > (ST.emailAuth.expiresAt || 0)) {
+        showToast("✕ Code expiré, clique sur Envoyer le code");
+        return;
+      }
+      if (entered !== ST.emailAuth.pendingCode) {
+        showToast("✕ Code incorrect, vérifie bien les 6 chiffres");
+        return;
+      }
+
+      ST.emailAuth.verified = true;
+      ST.emailAuth.pendingCode = "";
+      persistEmailAuthState();
+      showToast("✓ Email vérifié avec succès !");
+      render();
+    }
+
+    function injectEmailVerificationCard(app) {
+      if (!app || document.getElementById("emailVerificationCard")) return;
+      const isVer = Boolean(ST.emailAuth.verified);
+      const currentEmail = ST.emailAuth.email || ST.prefs?.account?.email || "";
+
+      const card = document.createElement("div");
+      card.id = "emailVerificationCard";
+      card.className = "panel-card email-verify-card";
+      card.innerHTML = `
+        <div class="panel-header">
+          <h3 class="panel-title">✉️ Vérification de l'adresse Email</h3>
+          <span class="verify-status-pill ${isVer ? "verified" : "pending"}">
+            ${isVer ? "✓ Email vérifié" : "⏳ En attente de vérification"}
+          </span>
+        </div>
+        <div class="sub">
+          Reçois un code à 6 chiffres pour vérifier l'adresse email associée au compte <strong>${esc(ST.prefs?.account?.name || "Youssef")}</strong>.
+        </div>
+        <div class="verify-inline-row">
+          <input type="email" id="verifyTargetEmailInput" class="field-input" style="flex:1;min-width:220px;" placeholder="exemple@domaine.com" value="${esc(currentEmail)}" />
+          <button type="button" class="s-btn active" id="sendEmailCodeBtn">📨 Envoyer le code</button>
+        </div>
+        <div class="verify-inline-row">
+          <input type="text" id="verifyCodeInput" class="verify-code-input" maxlength="6" inputmode="numeric" placeholder="Code 6 chiffres" />
+          <button type="button" class="btn-primary" id="confirmEmailCodeBtn">✓ Vérifier le code</button>
+        </div>
+        <div class="otp-preview-box" id="otpTestPreviewBox" style="display:none;"></div>
+      `;
+
+      app.appendChild(card);
+
+      document.getElementById("sendEmailCodeBtn")?.addEventListener("click", handleSendVerificationCode);
+      document.getElementById("confirmEmailCodeBtn")?.addEventListener("click", handleVerifySubmittedCode);
+      document.getElementById("verifyCodeInput")?.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleVerifySubmittedCode();
+        }
+      });
+    }
+
+    const _p21RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p21RenderSettings(app);
+      injectEmailVerificationCard(app);
+    };
+  </script>
+  <style>
+    /* Part 22: Verified Account Actions & Email Change Guard */
+    .verified-account-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12.5px;
+    }
+  </style>
+
+  <script>
+    function resetEmailVerificationFlag() {
+      ST.emailAuth.verified = false;
+      ST.emailAuth.pendingCode = "";
+      persistEmailAuthState();
+      showToast("✓ Statut de vérification réinitialisé");
+      render();
+    }
+
+    function injectVerifiedAccountActions() {
+      const card = document.getElementById("emailVerificationCard");
+      if (!card || document.getElementById("verifiedAccountActionsBar")) return;
+
+      const bar = document.createElement("div");
+      bar.id = "verifiedAccountActionsBar";
+      bar.className = "verified-account-meta";
+      bar.innerHTML = `
+        <div class="sub">
+          Adresse enregistrée : <strong>${esc(ST.emailAuth.email || "Non définie")}</strong>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="s-btn" id="resendOtpQuickBtn">↻ Renvoyer code</button>
+          <button type="button" class="s-btn" id="resetVerifyStatusBtn">🔓 Modifier / Réinitialiser</button>
+        </div>
+      `;
+
+      card.appendChild(bar);
+
+      document.getElementById("resendOtpQuickBtn")?.addEventListener("click", handleSendVerificationCode);
+      document.getElementById("resetVerifyStatusBtn")?.addEventListener("click", resetEmailVerificationFlag);
+
+      const emailInp = document.getElementById("verifyTargetEmailInput");
+      if (emailInp && !emailInp.dataset.watchChange) {
+        emailInp.dataset.watchChange = "1";
+        emailInp.addEventListener("input", () => {
+          const nextVal = emailInp.value.trim();
+          if (ST.emailAuth.verified && nextVal !== (ST.emailAuth.email || "").trim()) {
+            ST.emailAuth.verified = false;
+            persistEmailAuthState();
+          }
+        });
+      }
+    }
+
+    const _p22RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p22RenderSettings(app);
+      injectVerifiedAccountActions();
+    };
+  </script>
+  <style>
+    /* Part 23: Optional EmailJS Gateway Config inside Paramètres */
+    .gateway-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+  </style>
+
+  <script>
+    ST.emailGateway = Object.assign({
+      serviceId: "",
+      templateId: "",
+      publicKey: ""
+    }, JSON.parse(localStorage.getItem("footime_emailjs_cfg") || "{}"));
+
+    function injectEmailGatewaySettings(app) {
+      const verifyCard = document.getElementById("emailVerificationCard");
+      if (!verifyCard || document.getElementById("emailGatewayConfigCard")) return;
+
+      const gwCard = document.createElement("div");
+      gwCard.id = "emailGatewayConfigCard";
+      gwCard.className = "panel-card";
+      gwCard.style.marginTop = "16px";
+      gwCard.innerHTML = `
+        <div class="panel-header">
+          <h3 class="panel-title">⚙️ Passerelle d'envoi Email (EmailJS — Optionnel)</h3>
+          <span class="badge badge-lg">OTP Ready</span>
+        </div>
+        <div class="sub">
+          Ajoute tes clés EmailJS si tu veux envoyer de vrais emails vers la boîte de réception, ou utilise directement le mode de test local ci-dessus.
+        </div>
+        <div class="gateway-grid-3">
+          <div class="field-group" style="margin:0;">
+            <label class="field-label" for="ejsServiceId">Service ID</label>
+            <input type="text" id="ejsServiceId" class="field-input" placeholder="service_xxxxx" value="${esc(ST.emailGateway.serviceId)}" />
+          </div>
+          <div class="field-group" style="margin:0;">
+            <label class="field-label" for="ejsTemplateId">Template ID</label>
+            <input type="text" id="ejsTemplateId" class="field-input" placeholder="template_xxxxx" value="${esc(ST.emailGateway.templateId)}" />
+          </div>
+          <div class="field-group" style="margin:0;">
+            <label class="field-label" for="ejsPublicKey">Public Key</label>
+            <input type="text" id="ejsPublicKey" class="field-input" placeholder="public_xxxxx" value="${esc(ST.emailGateway.publicKey)}" />
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="s-btn active" id="saveEmailGatewayBtn">💾 Enregistrer la passerelle</button>
+          <button type="button" class="s-btn" id="clearEmailGatewayBtn">Effacer les clés</button>
+        </div>
+      `;
+
+      verifyCard.insertAdjacentElement("afterend", gwCard);
+
+      document.getElementById("saveEmailGatewayBtn")?.addEventListener("click", () => {
+        ST.emailGateway = {
+          serviceId: (document.getElementById("ejsServiceId")?.value || "").trim(),
+          templateId: (document.getElementById("ejsTemplateId")?.value || "").trim(),
+          publicKey: (document.getElementById("ejsPublicKey")?.value || "").trim()
+        };
+        try {
+          localStorage.setItem("footime_emailjs_cfg", JSON.stringify(ST.emailGateway));
+        } catch {}
+        showToast("✓ Configuration Email enregistrée");
+      });
+
+      document.getElementById("clearEmailGatewayBtn")?.addEventListener("click", () => {
+        ST.emailGateway = { serviceId: "", templateId: "", publicKey: "" };
+        localStorage.removeItem("footime_emailjs_cfg");
+        showToast("✓ Clés Email effacées");
+        render();
+      });
+    }
+
+    const _p23RenderSettings = renderSettingsView;
+    renderSettingsView = function (app) {
+      _p23RenderSettings(app);
+      injectEmailGatewaySettings(app);
+    };
   </script>
 </body>
 </html>
