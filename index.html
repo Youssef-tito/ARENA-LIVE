@@ -5777,5 +5777,126 @@
       }, 1200);
     })();
   </script>
-  </body>
+  <style id="blockDemoBunnyStyle">
+    .demo-blocked-card {
+      padding: 24px 20px;
+      text-align: center;
+      background: var(--bg-card, #111815);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 14px;
+      margin: 12px;
+    }
+
+    .demo-blocked-card h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: var(--fg-primary, #ffffff);
+    }
+
+    .demo-blocked-card p {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--fg-secondary, #cbd5e1);
+      line-height: 1.5;
+    }
+
+    .demo-blocked-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const DEMO_PATTERNS = [
+        "big buck bunny",
+        "big_buck_bunny",
+        "blender",
+        "gtv-videos-bucket/sample",
+        "commondatastorage.googleapis.com"
+      ];
+
+      function looksLikeDemoMedia(el) {
+        if (!el) return false;
+        const src = String(el.getAttribute("src") || el.currentSrc || "").toLowerCase();
+        const title = String(el.getAttribute("title") || "").toLowerCase();
+        const outer = String(el.outerHTML || "").toLowerCase();
+        return DEMO_PATTERNS.some(p => src.includes(p) || title.includes(p) || outer.includes(p));
+      }
+
+      function getCurrentModalMatchTitle() {
+        const headTitle = document.querySelector("#modal .m-head h3, #modal .m-head h2, #modal .m-head")?.textContent || "";
+        const cleaned = headTitle
+          .replace(/Theater|URL Bar|×/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        return cleaned || "Football Match";
+      }
+
+      function sanitizePlayerAgainstDemoVideos() {
+        const mBody = document.getElementById("mBody");
+        if (!mBody) return;
+
+        const mediaNodes = [...mBody.querySelectorAll("iframe, video, source")];
+        const hitDemo = mediaNodes.some(node => looksLikeDemoMedia(node)) ||
+          DEMO_PATTERNS.some(p => (mBody.textContent || "").toLowerCase().includes(p));
+
+        if (!hitDemo) return;
+
+        mediaNodes.forEach(node => {
+          if (looksLikeDemoMedia(node)) {
+            if (node.tagName === "IFRAME" || node.tagName === "VIDEO") {
+              node.setAttribute("src", "");
+              node.removeAttribute("src");
+            }
+            node.remove();
+          }
+        });
+
+        if (mBody.querySelector(".demo-blocked-card")) return;
+
+        const matchTitle = getCurrentModalMatchTitle();
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const searchQuery = `${matchTitle} ${todayStr} highlights replay`.trim();
+        const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
+
+        const box = document.createElement("div");
+        box.className = "demo-blocked-card";
+        box.innerHTML = `
+          <h4>⚠️ تم حجب فيديو تجريبي (Demo) تلقائياً</h4>
+          <p>
+            المصدر الافتراضي كان فيديو تجريبي لا يخص المباراة: <strong>${matchTitle.replace(/</g, "&lt;")}</strong>.<br>
+            يمكنك فتح بحث يوتيوب بتاريخ اليوم أو لصق رابط إعادة حقيقي في شريط الروابط.
+          </p>
+          <div class="demo-blocked-actions">
+            <a class="s-btn active" href="${ytUrl}" target="_blank" rel="noopener noreferrer">▶ بحث عن الإعادة (${todayStr})</a>
+            <button type="button" class="s-btn" id="focusCustomUrlFromDemoBtn">🔗 لصق رابط إعادة مخصص</button>
+          </div>
+        `;
+
+        mBody.prepend(box);
+
+        document.getElementById("focusCustomUrlFromDemoBtn")?.addEventListener("click", () => {
+          const ytRow = document.getElementById("mYt");
+          if (ytRow) ytRow.style.display = "flex";
+          const inp = document.getElementById("ytUrlInput");
+          if (inp) inp.focus();
+        });
+      }
+
+      const demoObserver = new MutationObserver(() => {
+        sanitizePlayerAgainstDemoVideos();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("modal") || document.body;
+        demoObserver.observe(modal, { childList: true, subtree: true, attributes: true });
+      });
+
+      setInterval(sanitizePlayerAgainstDemoVideos, 600);
+    })();
+  </script>
+</body>
 </html>
