@@ -5898,5 +5898,133 @@
       setInterval(sanitizePlayerAgainstDemoVideos, 600);
     })();
   </script>
+  <style id="autoMatchSearchOnDemoStyle">
+    .match-search-swap-box {
+      padding: 20px;
+      background: var(--bg-card, #111815);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 14px;
+      margin: 12px;
+      text-align: center;
+    }
+
+    .match-search-swap-box h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: var(--fg-primary, #ffffff);
+    }
+
+    .match-search-swap-box p {
+      margin: 0 0 14px;
+      font-size: 12.5px;
+      color: var(--fg-secondary, #cbd5e1);
+    }
+
+    .match-search-swap-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const BUNNY_KEYS = [
+        "big buck bunny",
+        "big_buck_bunny",
+        "blender",
+        "gtv-videos-bucket",
+        "commondatastorage.googleapis.com"
+      ];
+
+      function hasBunnyContent(el) {
+        if (!el) return false;
+        const s = String(el.getAttribute("src") || el.currentSrc || "").toLowerCase();
+        const t = String(el.getAttribute("title") || "").toLowerCase();
+        const h = String(el.outerHTML || "").toLowerCase();
+        return BUNNY_KEYS.some(k => s.includes(k) || t.includes(k) || h.includes(k));
+      }
+
+      function getCleanMatchTitleForSearch() {
+        const raw = document.querySelector("#modal .m-head h3, #modal .m-head h2, #modal .m-head")?.textContent || "";
+        const cleaned = raw
+          .replace(/Theater|URL Bar|×/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        return cleaned || "Football Match";
+      }
+
+      function swapBunnyForMatchSearch() {
+        const mBody = document.getElementById("mBody");
+        if (!mBody) return;
+
+        const nodes = [...mBody.querySelectorAll("iframe, video, source")];
+        const foundBunny = nodes.some(n => hasBunnyContent(n)) ||
+          BUNNY_KEYS.some(k => (mBody.textContent || "").toLowerCase().includes(k));
+
+        if (!foundBunny) return;
+
+        nodes.forEach(n => {
+          if (hasBunnyContent(n)) {
+            if (n.tagName === "IFRAME" || n.tagName === "VIDEO") {
+              n.setAttribute("src", "");
+              n.removeAttribute("src");
+            }
+            n.remove();
+          }
+        });
+
+        if (mBody.querySelector(".match-search-swap-box")) return;
+
+        const matchTitle = getCleanMatchTitleForSearch();
+        const dateTag = new Date().toISOString().slice(0, 10);
+        const query = `${matchTitle} ${dateTag} highlights replay`.trim();
+        const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+
+        const ytInp = document.getElementById("ytUrlInput");
+        if (ytInp) {
+          ytInp.value = query;
+          ytInp.placeholder = query;
+        }
+
+        const swapBox = document.createElement("div");
+        swapBox.className = "match-search-swap-box";
+        swapBox.innerHTML = `
+          <h4>🔎 تم تحويل المشغل للبحث عن المباراة: ${matchTitle.replace(/</g, "&lt;")}</h4>
+          <p>
+            تم إبعاد الفيديو التجريبي تلقائياً. عبارة البحث الجاهزة بالتاريخ:
+            <strong>${query.replace(/</g, "&lt;")}</strong>
+          </p>
+          <div class="match-search-swap-actions">
+            <a class="s-btn active" href="${ytSearchUrl}" target="_blank" rel="noopener noreferrer">▶ بحث مباشر في YouTube</a>
+            <button type="button" class="s-btn" id="copyMatchSearchQueryBtn">📋 نسخ عبارة البحث</button>
+          </div>
+        `;
+
+        mBody.prepend(swapBox);
+
+        document.getElementById("copyMatchSearchQueryBtn")?.addEventListener("click", () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(query).catch(() => {});
+          }
+          if (typeof showToast === "function") {
+            showToast("✓ تم نسخ عبارة البحث الخاصة بالمباراة");
+          }
+        });
+      }
+
+      const bunnySwapObserver = new MutationObserver(() => {
+        swapBunnyForMatchSearch();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const root = document.getElementById("modal") || document.body;
+        bunnySwapObserver.observe(root, { childList: true, subtree: true, attributes: true });
+      });
+
+      setInterval(swapBunnyForMatchSearch, 500);
+    })();
+  </script>
 </body>
 </html>
