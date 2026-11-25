@@ -6570,5 +6570,46 @@
       setInterval(guardModalInsideSite, 500);
     })();
   </script>
+  <script>
+    (function () {
+      function enforceResultsOnlyNoReplay() {
+        const replayNav = document.querySelector('#navPills .nav-btn[data-tab="replays"]');
+        if (replayNav) replayNav.remove();
+
+        if (typeof ST !== "undefined" && ST.tab === "replays") {
+          ST.tab = "matches";
+          const firstTab = document.querySelector('#navPills .nav-btn[data-tab="matches"]');
+          if (firstTab) {
+            document.querySelectorAll("#navPills .nav-btn").forEach(b => b.classList.remove("active"));
+            firstTab.classList.add("active");
+          }
+          if (typeof moveInd === "function") moveInd();
+          if (typeof render === "function") render();
+        }
+
+        ["replaysFilterRow", "jumpReplaysTabBtn"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.remove();
+        });
+
+        document.querySelectorAll(".replay-ribbon-tag, .quality-ribbon-tag.replay-tag").forEach(tag => {
+          tag.remove();
+        });
+
+        document.querySelectorAll("#app .sub, #app .lg, #app h2.section-title, .footer-pro").forEach(el => {
+          const current = el.textContent || "";
+          if (/replays?\s*&\s*highlights?|replays?\s*&\s*résumés?|replay|highlights/i.test(current)) {
+            el.textContent = current
+              .replace(/\s*[•\-–—]?\s*(replays?\s*&\s*highlights?|replays?\s*&\s*résumés?|replay|highlights)\b/gi, "")
+              .replace(/\s{2,}/g, " ")
+              .trim() || "Match Results";
+          }
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", enforceResultsOnlyNoReplay);
+      setInterval(enforceResultsOnlyNoReplay, 400);
+    })();
+  </script>
 </body>
 </html>
