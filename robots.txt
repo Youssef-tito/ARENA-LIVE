@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://footime.dpdns.org/sitemap.xml
