@@ -6570,45 +6570,199 @@
       setInterval(guardModalInsideSite, 500);
     })();
   </script>
-  <script>
+ <script>
     (function () {
-      function enforceResultsOnlyNoReplay() {
-        const replayNav = document.querySelector('#navPills .nav-btn[data-tab="replays"]');
-        if (replayNav) replayNav.remove();
+      const WORLD_COUNTRIES_DATA = {
+        "Tunisia": {
+          flag: "🇹🇳",
+          worldRank: "#41 World (FIFA)",
+          titles: ["AFCON Champions (2004)", "Arab Cup Winners (2021)", "CHAN Champions (2011)"],
+          awards: ["Best African Team Nominee", "Multiple AFCON Golden Boot / Best XI Selections"]
+        },
+        "Brazil": {
+          flag: "🇧🇷",
+          worldRank: "#5 World (FIFA)",
+          titles: ["5x FIFA World Cup", "9x Copa América", "4x FIFA Confederations Cup"],
+          awards: ["Most World Cup Titles", "Multiple Ballon d'Or & Golden Ball Winners"]
+        },
+        "Argentina": {
+          flag: "🇦🇷",
+          worldRank: "#1 World (FIFA)",
+          titles: ["3x FIFA World Cup", "16x Copa América", "2x Finalissima"],
+          awards: ["Multiple FIFA Best & Ballon d'Or Winners", "2022 World Cup Golden Ball"]
+        },
+        "France": {
+          flag: "🇫🇷",
+          worldRank: "#2 World (FIFA)",
+          titles: ["2x FIFA World Cup", "2x UEFA Euro", "1x UEFA Nations League"],
+          awards: ["2018 & 2022 World Cup Finalists", "Multiple Golden Boot & Kopa Trophy Winners"]
+        },
+        "Spain": {
+          flag: "🇪🇸",
+          worldRank: "#3 World (FIFA)",
+          titles: ["1x FIFA World Cup", "4x UEFA Euro", "1x UEFA Nations League"],
+          awards: ["Euro 2024 Champions", "Back-to-Back Major Tournament Honours"]
+        },
+        "England": {
+          flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+          worldRank: "#4 World (FIFA)",
+          titles: ["1x FIFA World Cup (1966)"],
+          awards: ["2x UEFA Euro Runners-Up", "World Cup Golden Boot Record Holders"]
+        },
+        "Germany": {
+          flag: "🇩🇪",
+          worldRank: "#11 World (FIFA)",
+          titles: ["4x FIFA World Cup", "3x UEFA Euro", "1x FIFA Confederations Cup"],
+          awards: ["Most World Cup Final Appearances", "Multiple World Cup Golden Boot Winners"]
+        },
+        "Morocco": {
+          flag: "🇲🇦",
+          worldRank: "#14 World (FIFA)",
+          titles: ["1x AFCON (1976)", "2x CHAN Champions"],
+          awards: ["First African & Arab FIFA World Cup Semi-Finalist (2022)", "CAF Best National Team"]
+        },
+        "Portugal": {
+          flag: "🇵🇹",
+          worldRank: "#6 World (FIFA)",
+          titles: ["1x UEFA Euro (2016)", "1x UEFA Nations League (2019)"],
+          awards: ["Multiple Ballon d'Or & European Golden Shoe Honours"]
+        },
+        "Italy": {
+          flag: "🇮🇹",
+          worldRank: "#9 World (FIFA)",
+          titles: ["4x FIFA World Cup", "2x UEFA Euro"],
+          awards: ["Four-Star World Cup Heritage", "Euro Golden Glove & Player Honours"]
+        },
+        "Japan": {
+          flag: "🇯🇵",
+          worldRank: "#15 World (FIFA)",
+          titles: ["4x AFC Asian Cup"],
+          awards: ["AFC National Team of the Year", "Consistent World Cup Knockout Contender"]
+        },
+        "Senegal": {
+          flag: "🇸🇳",
+          worldRank: "#17 World (FIFA)",
+          titles: ["1x AFCON Champions (2021)"],
+          awards: ["CAF Men's National Team of the Year", "World Cup Quarter-Final Heritage"]
+        }
+      };
 
-        if (typeof ST !== "undefined" && ST.tab === "replays") {
-          ST.tab = "matches";
-          const firstTab = document.querySelector('#navPills .nav-btn[data-tab="matches"]');
-          if (firstTab) {
-            document.querySelectorAll("#navPills .nav-btn").forEach(b => b.classList.remove("active"));
-            firstTab.classList.add("active");
-          }
-          if (typeof moveInd === "function") moveInd();
-          if (typeof render === "function") render();
+      const DEFAULT_COUNTRY_INFO = (countryName) => ({
+        flag: "🌍",
+        worldRank: "FIFA Global Ranking — Active Member",
+        titles: [`${countryName} National & Regional Football Honours`],
+        awards: ["International Federation & Continental Tournament Participation"]
+      });
+
+      function renderCountryDossier(countryName, container) {
+        const info = WORLD_COUNTRIES_DATA[countryName] || DEFAULT_COUNTRY_INFO(countryName);
+        let box = document.getElementById("footimeCountryDossier");
+        if (!box) {
+          box = document.createElement("div");
+          box.id = "footimeCountryDossier";
+          box.style.cssText = [
+            "margin-top:16px",
+            "padding:18px",
+            "border-radius:16px",
+            "background:var(--bg-card,#111b18)",
+            "border:1px solid var(--border-strong,rgba(255,255,255,0.16))",
+            "box-shadow:var(--shadow-card)"
+          ].join(";");
         }
 
-        ["replaysFilterRow", "jumpReplaysTabBtn"].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.remove();
-        });
+        box.innerHTML = `
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;">
+            <div style="font-size:18px;font-weight:800;color:var(--fg-primary);">
+              ${info.flag} ${countryName} — Country Football Profile
+            </div>
+            <span style="padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-bright);font-weight:700;font-size:13px;">
+              🏆 World Ranking: ${info.worldRank}
+            </span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+            <div style="padding:14px;border-radius:12px;background:var(--bg-elevated,#0c1311);border:1px solid var(--border);">
+              <div style="font-weight:700;color:var(--accent-bright);margin-bottom:8px;">🥇 Titles Won (الألقاب)</div>
+              <ul style="padding-left:18px;color:var(--fg-secondary);line-height:1.6;margin:0;">
+                ${info.titles.map(t => `<li>${t}</li>`).join("")}
+              </ul>
+            </div>
+            <div style="padding:14px;border-radius:12px;background:var(--bg-elevated,#0c1311);border:1px solid var(--border);">
+              <div style="font-weight:700;color:var(--accent-gold-bright);margin-bottom:8px;">🏅 Awards & Honors (الجوائز)</div>
+              <ul style="padding-left:18px;color:var(--fg-secondary);line-height:1.6;margin:0;">
+                ${info.awards.map(a => `<li>${a}</li>`).join("")}
+              </ul>
+            </div>
+          </div>
+        `;
 
-        document.querySelectorAll(".replay-ribbon-tag, .quality-ribbon-tag.replay-tag").forEach(tag => {
-          tag.remove();
-        });
-
-        document.querySelectorAll("#app .sub, #app .lg, #app h2.section-title, .footer-pro").forEach(el => {
-          const current = el.textContent || "";
-          if (/replays?\s*&\s*highlights?|replays?\s*&\s*résumés?|replay|highlights/i.test(current)) {
-            el.textContent = current
-              .replace(/\s*[•\-–—]?\s*(replays?\s*&\s*highlights?|replays?\s*&\s*résumés?|replay|highlights)\b/gi, "")
-              .replace(/\s{2,}/g, " ")
-              .trim() || "Match Results";
-          }
-        });
+        if (container && !container.contains(box)) {
+          container.prepend(box);
+        } else if (!box.parentElement) {
+          const app = document.getElementById("app");
+          if (app) app.prepend(box);
+        }
+        box.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
 
-      document.addEventListener("DOMContentLoaded", enforceResultsOnlyNoReplay);
-      setInterval(enforceResultsOnlyNoReplay, 400);
+      function enhanceWorldTeamsAndResults() {
+        const nav = document.getElementById("navPills");
+        if (nav && !nav.querySelector('[data-tab="replays"]')) {
+          const btn = document.createElement("button");
+          btn.className = "nav-btn";
+          btn.setAttribute("data-tab", "replays");
+          btn.textContent = "Résumés (Score)";
+          btn.addEventListener("click", () => {
+            if (typeof ST !== "undefined") {
+              ST.tab = "replays";
+              if (typeof render === "function") render();
+            }
+          });
+          nav.appendChild(btn);
+        }
+
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        // Ensure scores are clearly visible on match/summary cards
+        app.querySelectorAll(".match-card, .card, [class*='match']").forEach(card => {
+          const txt = card.textContent || "";
+          const scoreMatch = txt.match(/\b(\d{1,2}\s*[-–:]\s*\d{1,2})\b/);
+          if (scoreMatch && !card.querySelector(".footime-score-badge")) {
+            const badge = document.createElement("span");
+            badge.className = "footime-score-badge";
+            badge.textContent = `FT ${scoreMatch[1]}`;
+            badge.style.cssText = [
+              "display:inline-block",
+              "margin:6px 0",
+              "padding:4px 10px",
+              "border-radius:8px",
+              "background:var(--accent-soft)",
+              "color:var(--accent-bright)",
+              "font-weight:800",
+              "font-size:13px"
+            ].join(";");
+            card.prepend(badge);
+          }
+        });
+
+        // Attach country click listener in World Teams view
+        const isWorldTab = typeof ST !== "undefined" && (ST.tab === "teams" || ST.tab === "world");
+        if (isWorldTab) {
+          app.querySelectorAll("button, .chip, .pill, .country-btn, [data-country]").forEach(el => {
+            if (el.dataset.footimeCountryBound) return;
+            el.dataset.footimeCountryBound = "1";
+            el.addEventListener("click", () => {
+              const label = (el.dataset.country || el.textContent || "").trim();
+              if (label && label.length > 1 && label.length < 40 && !/all|tous|search|rechercher/i.test(label)) {
+                renderCountryDossier(label, app);
+              }
+            });
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", enhanceWorldTeamsAndResults);
+      setInterval(enhanceWorldTeamsAndResults, 700);
     })();
   </script>
 </body>
