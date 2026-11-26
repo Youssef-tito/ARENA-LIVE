@@ -6907,5 +6907,253 @@
       };
     })();
   </script>
+  <script>
+    (function () {
+      const WORLD_COUNTRIES_DATA = {
+        "Tunisia": {
+          flag: "🇹🇳",
+          worldRank: "#41 World (FIFA)",
+          titles: ["AFCON Champions (2004)", "Arab Cup Winners (2021)", "CHAN Champions (2011)"],
+          awards: ["Best African Team Nominee", "Multiple AFCON Golden Boot / Best XI Selections"]
+        },
+        "Brazil": {
+          flag: "🇧🇷",
+          worldRank: "#5 World (FIFA)",
+          titles: ["5x FIFA World Cup", "9x Copa América", "4x FIFA Confederations Cup"],
+          awards: ["Most World Cup Titles", "Multiple Ballon d'Or & Golden Ball Winners"]
+        },
+        "Argentina": {
+          flag: "🇦🇷",
+          worldRank: "#1 World (FIFA)",
+          titles: ["3x FIFA World Cup", "16x Copa América", "2x Finalissima"],
+          awards: ["Multiple FIFA Best & Ballon d'Or Winners", "2022 World Cup Golden Ball"]
+        },
+        "France": {
+          flag: "🇫🇷",
+          worldRank: "#2 World (FIFA)",
+          titles: ["2x FIFA World Cup", "2x UEFA Euro", "1x UEFA Nations League"],
+          awards: ["2018 & 2022 World Cup Finalists", "Multiple Golden Boot & Kopa Trophy Winners"]
+        },
+        "Spain": {
+          flag: "🇪🇸",
+          worldRank: "#3 World (FIFA)",
+          titles: ["1x FIFA World Cup", "4x UEFA Euro", "1x UEFA Nations League"],
+          awards: ["Euro 2024 Champions", "Back-to-Back Major Tournament Honours"]
+        },
+        "England": {
+          flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+          worldRank: "#4 World (FIFA)",
+          titles: ["1x FIFA World Cup (1966)"],
+          awards: ["2x UEFA Euro Runners-Up", "World Cup Golden Boot Record Holders"]
+        },
+        "Germany": {
+          flag: "🇩🇪",
+          worldRank: "#11 World (FIFA)",
+          titles: ["4x FIFA World Cup", "3x UEFA Euro", "1x FIFA Confederations Cup"],
+          awards: ["Most World Cup Final Appearances", "Multiple World Cup Golden Boot Winners"]
+        },
+        "Morocco": {
+          flag: "🇲🇦",
+          worldRank: "#14 World (FIFA)",
+          titles: ["1x AFCON (1976)", "2x CHAN Champions"],
+          awards: ["First African & Arab FIFA World Cup Semi-Finalist (2022)", "CAF Best National Team"]
+        },
+        "Egypt": {
+          flag: "🇪🇬",
+          worldRank: "#33 World (FIFA)",
+          titles: ["7x AFCON Champions (Record)"],
+          awards: ["Most AFCON Titles in History", "Multiple AFCON Player & Golden Boot Winners"]
+        },
+        "Algeria": {
+          flag: "🇩🇿",
+          worldRank: "#37 World (FIFA)",
+          titles: ["2x AFCON Champions (1990, 2019)", "1x Arab Cup (2021)"],
+          awards: ["CAF Men's National Team of the Year", "World Cup Knockout Heritage"]
+        },
+        "Saudi Arabia": {
+          flag: "🇸🇦",
+          worldRank: "#56 World (FIFA)",
+          titles: ["3x AFC Asian Cup"],
+          awards: ["AFC National Team of the Year", "Iconic FIFA World Cup Upsets"]
+        },
+        "Portugal": {
+          flag: "🇵🇹",
+          worldRank: "#6 World (FIFA)",
+          titles: ["1x UEFA Euro (2016)", "1x UEFA Nations League (2019)"],
+          awards: ["Multiple Ballon d'Or & European Golden Shoe Honours"]
+        },
+        "Italy": {
+          flag: "🇮🇹",
+          worldRank: "#9 World (FIFA)",
+          titles: ["4x FIFA World Cup", "2x UEFA Euro"],
+          awards: ["Four-Star World Cup Heritage", "Euro Golden Glove & Player Honours"]
+        },
+        "Netherlands": {
+          flag: "🇳🇱",
+          worldRank: "#7 World (FIFA)",
+          titles: ["1x UEFA Euro (1988)"],
+          awards: ["3x FIFA World Cup Runners-Up", "Total Football Legacy"]
+        },
+        "Belgium": {
+          flag: "🇧🇪",
+          worldRank: "#8 World (FIFA)",
+          titles: ["1x Olympic Gold Medal (1920)"],
+          awards: ["2018 FIFA World Cup Third Place", "Former #1 FIFA Ranking"]
+        },
+        "Croatia": {
+          flag: "🇭🇷",
+          worldRank: "#12 World (FIFA)",
+          titles: ["2018 FIFA World Cup Runner-Up", "2022 World Cup Third Place"],
+          awards: ["UEFA Nations League Runner-Up (2023)", "Ballon d'Or Winner Heritage"]
+        },
+        "Japan": {
+          flag: "🇯🇵",
+          worldRank: "#15 World (FIFA)",
+          titles: ["4x AFC Asian Cup"],
+          awards: ["AFC National Team of the Year", "Consistent World Cup Knockout Contender"]
+        },
+        "South Korea": {
+          flag: "🇰🇷",
+          worldRank: "#22 World (FIFA)",
+          titles: ["2x AFC Asian Cup", "3x EAFF Championship"],
+          awards: ["2002 FIFA World Cup Fourth Place (Best Asian Finish)", "AFC Honours"]
+        },
+        "Senegal": {
+          flag: "🇸🇳",
+          worldRank: "#17 World (FIFA)",
+          titles: ["1x AFCON Champions (2021)"],
+          awards: ["CAF Men's National Team of the Year", "World Cup Quarter-Final Heritage"]
+        },
+        "United States": {
+          flag: "🇺🇸",
+          worldRank: "#16 World (FIFA)",
+          titles: ["7x CONCACAF Gold Cup", "3x CONCACAF Nations League"],
+          awards: ["1930 FIFA World Cup Third Place", "CONCACAF Honours"]
+        }
+      };
+
+      function getCountryProfile(countryName) {
+        if (WORLD_COUNTRIES_DATA[countryName]) return WORLD_COUNTRIES_DATA[countryName];
+        const lower = countryName.toLowerCase();
+        const foundKey = Object.keys(WORLD_COUNTRIES_DATA).find(
+          (k) => k.toLowerCase() === lower || lower.includes(k.toLowerCase())
+        );
+        if (foundKey) return WORLD_COUNTRIES_DATA[foundKey];
+        return {
+          flag: "🌍",
+          worldRank: "FIFA Global Ranking — Active National Team",
+          titles: [`${countryName} National & Regional Football Honours`],
+          awards: ["International & Continental Federation Participation"]
+        };
+      }
+
+      function renderCountryProfile(countryName, mountTarget) {
+        const info = getCountryProfile(countryName);
+        let box = document.getElementById("footimeCountryProfileBox");
+        if (!box) {
+          box = document.createElement("div");
+          box.id = "footimeCountryProfileBox";
+          box.style.cssText = [
+            "margin:14px 0",
+            "padding:16px",
+            "border-radius:16px",
+            "background:var(--bg-card,#111b18)",
+            "border:1px solid var(--border-strong,rgba(255,255,255,0.16))",
+            "box-shadow:var(--shadow-card)"
+          ].join(";");
+        }
+
+        box.innerHTML = `
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;">
+            <div style="font-size:18px;font-weight:800;color:var(--fg-primary);">
+              ${info.flag} ${countryName}
+            </div>
+            <span style="padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-bright);font-weight:800;font-size:13px;">
+              🌍 ترتيب العالم: ${info.worldRank}
+            </span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;">
+            <div style="padding:12px;border-radius:12px;background:var(--bg-elevated,#0c1311);border:1px solid var(--border);">
+              <div style="font-weight:700;color:var(--accent-bright);margin-bottom:6px;">🏆 الألقاب (Titres)</div>
+              <ul style="padding-left:18px;color:var(--fg-secondary);line-height:1.6;margin:0;">
+                ${info.titles.map((t) => `<li>${t}</li>`).join("")}
+              </ul>
+            </div>
+            <div style="padding:12px;border-radius:12px;background:var(--bg-elevated,#0c1311);border:1px solid var(--border);">
+              <div style="font-weight:700;color:var(--accent-gold-bright);margin-bottom:6px;">🏅 الجوائز (Awards)</div>
+              <ul style="padding-left:18px;color:var(--fg-secondary);line-height:1.6;margin:0;">
+                ${info.awards.map((a) => `<li>${a}</li>`).join("")}
+              </ul>
+            </div>
+          </div>
+        `;
+
+        const container = mountTarget || document.getElementById("app") || document.body;
+        if (!container.contains(box)) {
+          container.prepend(box);
+        }
+      }
+
+      function syncResumesAndCountries() {
+        const nav = document.getElementById("navPills");
+        if (nav && !nav.querySelector('[data-tab="replays"]')) {
+          const btn = document.createElement("button");
+          btn.className = "nav-btn";
+          btn.setAttribute("data-tab", "replays");
+          btn.textContent = "Résumés";
+          btn.addEventListener("click", () => {
+            if (typeof ST !== "undefined") {
+              ST.tab = "replays";
+              if (typeof render === "function") render();
+            }
+          });
+          nav.appendChild(btn);
+        }
+
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        // Show score clearly on cards/resumes
+        app.querySelectorAll(".match-card, .card, [class*='match'], [class*='replay']").forEach((card) => {
+          const txt = card.textContent || "";
+          const scoreMatch = txt.match(/\b(\d{1,2}\s*[-–:]\s*\d{1,2})\b/);
+          if (scoreMatch && !card.querySelector(".footime-score-tag")) {
+            const tag = document.createElement("span");
+            tag.className = "footime-score-tag";
+            tag.textContent = `FT ${scoreMatch[1]}`;
+            tag.style.cssText = [
+              "display:inline-block",
+              "margin:6px 0",
+              "padding:4px 10px",
+              "border-radius:8px",
+              "background:var(--accent-soft)",
+              "color:var(--accent-bright)",
+              "font-weight:800",
+              "font-size:13px"
+            ].join(";");
+            card.prepend(tag);
+          }
+        });
+
+        // Listen for clicking any country in Équipes du Monde
+        const isWorldTab = typeof ST !== "undefined" && (ST.tab === "teams" || ST.tab === "world");
+        if (isWorldTab) {
+          app.querySelectorAll("button, .chip, .pill, .country-btn, [data-country]").forEach((el) => {
+            if (el.dataset.countryProfileBound) return;
+            el.dataset.countryProfileBound = "1";
+            el.addEventListener("click", () => {
+              const name = (el.dataset.country || el.textContent || "").trim();
+              if (name && name.length > 1 && name.length < 45 && !/all|tous|search|rechercher/i.test(name)) {
+                renderCountryProfile(name, app);
+              }
+            });
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", syncResumesAndCountries);
+      setInterval(syncResumesAndCountries, 700);
+    })();
+  </script>
 </body>
 </html>
