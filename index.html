@@ -8132,5 +8132,189 @@
       }, 450);
     })();
   </script>
+  <script>
+    (function () {
+      const REAL_CREST_CACHE = JSON.parse(localStorage.getItem("footime_real_crests_v1") || "{}");
+      const IN_FLIGHT_CRESTS = new Set();
+
+      function saveCrestCache() {
+        try {
+          localStorage.setItem("footime_real_crests_v1", JSON.stringify(REAL_CREST_CACHE));
+        } catch {}
+      }
+
+      function normalizeTeamName(raw) {
+        return String(raw || "")
+          .replace(/\b(fc|cf|sc|ac|as|us|cd|rc|afc|ssc|sv|vfb|fk|sk|nk|bsc|19\d\d|20\d\d)\b/gi, "")
+          .replace(/[^a-zA-Z0-9\s]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function getCachedRealCrest(teamName) {
+        const key = normalizeTeamName(teamName).toLowerCase();
+        if (!key) return "";
+        if (REAL_CREST_CACHE[key]) return REAL_CREST_CACHE[key];
+
+        if (typeof ST !== "undefined" && Array.isArray(ST.teams) && ST.teams.length) {
+          const hit = ST.teams.find(t => {
+            const tn = normalizeTeamName(t.name || "").toLowerCase();
+            return tn && (tn === key || tn.includes(key) || key.includes(tn));
+          });
+          if (hit && hit.badge) {
+            REAL_CREST_CACHE[key] = hit.badge;
+            saveCrestCache();
+            return hit.badge;
+          }
+        }
+        return "";
+      }
+
+      async function fetchRealTeamCrest(teamName) {
+        const clean = normalizeTeamName(teamName);
+        const key = clean.toLowerCase();
+        if (!clean || clean.length < 2) return "";
+        if (REAL_CREST_CACHE[key]) return REAL_CREST_CACHE[key];
+        if (IN_FLIGHT_CRESTS.has(key)) return "";
+
+        IN_FLIGHT_CRESTS.add(key);
+        try {
+          const url = `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(clean)}`;
+          const res = await fetch(url);
+          if (!res.ok) return "";
+          const data = await res.json();
+          const teams = Array.isArray(data?.teams) ? data.teams : [];
+          const soccerTeam = teams.find(t => /soccer|football/i.test(String(t.strSport || ""))) || teams[0];
+          const badge = soccerTeam?.strBadge || soccerTeam?.strTeamBadge || "";
+          if (badge) {
+            REAL_CREST_CACHE[key] = badge;
+            saveCrestCache();
+            return badge;
+          }
+        } catch {} finally {
+          IN_FLIGHT_CRESTS.delete(key);
+        }
+        return "";
+      }
+
+      function splitPair(title) {
+        const parts = String(title || "").split(/\s+(?:vs\.?|v|-)\s+/i);
+        if (parts.length >= 2) {
+          return [parts[0].trim(), parts.slice(1).join(" vs ").trim()];
+        }
+        return [String(title || "").trim(), ""];
+      }
+
+      function dedupeResumesCards() {
+        if (typeof ST === "undefined" || ST.tab !== "replays") return;
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        // Remove duplicate FT bars sitting right above cards
+        app.querySelectorAll(".grid").forEach(grid => {
+          [...grid.children].forEach(child => {
+            if (!child.classList.contains("card")) child.remove();
+          });
+        });
+
+        // Deduplicate cards with the exact same match title inside Résumés tab
+        const seenTitles = new Set();
+        app.querySelectorAll(".grid .card").forEach(card => {
+          const t = (card.querySelector(".title")?.textContent || "").trim().toLowerCase();
+          if (!t) return;
+          if (seenTitles.has(t)) {
+            card.remove();
+          } else {
+            seenTitles.add(t);
+          }
+        });
+
+        // Keep only one FT pill per résumé banner
+        app.querySelectorAll(".grid .card .banner").forEach(banner => {
+          const pills = [...banner.querySelectorAll(".pill")];
+          if (pills.length > 1) {
+            pills.slice(1).forEach(p => p.remove());
+          }
+        });
+      }
+
+      function applyRealCrestsToDom() {
+        const pendingNames = new Set();
+
+        document.querySelectorAll("#app .grid .card").forEach(card => {
+          const title = card.querySelector(".title")?.textContent || "";
+          const [teamA, teamB] = splitPair(title);
+          const stage = card.querySelector(".match-vs-stage");
+          if (!stage) return;
+
+          const imgs = stage.querySelectorAll("img.match-side-crest");
+          const badgeA = getCachedRealCrest(teamA);
+          const badgeB = getCachedRealCrest(teamB);
+
+          if (teamA && !badgeA) pendingNames.add(teamA);
+          if (teamB && !badgeB) pendingNames.add(teamB);
+
+          if (imgs[0] && badgeA) {
+            imgs[0].src = badgeA;
+            imgs[0].style.opacity = "1";
+          } else if (imgs[0] && !badgeA) {
+            imgs[0].style.opacity = "0";
+          }
+
+          if (imgs[1] && badgeB) {
+            imgs[1].src = badgeB;
+            imgs[1].style.opacity = "1";
+          } else if (imgs[1] && !badgeB) {
+            imgs[1].style.opacity = "0";
+          }
+        });
+
+        // Also update lobby crests
+        const lobby = document.getElementById("exclusiveLobbyWrapper");
+        if (lobby) {
+          const rows = lobby.querySelectorAll(".lobby-team-row");
+          if (rows.length >= 2) {
+            const nA = rows[0].querySelector("span")?.textContent || "";
+            const nB = rows[1].querySelector("span")?.textContent || "";
+            const cA = rows[0].querySelector("img.lobby-team-crest");
+            const cB = rows[1].querySelector("img.lobby-team-crest");
+            const bA = getCachedRealCrest(nA);
+            const bB = getCachedRealCrest(nB);
+            if (nA && !bA) pendingNames.add(nA);
+            if (nB && !bB) pendingNames.add(nB);
+            if (cA && bA) { cA.src = bA; cA.style.display = "inline-block"; }
+            if (cB && bB) { cB.src = bB; cB.style.display = "inline-block"; }
+          }
+        }
+
+        if (pendingNames.size > 0) {
+          const batch = [...pendingNames].slice(0, 12);
+          Promise.all(batch.map(name => fetchRealTeamCrest(name))).then(results => {
+            if (results.some(Boolean)) {
+              applyRealCrestsToDom();
+            }
+          });
+        }
+      }
+
+      if (typeof render === "function") {
+        const _prevRealCrestRender = render;
+        render = function () {
+          _prevRealCrestRender();
+          dedupeResumesCards();
+          applyRealCrestsToDom();
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        dedupeResumesCards();
+        applyRealCrestsToDom();
+      });
+      setTimeout(() => {
+        dedupeResumesCards();
+        applyRealCrestsToDom();
+      }, 400);
+    })();
+  </script>
 </body>
 </html>
