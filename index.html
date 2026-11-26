@@ -8859,5 +8859,256 @@
   }
 })();
 </script>
+  <style id="footimeAllInOneCleanStyle">
+  /* Clean match cards without duplicate pills or broken/overlapping images */
+  #app .grid .card .banner {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 16px 18px !important;
+    overflow: hidden !important;
+    background: linear-gradient(90deg, #10241c 0%, #090e0c 50%, #1d140b 100%) !important;
+  }
+
+  #app .grid .card .banner .pill:nth-of-type(n + 2),
+  #app .grid .card .footime-dup-ft {
+    display: none !important;
+  }
+
+  #app .grid .card .banner img {
+    width: 66px !important;
+    height: 66px !important;
+    max-width: 66px !important;
+    max-height: 66px !important;
+    object-fit: contain !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    padding: 5px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #app .grid .card .banner img.footime-broken-hide {
+    display: none !important;
+  }
+</style>
+
+<script>
+(function () {
+  const CREST_CACHE_KEY = "footime_crests_v1";
+  let crestCache = {};
+  const pendingLookups = new Set();
+
+  try {
+    crestCache = JSON.parse(localStorage.getItem(CREST_CACHE_KEY) || "{}");
+  } catch {
+    crestCache = {};
+  }
+
+  function saveCrestCache() {
+    try {
+      localStorage.setItem(CREST_CACHE_KEY, JSON.stringify(crestCache));
+    } catch {}
+  }
+
+  function normalizeTeam(name) {
+    return String(name || "")
+      .toLowerCase()
+      .replace(/\b(fc|cf|sc|ac|as|afc|cfc|rc|cd|ud|sd|fk|sk|nk|bv|vfb|fsv|rb|psg|inter|ac)\b/gi, " ")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function splitTeamsFromCard(card) {
+    const raw =
+      card.querySelector(".title")?.textContent ||
+      card.querySelector("h3, h4, .match-title")?.textContent ||
+      "";
+    const parts = raw.split(/\s+(?:vs\.?|v|-|–)\s+/i);
+    return parts.length >= 2 ? [parts[0].trim(), parts[1].trim()] : [raw.trim(), ""];
+  }
+
+  function lookupCachedBadge(teamName) {
+    const key = normalizeTeam(teamName);
+    if (!key) return "";
+    if (crestCache[key]) return crestCache[key];
+    if (typeof findCachedTeamRecord === "function") {
+      const rec = findCachedTeamRecord(teamName);
+      if (rec && rec.badge) {
+        crestCache[key] = rec.badge;
+        saveCrestCache();
+        return rec.badge;
+      }
+    }
+    if (typeof ST !== "undefined" && Array.isArray(ST.teams)) {
+      const found = ST.teams.find((t) => {
+        const tn = normalizeTeam(t.name || "");
+        return tn && (tn === key || tn.includes(key) || key.includes(tn));
+      });
+      if (found && found.badge) {
+        crestCache[key] = found.badge;
+        saveCrestCache();
+        return found.badge;
+      }
+    }
+    return "";
+  }
+
+  function fetchSportsDbBadge(teamName, onDone) {
+    const key = normalizeTeam(teamName);
+    if (!key || key.length < 2) return;
+    if (crestCache[key]) {
+      onDone && onDone(crestCache[key]);
+      return;
+    }
+    if (pendingLookups.has(key)) return;
+    pendingLookups.add(key);
+
+    fetch("https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=" + encodeURIComponent(key))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const teams = data && Array.isArray(data.teams) ? data.teams : [];
+        const soccerTeam =
+          teams.find((t) => /soccer|football/i.test(t.strSport || "")) || teams[0];
+        const badge = (soccerTeam && (soccerTeam.strBadge || soccerTeam.strTeamBadge)) || "";
+        if (badge) {
+          crestCache[key] = badge;
+          saveCrestCache();
+          onDone && onDone(badge);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        pendingLookups.delete(key);
+      });
+  }
+
+  function purgeLeakedTextAndDuplicates() {
+    // 1. Remove leaked code/template strings rendered as text nodes outside <script>
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const badNodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (!node.parentElement) continue;
+      const tag = node.parentElement.tagName;
+      if (tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA") continue;
+      const t = (node.nodeValue || "").trim();
+      if (!t) continue;
+      if (
+        t.includes("${esc(") ||
+        t.includes("${badgeA") ||
+        t.includes("${badgeB") ||
+        t.includes("if (typeof render ===") ||
+        t.includes("function polishLobbyVisuals()") ||
+        t.includes("Affichage Résumé sans lecture vidéo défaillante")
+      ) {
+        badNodes.push(node);
+      }
+    }
+    badNodes.forEach((n) => n.parentNode && n.parentNode.removeChild(n));
+
+    // 2. Remove duplicate FT badges stacked above or inside cards
+    document.querySelectorAll("#app .grid").forEach((grid) => {
+      let seenFt = "";
+      [...grid.children].forEach((el) => {
+        if (!el.classList.contains("card")) {
+          const txt = (el.textContent || "").trim();
+          if (/^ft\b/i.test(txt)) {
+            if (txt === seenFt) {
+              el.remove();
+            } else {
+              seenFt = txt;
+            }
+          }
+        }
+      });
+    });
+  }
+
+  function fixCardsAndCrests() {
+    purgeLeakedTextAndDuplicates();
+
+    document.querySelectorAll("#app .grid .card").forEach((card) => {
+      const banner = card.querySelector(".banner");
+      if (!banner) return;
+
+      // Remove stray text nodes inside banner that collide with team names/icons
+      [...banner.childNodes].forEach((ch) => {
+        if (ch.nodeType === Node.TEXT_NODE && ch.nodeValue.trim()) {
+          ch.nodeValue = "";
+        }
+      });
+
+      const [teamA, teamB] = splitTeamsFromCard(card);
+      const imgs = [...banner.querySelectorAll("img")].filter(
+        (im) => !im.classList.contains("bg-art")
+      );
+
+      [teamA, teamB].forEach((tName, idx) => {
+        if (!tName) return;
+        const cached = lookupCachedBadge(tName);
+        const imgEl = imgs[idx];
+
+        if (imgEl) {
+          imgEl.addEventListener(
+            "error",
+            () => {
+              imgEl.classList.add("footime-broken-hide");
+              const next = imgEl.nextElementSibling;
+              if (next && next.tagName === "SPAN" && next.textContent.trim().length <= 4) {
+                next.style.display = "none";
+              }
+            },
+            { once: true }
+          );
+
+          if (cached) {
+            if (imgEl.getAttribute("src") !== cached) {
+              imgEl.src = cached;
+            }
+            imgEl.classList.remove("footime-broken-hide");
+          } else if (imgEl.complete && imgEl.naturalWidth === 0) {
+            imgEl.classList.add("footime-broken-hide");
+          }
+        }
+
+        if (!cached) {
+          fetchSportsDbBadge(tName, (badgeUrl) => {
+            const currentImgs = [...banner.querySelectorAll("img")].filter(
+              (im) => !im.classList.contains("bg-art")
+            );
+            if (currentImgs[idx] && badgeUrl) {
+              currentImgs[idx].src = badgeUrl;
+              currentImgs[idx].classList.remove("footime-broken-hide");
+            }
+          });
+        }
+      });
+
+      // Keep only one FT pill per card
+      const pills = [...card.querySelectorAll(".pill")];
+      if (pills.length > 1) {
+        pills.slice(1).forEach((p) => p.remove());
+      }
+    });
+  }
+
+  const observer = new MutationObserver(() => {
+    fixCardsAndCrests();
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      fixCardsAndCrests();
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+  } else {
+    fixCardsAndCrests();
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+})();
+</script>
 </body>
 </html>
