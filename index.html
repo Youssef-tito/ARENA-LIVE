@@ -8316,5 +8316,259 @@
       }, 400);
     })();
   </script>
+  <style>
+    /* Crisp Crests & Clean Badges Across Live, Upcoming & Résumés */
+    .match-vs-stage {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 8px;
+    }
+
+    .match-side-crest {
+      width: 68px;
+      height: 68px;
+      max-width: 68px;
+      max-height: 68px;
+      margin: 0;
+      object-fit: contain;
+      opacity: 1 !important;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+      transition: transform var(--transition-fast);
+    }
+
+    .card:hover .match-side-crest {
+      transform: scale(1.06);
+    }
+
+    .match-center-emblem {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 34px;
+      padding: 0 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(6, 10, 9, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      font-family: "Outfit", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: #ffffff;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Clean up duplicate FT bars above Upcoming/Résumé cards */
+    #app .grid {
+      align-items: start;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const CREST_DB = JSON.parse(localStorage.getItem("footime_crest_db_v2") || "{}");
+      const FAILED_QUERIES = new Set();
+      const ACTIVE_REQUESTS = new Set();
+
+      function saveCrestDb() {
+        try {
+          localStorage.setItem("footime_crest_db_v2", JSON.stringify(CREST_DB));
+        } catch {}
+      }
+
+      function stripClubAffixes(name) {
+        return String(name || "")
+          .replace(/\b(fc|cf|sc|ac|as|us|cd|rc|afc|ssc|sv|vfb|fk|sk|nk|bsc|calcio|united|city|athletic|atletico|sporting|club|de|del|la|las|los)\b/gi, " ")
+          .replace(/[^a-zA-Z0-9\s]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function candidateQueriesForTeam(rawName) {
+        const clean = String(rawName || "").replace(/\s+/g, " ").trim();
+        const stripped = stripClubAffixes(clean);
+        const words = stripped.split(" ").filter(Boolean);
+        const queries = [];
+
+        if (clean.length >= 2) queries.push(clean);
+        if (stripped.length >= 2 && stripped.toLowerCase() !== clean.toLowerCase()) queries.push(stripped);
+        if (words.length >= 2) queries.push(words.slice(0, 2).join(" "));
+        if (words.length >= 1 && words[0].length >= 3) queries.push(words[0]);
+
+        return [...new Set(queries)];
+      }
+
+      function getCachedBadge(teamName) {
+        const key = String(teamName || "").trim().toLowerCase();
+        if (!key) return "";
+        if (CREST_DB[key]) return CREST_DB[key];
+
+        const strippedKey = stripClubAffixes(key);
+        if (strippedKey && CREST_DB[strippedKey]) return CREST_DB[strippedKey];
+
+        if (typeof ST !== "undefined" && Array.isArray(ST.teams) && ST.teams.length) {
+          const hit = ST.teams.find(t => {
+            const tn = String(t.name || "").trim().toLowerCase();
+            const stn = stripClubAffixes(tn);
+            return (
+              tn === key ||
+              (strippedKey && stn === strippedKey) ||
+              (key.length >= 4 && tn.includes(key)) ||
+              (strippedKey.length >= 4 && stn.includes(strippedKey))
+            );
+          });
+          if (hit && hit.badge) {
+            CREST_DB[key] = hit.badge;
+            if (strippedKey) CREST_DB[strippedKey] = hit.badge;
+            saveCrestDb();
+            return hit.badge;
+          }
+        }
+        return "";
+      }
+
+      async function resolveTeamBadgeSmart(teamName) {
+        const origKey = String(teamName || "").trim().toLowerCase();
+        if (!origKey) return "";
+        const cached = getCachedBadge(origKey);
+        if (cached) return cached;
+
+        const queries = candidateQueriesForTeam(teamName);
+        for (const q of queries) {
+          const qKey = q.toLowerCase();
+          if (FAILED_QUERIES.has(qKey) || ACTIVE_REQUESTS.has(qKey)) continue;
+          ACTIVE_REQUESTS.add(qKey);
+          try {
+            const resp = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(q)}`);
+            if (resp.ok) {
+              const json = await resp.json();
+              const list = Array.isArray(json?.teams) ? json.teams : [];
+              const soccer = list.find(item => /soccer|football/i.test(String(item.strSport || ""))) || list[0];
+              const badge = soccer?.strBadge || soccer?.strTeamBadge || "";
+              if (badge) {
+                CREST_DB[origKey] = badge;
+                const sKey = stripClubAffixes(origKey);
+                if (sKey) CREST_DB[sKey] = badge;
+                CREST_DB[qKey] = badge;
+                saveCrestDb();
+                return badge;
+              }
+            }
+            FAILED_QUERIES.add(qKey);
+          } catch {
+            FAILED_QUERIES.add(qKey);
+          } finally {
+            ACTIVE_REQUESTS.delete(qKey);
+          }
+        }
+        return "";
+      }
+
+      function shieldFallbackUrl(teamName) {
+        const abbr = stripClubAffixes(teamName)
+          .split(" ")
+          .filter(Boolean)
+          .map(w => w[0])
+          .join("")
+          .slice(0, 3)
+          .toUpperCase() || "FC";
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><path d="M48 8 L82 20 L76 58 C73 74 61 84 48 90 C35 84 23 74 20 58 L14 20 Z" fill="rgba(15,23,42,0.82)" stroke="rgba(255,255,255,0.45)" stroke-width="3"/><text x="48" y="57" text-anchor="middle" fill="#ffffff" font-family="Outfit,sans-serif" font-size="22" font-weight="900">${abbr}</text></svg>`;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      }
+
+      function splitMatchPair(title) {
+        const parts = String(title || "Match").split(/\s+(?:vs\.?|v|-)\s+/i);
+        if (parts.length >= 2) {
+          return [parts[0].trim(), parts.slice(1).join(" vs ").trim()];
+        }
+        return [String(title || "Match").trim(), ""];
+      }
+
+      function cleanDuplicateBadgesAboveCards() {
+        document.querySelectorAll("#app .grid").forEach(grid => {
+          [...grid.children].forEach(node => {
+            if (!node.classList.contains("card")) node.remove();
+          });
+        });
+      }
+
+      function paintCrestsEverywhere() {
+        cleanDuplicateBadgesAboveCards();
+        const toLookup = new Set();
+
+        document.querySelectorAll("#app .grid .card").forEach(card => {
+          const title = card.querySelector(".title")?.textContent || "";
+          const [teamA, teamB] = splitMatchPair(title);
+          const stage = card.querySelector(".match-vs-stage");
+          if (!stage) return;
+
+          const crestImgs = stage.querySelectorAll("img.match-side-crest");
+          const bA = getCachedBadge(teamA);
+          const bB = getCachedBadge(teamB);
+
+          if (teamA && !bA) toLookup.add(teamA);
+          if (teamB && !bB) toLookup.add(teamB);
+
+          if (crestImgs[0]) {
+            crestImgs[0].src = bA || shieldFallbackUrl(teamA);
+            crestImgs[0].onerror = () => {
+              crestImgs[0].onerror = null;
+              crestImgs[0].src = shieldFallbackUrl(teamA);
+            };
+          }
+
+          if (crestImgs[1]) {
+            crestImgs[1].src = bB || shieldFallbackUrl(teamB);
+            crestImgs[1].onerror = () => {
+              crestImgs[1].onerror = null;
+              crestImgs[1].src = shieldFallbackUrl(teamB);
+            };
+          }
+        });
+
+        const lobby = document.getElementById("exclusiveLobbyWrapper");
+        if (lobby) {
+          const rows = lobby.querySelectorAll(".lobby-team-row");
+          if (rows.length >= 2) {
+            const nA = rows[0].querySelector("span")?.textContent || "";
+            const nB = rows[1].querySelector("span")?.textContent || "";
+            const imgA = rows[0].querySelector("img.lobby-team-crest");
+            const imgB = rows[1].querySelector("img.lobby-team-crest");
+            const bA = getCachedBadge(nA);
+            const bB = getCachedBadge(nB);
+            if (nA && !bA) toLookup.add(nA);
+            if (nB && !bB) toLookup.add(nB);
+            if (imgA && bA) imgA.src = bA;
+            if (imgB && bB) imgB.src = bB;
+          }
+        }
+
+        if (toLookup.size > 0) {
+          const batch = [...toLookup].slice(0, 16);
+          Promise.all(batch.map(name => resolveTeamBadgeSmart(name))).then(found => {
+            if (found.some(Boolean)) {
+              paintCrestsEverywhere();
+            }
+          });
+        }
+      }
+
+      if (typeof render === "function") {
+        const _prevCrestRender = render;
+        render = function () {
+          _prevCrestRender();
+          paintCrestsEverywhere();
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", paintCrestsEverywhere);
+      setTimeout(paintCrestsEverywhere, 350);
+    })();
+  </script>
 </body>
 </html>
