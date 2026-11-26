@@ -6792,5 +6792,70 @@
       };
     })();
   </script>
+  <script>
+    (function () {
+      // 1. Block unwanted popups/redirects on mobile & desktop
+      const origOpen = window.open;
+      window.open = function (url, target, features) {
+        try {
+          if (!url || typeof url !== "string") return null;
+          const u = new URL(url, window.location.origin);
+          const okHosts = [
+            window.location.hostname,
+            "footime.dpdns.org",
+            "youtube.com",
+            "www.youtube.com",
+            "youtu.be"
+          ];
+          const allowed = okHosts.some(h => u.hostname === h || u.hostname.endsWith("." + h));
+          if (!allowed) return null;
+        } catch (err) {
+          return null;
+        }
+        return origOpen.call(window, url, target, features);
+      };
+
+      // 2. Mobile & PC responsive polish for cards, buttons, and country dossier
+      const style = document.createElement("style");
+      style.textContent = `
+        button, a, .nav-btn, .chip, .pill, [role="button"] {
+          touch-action: manipulation;
+        }
+        #footimeCountryDossier {
+          margin: 14px 0;
+          padding: 16px;
+          border-radius: 16px;
+          background: var(--bg-card, #111b18);
+          border: 1px solid var(--border-strong, rgba(255,255,255,0.16));
+          box-shadow: var(--shadow-card);
+          max-width: 100%;
+          overflow-x: hidden;
+        }
+        .footime-score-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 10px;
+          margin: 6px 0;
+          border-radius: 8px;
+          background: var(--accent-soft);
+          color: var(--accent-bright);
+          font-weight: 800;
+          font-size: 13px;
+        }
+        @media (max-width: 640px) {
+          #footimeCountryDossier {
+            padding: 12px;
+            border-radius: 14px;
+          }
+          #footimeCountryDossier > div:first-child {
+            flex-direction: column;
+            align-items: flex-start !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    })();
+  </script>
 </body>
 </html>
