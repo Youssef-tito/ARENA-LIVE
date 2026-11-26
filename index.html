@@ -7186,7 +7186,7 @@
   padding: 4px !important;
   flex-shrink: 0 !important;
 }
-        /* 3. Clean responsive grid for channels on mobile */
+       /* 3. Clean responsive grid for channels on mobile */
         @media (max-width: 640px) {
           .channels-grid,
           .tv-grid,
@@ -7209,12 +7209,11 @@
       function organizeTvChannelsView() {
         const isTvTab =
           (typeof ST !== "undefined" && (ST.tab === "tv" || ST.tab === "channels")) ||
-          /chaînes|chaines|channels/i.test(document.body.innerText.slice(0, 1200));
+          /chaînes|chaines|channels/i.test((document.body.innerText || "").slice(0, 1200));
 
         if (!isTvTab) return;
 
-        // Fix any huge images inside TV/channel containers
-        document.querySelectorAll("img").forEach((img) => {
+        document.querySelectorAll('[class*="channel"] img, [class*="tv"] img').forEach((img) => {
           const rect = img.getBoundingClientRect();
           if (rect.width > 90 || rect.height > 90) {
             img.style.width = "48px";
@@ -7226,64 +7225,15 @@
         });
       }
 
-      document.addEventListener("DOMContentLoaded", organizeTvChannelsView);
-      setInterval(organizeTvChannelsView, 800);
-    })();
-  </script>
-  <script>
-    (function () {
-      function enhanceResultAndReplayCards() {
-        const app = document.getElementById("app");
-        if (!app) return;
-
-        app.querySelectorAll(".match-card, .card, [class*='match'], [class*='replay']").forEach((card) => {
-          const text = card.textContent || "";
-          const scoreMatch = text.match(/\b(\d{1,2}\s*[-–:]\s*\d{1,2})\b/);
-
-          // Show FT result badge clearly
-          if (scoreMatch && !card.querySelector(".footime-result-badge")) {
-            const badge = document.createElement("div");
-            badge.className = "footime-result-badge";
-            badge.textContent = `FT • Résultat: ${scoreMatch[1].replace(/\s+/g, "")}`;
-            badge.style.cssText = [
-              "display:inline-flex",
-              "align-items:center",
-              "gap:6px",
-              "margin:6px 8px 6px 0",
-              "padding:4px 10px",
-              "border-radius:8px",
-              "background:var(--accent-soft,rgba(34,197,94,0.16))",
-              "color:var(--accent-bright,#4ade80)",
-              "font-weight:800",
-              "font-size:12px"
-            ].join(";");
-            card.prepend(badge);
-          }
-
-          // Mark replay availability status cleanly when no replay stream exists
-          const hasReplayBtn = Array.from(card.querySelectorAll("button, a")).some((el) =>
-            /replay|résumé|resume|highlight/i.test(el.textContent || "")
-          );
-          if (hasReplayBtn && !card.querySelector(".footime-replay-note")) {
-            const note = document.createElement("span");
-            note.className = "footime-replay-note";
-            note.textContent = "Replay: source serveur / lien requis";
-            note.style.cssText = [
-              "display:inline-block",
-              "margin:4px 0",
-              "padding:3px 8px",
-              "border-radius:6px",
-              "background:rgba(255,255,255,0.06)",
-              "color:var(--fg-muted,#9fb3a8)",
-              "font-size:11px"
-            ].join(";");
-            card.appendChild(note);
-          }
-        });
+      if (typeof render === "function") {
+        const _prevTvRender = render;
+        render = function () {
+          _prevTvRender();
+          organizeTvChannelsView();
+        };
       }
 
-      document.addEventListener("DOMContentLoaded", enhanceResultAndReplayCards);
-      setInterval(enhanceResultAndReplayCards, 900);
+      document.addEventListener("DOMContentLoaded", organizeTvChannelsView);
     })();
   </script>
   <script>
