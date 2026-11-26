@@ -7174,21 +7174,18 @@
         img {
           max-width: 100%;
         }
-        [class*="channel"] img,
-        [class*="tv"] img,
-        .card img,
-        .match-card img {
-          width: 48px !important;
-          height: 48px !important;
-          max-width: 48px !important;
-          max-height: 48px !important;
-          object-fit: contain !important;
-          border-radius: 10px !important;
-          background: rgba(255, 255, 255, 0.05) !important;
-          padding: 4px !important;
-          flex-shrink: 0 !important;
-        }
-
+     [class*="channel"] img,
+[class*="tv"] img {
+  width: 48px !important;
+  height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  object-fit: contain !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  padding: 4px !important;
+  flex-shrink: 0 !important;
+}
         /* 3. Clean responsive grid for channels on mobile */
         @media (max-width: 640px) {
           .channels-grid,
