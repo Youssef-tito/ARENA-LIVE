@@ -7314,7 +7314,7 @@
       };
     })();
   </script>
-  <script>
+ <script>
     (function () {
       const TEAM_LOGOS = {
         "nottingham forest": "https://media.api-sports.io/football/teams/65.png",
@@ -7324,158 +7324,155 @@
         "real madrid": "https://media.api-sports.io/football/teams/541.png",
         "barcelona": "https://media.api-sports.io/football/teams/529.png",
         "esperance": "https://media.api-sports.io/football/teams/989.png",
-        "club africain": "https://media.api-sports.io/football/teams/991.png",
-        "manchester city": "https://media.api-sports.io/football/teams/50.png",
-        "manchester united": "https://media.api-sports.io/football/teams/33.png",
-        "psg": "https://media.api-sports.io/football/teams/85.png",
-        "paris saint germain": "https://media.api-sports.io/football/teams/85.png",
-        "bayern munich": "https://media.api-sports.io/football/teams/157.png",
-        "juventus": "https://media.api-sports.io/football/teams/496.png",
-        "inter": "https://media.api-sports.io/football/teams/505.png",
-        "ac milan": "https://media.api-sports.io/football/teams/489.png"
+        "club africain": "https://media.api-sports.io/football/teams/991.png"
       };
 
-      function getTeamLogo(name) {
+      function findLogo(name) {
         const clean = String(name || "").toLowerCase().trim();
-        for (const key of Object.keys(TEAM_LOGOS)) {
-          if (clean.includes(key)) return TEAM_LOGOS[key];
+        for (const k of Object.keys(TEAM_LOGOS)) {
+          if (clean.includes(k)) return TEAM_LOGOS[k];
         }
         return "";
       }
 
-      // 1. Style improvements for Hero Banner & clean Replay cards
       const style = document.createElement("style");
+      style.id = "footimeCleanFinalStyle";
       style.textContent = `
-        .footime-hero-logos {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          margin: 14px 0;
+        /* 1. Full width hero banner in lobby */
+        .footime-hero-full {
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+          background: radial-gradient(circle at 80% 35%, rgba(22, 163, 74, 0.22), transparent 55%),
+                      linear-gradient(135deg, #0b1411 0%, #070b09 100%) !important;
         }
-        .footime-hero-team-badge {
-          display: flex;
-          flex-direction: column;
+        .footime-hero-logos-row {
+          display: inline-flex;
           align-items: center;
-          gap: 6px;
-          padding: 10px 14px;
+          gap: 14px;
+          margin: 12px 0;
+        }
+        .footime-hero-logo-box {
+          width: 58px;
+          height: 58px;
           border-radius: 14px;
           background: rgba(255, 255, 255, 0.06);
           border: 1px solid rgba(255, 255, 255, 0.14);
-          backdrop-filter: blur(6px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 6px;
         }
-        .footime-hero-team-badge img {
-          width: 54px !important;
-          height: 54px !important;
-          max-width: 54px !important;
-          max-height: 54px !important;
-          object-fit: contain !important;
+        .footime-hero-logo-box img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
         }
-        .footime-hero-vs {
-          font-weight: 900;
-          font-size: 16px;
-          color: var(--accent-bright, #22c55e);
-          padding: 6px 10px;
-          border-radius: 999px;
-          background: rgba(34, 197, 94, 0.15);
+
+        /* 2. Keep Live Now match banners properly sized */
+        [class*="live"] img:not(.footime-hero-logo-box img),
+        .match-card img:not(.footime-hero-logo-box img) {
+          max-width: 100%;
+          height: auto;
         }
       `;
       document.head.appendChild(style);
 
-      function fixLobbyHeroAndReplays() {
-        // A. Block Big Buck Bunny demo video inside modal iframe/video
-        document.querySelectorAll("iframe, video, source").forEach((el) => {
-          const src = (el.getAttribute("src") || "").toLowerCase();
+      function applyCleanFixes() {
+        // Block Big Buck Bunny video/source immediately
+        document.querySelectorAll("video, source, iframe").forEach((node) => {
+          const src = (node.getAttribute("src") || "").toLowerCase();
+          const poster = (node.getAttribute("poster") || "").toLowerCase();
           if (
             src.includes("big-buck-bunny") ||
             src.includes("big_buck_bunny") ||
             src.includes("aqz-kei-keg") ||
             src.includes("blender") ||
-            src.includes("commondatastorage")
+            poster.includes("big-buck-bunny") ||
+            poster.includes("blender")
           ) {
-            const modalTitle =
-              document.querySelector("[class*='modal'] h2, [class*='modal'] h3, [class*='player'] h2, [class*='player'] h3")?.textContent ||
-              "Match Highlights";
-            const query = encodeURIComponent(modalTitle.replace(/—.*$/, "").trim() + " highlights");
-            const fallbackBox = document.createElement("div");
-            fallbackBox.style.cssText = [
-              "width:100%",
-              "min-height:320px",
-              "display:flex",
-              "flex-direction:column",
-              "align-items:center",
-              "justify-content:center",
-              "gap:14px",
-              "padding:24px",
-              "text-align:center",
-              "background:radial-gradient(circle at center, rgba(34,197,94,0.14), #080d0b 75%)",
-              "border-radius:14px"
-            ].join(";");
-            fallbackBox.innerHTML = `
-              <div style="font-size:18px;font-weight:800;color:#eef7f2;">🎬 ${modalTitle}</div>
-              <div style="font-size:13px;color:#9fb3a8;max-width:440px;">
-                Aucun enregistrement serveur direct disponible pour ce match. Vous pouvez voir le résumé officiel ou les temps forts :
-              </div>
-              <a href="https://www.youtube.com/results?search_query=${query}" target="_blank" rel="noopener noreferrer"
-                 style="padding:10px 18px;border-radius:999px;background:#16a34a;color:#fff;font-weight:800;text-decoration:none;">
-                ▶ Voir Résumé & Highlights sur YouTube
-              </a>
-            `;
-            el.replaceWith(fallbackBox);
-          }
-        });
-
-        // B. Remove duplicate FT badges inside cards (keep only 1 clean badge)
-        document.querySelectorAll(".match-card, .card, [class*='replay'], [class*='match']").forEach((card) => {
-          const customBadges = card.querySelectorAll(".footime-score-tag, .footime-result-badge");
-          if (customBadges.length > 1) {
-            customBadges.forEach((b, idx) => {
-              if (idx > 0) b.remove();
-            });
-          }
-        });
-
-        // C. Decorate the big Lobby Hero Banner with team logos & stadium gradient
-        const heroCandidates = Array.from(document.querySelectorAll("section, div")).filter((el) => {
-          const txt = el.textContent || "";
-          return (
-            txt.includes("Watch Exclusive in Frame") &&
-            el.offsetHeight >= 220 &&
-            el.offsetHeight <= 620
-          );
-        });
-
-        const hero = heroCandidates[heroCandidates.length - 1];
-        if (hero && !hero.dataset.footimeHeroEnhanced) {
-          hero.dataset.footimeHeroEnhanced = "1";
-          hero.style.background =
-            "radial-gradient(circle at 75% 35%, rgba(22, 163, 74, 0.24), transparent 55%), linear-gradient(135deg, #0b1411 0%, #070b09 100%)";
-
-          const vsLine = Array.from(hero.querySelectorAll("*")).find((el) =>
-            /vs/i.test(el.textContent || "") && el.children.length === 0
-          );
-          if (vsLine) {
-            const parts = vsLine.textContent.split(/vs/i);
-            const homeName = (parts[0] || "").trim();
-            const awayName = (parts[1] || "").trim();
-            const homeLogo = getTeamLogo(homeName);
-            const awayLogo = getTeamLogo(awayName);
-
-            if (homeLogo || awayLogo) {
-              const logosRow = document.createElement("div");
-              logosRow.className = "footime-hero-logos";
-              logosRow.innerHTML = `
-                ${homeLogo ? `<div class="footime-hero-team-badge"><img src="${homeLogo}" alt="${homeName}"></div>` : ""}
-                <span class="footime-hero-vs">VS</span>
-                ${awayLogo ? `<div class="footime-hero-team-badge"><img src="${awayLogo}" alt="${awayName}"></div>` : ""}
+            if (node.tagName === "VIDEO") {
+              try {
+                node.pause();
+                node.removeAttribute("src");
+                node.load();
+              } catch {}
+            }
+            const wrapper = node.closest("video") || node;
+            if (!wrapper.dataset.replacedBunny) {
+              wrapper.dataset.replacedBunny = "1";
+              const titleEl = document.querySelector(
+                "[class*='modal'] h2, [class*='modal'] h3, [class*='player'] h2, [class*='player'] h3"
+              );
+              const matchTitle = (titleEl?.textContent || "Match Replay").replace(/—.*$/, "").trim();
+              const box = document.createElement("div");
+              box.style.cssText = [
+                "width:100%",
+                "min-height:300px",
+                "display:flex",
+                "flex-direction:column",
+                "align-items:center",
+                "justify-content:center",
+                "gap:12px",
+                "padding:20px",
+                "text-align:center",
+                "background:#090f0d",
+                "border-radius:12px"
+              ].join(";");
+              box.innerHTML = `
+                <div style="font-size:17px;font-weight:800;color:#eef7f2;">${matchTitle}</div>
+                <div style="font-size:13px;color:#9fb3a8;max-width:440px;">
+                  Pas de vidéo enregistrée sur serveur pour ce match. Ouvrez le résumé officiel ou les temps forts :
+                </div>
+                <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(matchTitle + " highlights")}"
+                   target="_blank" rel="noopener noreferrer"
+                   style="padding:10px 18px;border-radius:999px;background:#16a34a;color:#fff;font-weight:800;text-decoration:none;">
+                  ▶ Résumé / Highlights
+                </a>
               `;
-              vsLine.parentElement.insertBefore(logosRow, vsLine.nextSibling);
+              wrapper.replaceWith(box);
+            }
+          }
+        });
+
+        // Fix hero width & add team logos cleanly without shrinking container
+        const hero = Array.from(document.querySelectorAll("section, div")).find((el) => {
+          const t = el.textContent || "";
+          return t.includes("Watch Exclusive in Frame") && el.offsetHeight >= 200 && el.offsetHeight <= 650;
+        });
+
+        if (hero) {
+          hero.classList.add("footime-hero-full");
+          if (hero.parentElement) {
+            hero.parentElement.style.width = "100%";
+            hero.parentElement.style.maxWidth = "100%";
+          }
+          if (!hero.dataset.logosAdded) {
+            hero.dataset.logosAdded = "1";
+            const vsEl = Array.from(hero.querySelectorAll("*")).find(
+              (el) => el.children.length === 0 && /\bvs\b/i.test(el.textContent || "")
+            );
+            if (vsEl && vsEl.parentElement) {
+              const parts = vsEl.textContent.split(/\bvs\b/i);
+              const l1 = findLogo(parts[0]);
+              const l2 = findLogo(parts[1]);
+              if (l1 || l2) {
+                const row = document.createElement("div");
+                row.className = "footime-hero-logos-row";
+                row.innerHTML = `
+                  ${l1 ? `<div class="footime-hero-logo-box"><img src="${l1}" alt="${parts[0].trim()}"></div>` : ""}
+                  <span style="font-weight:900;color:#4ade80;">VS</span>
+                  ${l2 ? `<div class="footime-hero-logo-box"><img src="${l2}" alt="${parts[1].trim()}"></div>` : ""}
+                `;
+                vsEl.parentElement.insertBefore(row, vsEl.nextSibling);
+              }
             }
           }
         }
       }
 
-      document.addEventListener("DOMContentLoaded", fixLobbyHeroAndReplays);
-      setInterval(fixLobbyHeroAndReplays, 600);
+      document.addEventListener("DOMContentLoaded", applyCleanFixes);
+      setInterval(applyCleanFixes, 500);
     })();
   </script>
 </body>
