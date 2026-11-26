@@ -7314,5 +7314,169 @@
       };
     })();
   </script>
+  <script>
+    (function () {
+      const TEAM_LOGOS = {
+        "nottingham forest": "https://media.api-sports.io/football/teams/65.png",
+        "chelsea": "https://media.api-sports.io/football/teams/49.png",
+        "arsenal": "https://media.api-sports.io/football/teams/42.png",
+        "liverpool": "https://media.api-sports.io/football/teams/40.png",
+        "real madrid": "https://media.api-sports.io/football/teams/541.png",
+        "barcelona": "https://media.api-sports.io/football/teams/529.png",
+        "esperance": "https://media.api-sports.io/football/teams/989.png",
+        "club africain": "https://media.api-sports.io/football/teams/991.png",
+        "manchester city": "https://media.api-sports.io/football/teams/50.png",
+        "manchester united": "https://media.api-sports.io/football/teams/33.png",
+        "psg": "https://media.api-sports.io/football/teams/85.png",
+        "paris saint germain": "https://media.api-sports.io/football/teams/85.png",
+        "bayern munich": "https://media.api-sports.io/football/teams/157.png",
+        "juventus": "https://media.api-sports.io/football/teams/496.png",
+        "inter": "https://media.api-sports.io/football/teams/505.png",
+        "ac milan": "https://media.api-sports.io/football/teams/489.png"
+      };
+
+      function getTeamLogo(name) {
+        const clean = String(name || "").toLowerCase().trim();
+        for (const key of Object.keys(TEAM_LOGOS)) {
+          if (clean.includes(key)) return TEAM_LOGOS[key];
+        }
+        return "";
+      }
+
+      // 1. Style improvements for Hero Banner & clean Replay cards
+      const style = document.createElement("style");
+      style.textContent = `
+        .footime-hero-logos {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          margin: 14px 0;
+        }
+        .footime-hero-team-badge {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          padding: 10px 14px;
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          backdrop-filter: blur(6px);
+        }
+        .footime-hero-team-badge img {
+          width: 54px !important;
+          height: 54px !important;
+          max-width: 54px !important;
+          max-height: 54px !important;
+          object-fit: contain !important;
+        }
+        .footime-hero-vs {
+          font-weight: 900;
+          font-size: 16px;
+          color: var(--accent-bright, #22c55e);
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: rgba(34, 197, 94, 0.15);
+        }
+      `;
+      document.head.appendChild(style);
+
+      function fixLobbyHeroAndReplays() {
+        // A. Block Big Buck Bunny demo video inside modal iframe/video
+        document.querySelectorAll("iframe, video, source").forEach((el) => {
+          const src = (el.getAttribute("src") || "").toLowerCase();
+          if (
+            src.includes("big-buck-bunny") ||
+            src.includes("big_buck_bunny") ||
+            src.includes("aqz-kei-keg") ||
+            src.includes("blender") ||
+            src.includes("commondatastorage")
+          ) {
+            const modalTitle =
+              document.querySelector("[class*='modal'] h2, [class*='modal'] h3, [class*='player'] h2, [class*='player'] h3")?.textContent ||
+              "Match Highlights";
+            const query = encodeURIComponent(modalTitle.replace(/—.*$/, "").trim() + " highlights");
+            const fallbackBox = document.createElement("div");
+            fallbackBox.style.cssText = [
+              "width:100%",
+              "min-height:320px",
+              "display:flex",
+              "flex-direction:column",
+              "align-items:center",
+              "justify-content:center",
+              "gap:14px",
+              "padding:24px",
+              "text-align:center",
+              "background:radial-gradient(circle at center, rgba(34,197,94,0.14), #080d0b 75%)",
+              "border-radius:14px"
+            ].join(";");
+            fallbackBox.innerHTML = `
+              <div style="font-size:18px;font-weight:800;color:#eef7f2;">🎬 ${modalTitle}</div>
+              <div style="font-size:13px;color:#9fb3a8;max-width:440px;">
+                Aucun enregistrement serveur direct disponible pour ce match. Vous pouvez voir le résumé officiel ou les temps forts :
+              </div>
+              <a href="https://www.youtube.com/results?search_query=${query}" target="_blank" rel="noopener noreferrer"
+                 style="padding:10px 18px;border-radius:999px;background:#16a34a;color:#fff;font-weight:800;text-decoration:none;">
+                ▶ Voir Résumé & Highlights sur YouTube
+              </a>
+            `;
+            el.replaceWith(fallbackBox);
+          }
+        });
+
+        // B. Remove duplicate FT badges inside cards (keep only 1 clean badge)
+        document.querySelectorAll(".match-card, .card, [class*='replay'], [class*='match']").forEach((card) => {
+          const customBadges = card.querySelectorAll(".footime-score-tag, .footime-result-badge");
+          if (customBadges.length > 1) {
+            customBadges.forEach((b, idx) => {
+              if (idx > 0) b.remove();
+            });
+          }
+        });
+
+        // C. Decorate the big Lobby Hero Banner with team logos & stadium gradient
+        const heroCandidates = Array.from(document.querySelectorAll("section, div")).filter((el) => {
+          const txt = el.textContent || "";
+          return (
+            txt.includes("Watch Exclusive in Frame") &&
+            el.offsetHeight >= 220 &&
+            el.offsetHeight <= 620
+          );
+        });
+
+        const hero = heroCandidates[heroCandidates.length - 1];
+        if (hero && !hero.dataset.footimeHeroEnhanced) {
+          hero.dataset.footimeHeroEnhanced = "1";
+          hero.style.background =
+            "radial-gradient(circle at 75% 35%, rgba(22, 163, 74, 0.24), transparent 55%), linear-gradient(135deg, #0b1411 0%, #070b09 100%)";
+
+          const vsLine = Array.from(hero.querySelectorAll("*")).find((el) =>
+            /vs/i.test(el.textContent || "") && el.children.length === 0
+          );
+          if (vsLine) {
+            const parts = vsLine.textContent.split(/vs/i);
+            const homeName = (parts[0] || "").trim();
+            const awayName = (parts[1] || "").trim();
+            const homeLogo = getTeamLogo(homeName);
+            const awayLogo = getTeamLogo(awayName);
+
+            if (homeLogo || awayLogo) {
+              const logosRow = document.createElement("div");
+              logosRow.className = "footime-hero-logos";
+              logosRow.innerHTML = `
+                ${homeLogo ? `<div class="footime-hero-team-badge"><img src="${homeLogo}" alt="${homeName}"></div>` : ""}
+                <span class="footime-hero-vs">VS</span>
+                ${awayLogo ? `<div class="footime-hero-team-badge"><img src="${awayLogo}" alt="${awayName}"></div>` : ""}
+              `;
+              vsLine.parentElement.insertBefore(logosRow, vsLine.nextSibling);
+            }
+          }
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", fixLobbyHeroAndReplays);
+      setInterval(fixLobbyHeroAndReplays, 600);
+    })();
+  </script>
 </body>
 </html>
