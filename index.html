@@ -8570,5 +8570,216 @@
       setTimeout(paintCrestsEverywhere, 350);
     })();
   </script>
+  <style>
+    .footime-crest-row {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      pointer-events: none;
+    }
+
+    .footime-crest-img {
+      width: 64px;
+      height: 64px;
+      max-width: 64px;
+      max-height: 64px;
+      margin: 0;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+    }
+
+    .footime-crest-mid {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(6, 10, 9, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-family: "Outfit", sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "footime_crests_keep_v5";
+      const FALLBACK_URL = "https://footime.dpdns.org/logo-96.png";
+      const CACHE = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      const IN_PROGRESS = new Set();
+      const BLOCKED_Q = new Set();
+
+      function saveCache() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(CACHE));
+        } catch {}
+      }
+
+      function normalizeClubName(name) {
+        return String(name || "")
+          .replace(/\b(fc|cf|sc|ac|as|us|cd|rc|afc|ssc|sv|vfb|fk|sk|nk|bsc|calcio|united|city|athletic|atletico|sporting|club|de|del|la|las|los)\b/gi, " ")
+          .replace(/[^a-zA-Z0-9\s]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function getQueries(raw) {
+        const clean = String(raw || "").replace(/\s+/g, " ").trim();
+        const base = normalizeClubName(clean);
+        const words = base.split(" ").filter(Boolean);
+        const out = [];
+        if (clean.length >= 2) out.push(clean);
+        if (base.length >= 2 && base.toLowerCase() !== clean.toLowerCase()) out.push(base);
+        if (words.length >= 2) out.push(words.slice(0, 2).join(" "));
+        if (words.length >= 1 && words[0].length >= 3) out.push(words[0]);
+        return [...new Set(out)];
+      }
+
+      function lookupCached(teamName) {
+        const key = String(teamName || "").trim().toLowerCase();
+        if (!key) return "";
+        if (CACHE[key]) return CACHE[key];
+
+        const baseKey = normalizeClubName(key);
+        if (baseKey && CACHE[baseKey]) return CACHE[baseKey];
+
+        if (typeof ST !== "undefined" && Array.isArray(ST.teams) && ST.teams.length) {
+          const item = ST.teams.find(t => {
+            const tn = String(t.name || "").trim().toLowerCase();
+            const bn = normalizeClubName(tn);
+            return tn === key || (baseKey && bn === baseKey) || (key.length >= 4 && tn.includes(key));
+          });
+          if (item && item.badge) {
+            CACHE[key] = item.badge;
+            if (baseKey) CACHE[baseKey] = item.badge;
+            saveCache();
+            return item.badge;
+          }
+        }
+        return "";
+      }
+
+      async function fetchCrest(teamName) {
+        const key = String(teamName || "").trim().toLowerCase();
+        if (!key) return "";
+        const cached = lookupCached(key);
+        if (cached) return cached;
+
+        for (const q of getQueries(teamName)) {
+          const qk = q.toLowerCase();
+          if (IN_PROGRESS.has(qk) || BLOCKED_Q.has(qk)) continue;
+          IN_PROGRESS.add(qk);
+          try {
+            const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(q)}`);
+            if (res.ok) {
+              const data = await res.json();
+              const arr = Array.isArray(data?.teams) ? data.teams : [];
+              const soccer = arr.find(x => /soccer|football/i.test(String(x.strSport || ""))) || arr[0];
+              const badge = soccer?.strBadge || soccer?.strTeamBadge || "";
+              if (badge) {
+                CACHE[key] = badge;
+                const baseKey = normalizeClubName(key);
+                if (baseKey) CACHE[baseKey] = badge;
+                CACHE[qk] = badge;
+                saveCache();
+                return badge;
+              }
+            }
+            BLOCKED_Q.add(qk);
+          } catch {
+            BLOCKED_Q.add(qk);
+          } finally {
+            IN_PROGRESS.delete(qk);
+          }
+        }
+        return "";
+      }
+
+      function splitMatchTitle(title) {
+        const parts = String(title || "Match").split(/\s+(?:vs\.?|v|-)\s+/i);
+        return parts.length >= 2 ? [parts[0].trim(), parts.slice(1).join(" vs ").trim()] : [String(title || "Match").trim(), ""];
+      }
+
+      function renderCrestsNonDestructive() {
+        const needFetch = new Set();
+
+        document.querySelectorAll("#app .grid .card").forEach(card => {
+          const banner = card.querySelector(".banner");
+          if (!banner) return;
+
+          const title = card.querySelector(".title")?.textContent || "Match";
+          const [teamA, teamB] = splitMatchTitle(title);
+          const logoA = lookupCached(teamA);
+          const logoB = lookupCached(teamB);
+
+          if (teamA && !logoA) needFetch.add(teamA);
+          if (teamB && !logoB) needFetch.add(teamB);
+
+          let row = banner.querySelector(".footime-crest-row");
+          if (!row) {
+            row = document.createElement("div");
+            row.className = "footime-crest-row";
+            banner.appendChild(row);
+          }
+
+          const pillText = banner.querySelector(".pill")?.textContent || "";
+          const centerText = /ft\b/i.test(pillText)
+            ? pillText.replace(/^ft\s*•?\s*/i, "").trim() || "FT"
+            : "VS";
+
+          row.innerHTML = `
+            <img class="footime-crest-img" src="${esc(logoA || FALLBACK_URL)}" alt="${esc(teamA)}" onerror="this.onerror=null;this.src='${esc(FALLBACK_URL)}'" />
+            <span class="footime-crest-mid">${esc(centerText)}</span>
+            <img class="footime-crest-img" src="${esc(logoB || FALLBACK_URL)}" alt="${esc(teamB)}" onerror="this.onerror=null;this.src='${esc(FALLBACK_URL)}'" />
+          `;
+        });
+
+        const lobby = document.getElementById("exclusiveLobbyWrapper");
+        if (lobby) {
+          const rows = lobby.querySelectorAll(".lobby-team-row");
+          if (rows.length >= 2) {
+            const nA = rows[0].querySelector("span")?.textContent || "";
+            const nB = rows[1].querySelector("span")?.textContent || "";
+            const cA = rows[0].querySelector("img.lobby-team-crest");
+            const cB = rows[1].querySelector("img.lobby-team-crest");
+            const bA = lookupCached(nA);
+            const bB = lookupCached(nB);
+            if (nA && !bA) needFetch.add(nA);
+            if (nB && !bB) needFetch.add(nB);
+            if (cA && bA) cA.src = bA;
+            if (cB && bB) cB.src = bB;
+          }
+        }
+
+        if (needFetch.size > 0) {
+          const batch = [...needFetch].slice(0, 14);
+          Promise.all(batch.map(name => fetchCrest(name))).then(found => {
+            if (found.some(Boolean)) {
+              renderCrestsNonDestructive();
+            }
+          });
+        }
+      }
+
+      if (typeof render === "function") {
+        const _keepRender = render;
+        render = function () {
+          _keepRender();
+          renderCrestsNonDestructive();
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", renderCrestsNonDestructive);
+      setTimeout(renderCrestsNonDestructive, 300);
+    })();
+  </script>
 </body>
 </html>
