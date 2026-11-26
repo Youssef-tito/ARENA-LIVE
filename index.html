@@ -7474,5 +7474,72 @@
       setInterval(applyCleanFixes, 500);
     })();
   </script>
+  <script>
+    (function () {
+      function applyResumesCleanUi() {
+        document.querySelectorAll("button, a, .chip, .s-btn, h2.section-title").forEach(el => {
+          const txt = (el.textContent || "").trim();
+          if (/replays?\s*&\s*highlights/i.test(txt)) {
+            el.textContent = txt.replace(/replays?\s*&\s*highlights/i, "Résumés & Highlights");
+          } else if (/^all replays$/i.test(txt)) {
+            el.textContent = "All Résumés";
+          } else if (/tunisia replays/i.test(txt)) {
+            el.textContent = "🇹🇳 Tunisia Résumés";
+          } else if (txt === "Replays") {
+            el.textContent = "Résumés";
+          }
+        });
+      }
+
+      function syncResumeInfoInModal(m) {
+        if (!m) return;
+        const body = document.getElementById("mBody");
+        const iframeSrc = body?.querySelector("iframe")?.getAttribute("src") || "";
+        const hasVideo = Boolean(body?.querySelector("iframe, video"));
+
+        if (!hasVideo && body) {
+          const scoreText = m.score ? `FT • ${m.score}` : "Match terminé (FT)";
+          body.innerHTML = `
+            <div style="padding:28px 20px;text-align:center;background:var(--bg-card);border-bottom:1px solid var(--border);">
+              <div class="badge badge-lg" style="margin-bottom:10px;">${esc(m.league || m.category || "Football")}</div>
+              <h3 style="font-size:20px;margin-bottom:8px;">${esc(m.title || "Match")}</h3>
+              <div style="font-size:16px;font-weight:800;color:var(--accent-bright);margin-bottom:10px;">${esc(scoreText)}</div>
+              <div class="sub">Pas de replay vidéo stocké (aucun serveur d'enregistrement). Résultat et résumé disponibles, ou colle un lien externe ci-dessous.</div>
+            </div>
+          `;
+        }
+
+        const ytInp = document.getElementById("ytUrlInput");
+        if (ytInp && !ytInp.value.trim()) {
+          ytInp.placeholder = `Paste external highlight / stream URL for "${m.title || "match"}"...`;
+        }
+
+        if (iframeSrc && typeof showToast === "function") {
+          showToast("✓ Flux chargé dans le lecteur");
+        }
+      }
+
+      if (typeof render === "function") {
+        const _prevResRender = render;
+        render = function () {
+          _prevResRender();
+          applyResumesCleanUi();
+        };
+      }
+
+      if (typeof openMatch === "function") {
+        const _prevResOpenMatch = openMatch;
+        openMatch = function (m) {
+          _prevResOpenMatch(m);
+          syncResumeInfoInModal(m);
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", applyResumesCleanUi);
+      setTimeout(applyResumesCleanUi, 400);
+    })();
+  </script>
+</body>
+</html>
 </body>
 </html>
