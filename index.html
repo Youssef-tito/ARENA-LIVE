@@ -5765,5 +5765,289 @@
       setTimeout(applyResumesCleanUi, 400);
     })();
   </script>
+  <style id="footimeTvFixStyle">
+    /* 1. Fix white select boxes in Chaînes TV */
+    select {
+      background-color: var(--bg-elevated, #0c1311) !important;
+      color: var(--fg-primary, #eef7f2) !important;
+      border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.16)) !important;
+      border-radius: 10px !important;
+      padding: 8px 12px !important;
+      font-size: 13px !important;
+      max-width: 100% !important;
+    }
+
+    /* 2. Clamp oversized TV channel logos without squishing match crests */
+    [class*="channel"] img,
+    [class*="tv"] img {
+      width: 48px !important;
+      height: 48px !important;
+      max-width: 48px !important;
+      max-height: 48px !important;
+      object-fit: contain !important;
+      border-radius: 10px !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+      padding: 4px !important;
+      flex-shrink: 0 !important;
+    }
+
+    /* 3. Clean responsive grid for channels on mobile */
+    @media (max-width: 640px) {
+      .channels-grid,
+      .tv-grid,
+      [class*="channels-list"],
+      [class*="tv-list"] {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+      [class*="channel-card"],
+      [class*="tv-card"] {
+        padding: 10px !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+      }
+    }
+
+    /* 4. Full width hero banner in lobby */
+    .footime-hero-full {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      background: radial-gradient(circle at 80% 35%, rgba(22, 163, 74, 0.22), transparent 55%),
+                  linear-gradient(135deg, #0b1411 0%, #070b09 100%) !important;
+    }
+
+    .footime-hero-logos-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin: 12px 0;
+    }
+
+    .footime-hero-logo-box {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+    }
+
+    .footime-hero-logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const TEAM_LOGOS = {
+        "nottingham forest": "https://media.api-sports.io/football/teams/65.png",
+        "chelsea": "https://media.api-sports.io/football/teams/49.png",
+        "arsenal": "https://media.api-sports.io/football/teams/42.png",
+        "liverpool": "https://media.api-sports.io/football/teams/40.png",
+        "real madrid": "https://media.api-sports.io/football/teams/541.png",
+        "barcelona": "https://media.api-sports.io/football/teams/529.png",
+        "esperance": "https://media.api-sports.io/football/teams/989.png",
+        "club africain": "https://media.api-sports.io/football/teams/991.png"
+      };
+
+      function findLogo(name) {
+        const clean = String(name || "").toLowerCase().trim();
+        for (const k of Object.keys(TEAM_LOGOS)) {
+          if (clean.includes(k)) return TEAM_LOGOS[k];
+        }
+        return "";
+      }
+
+      // Allow stream iframes to load cleanly while blocking silent ad popups
+      document.querySelectorAll("iframe[sandbox]").forEach((f) => f.removeAttribute("sandbox"));
+
+      const origOpen = window.open;
+      window.open = function (url, target, features) {
+        try {
+          if (!url || typeof url !== "string") return null;
+          const u = new URL(url, window.location.origin);
+          if (u.protocol === "http:" || u.protocol === "https:") {
+            if (!navigator.userActivation || !navigator.userActivation.isActive) {
+              return null;
+            }
+          }
+        } catch {
+          return null;
+        }
+        return origOpen.call(window, url, target, features);
+      };
+
+      function applyCleanFixes() {
+        // Block Big Buck Bunny demo media cleanly
+        document.querySelectorAll("video, source, iframe").forEach((node) => {
+          const src = (node.getAttribute("src") || "").toLowerCase();
+          const poster = (node.getAttribute("poster") || "").toLowerCase();
+          if (
+            src.includes("big-buck-bunny") ||
+            src.includes("big_buck_bunny") ||
+            src.includes("aqz-kei-keg") ||
+            src.includes("blender") ||
+            poster.includes("big-buck-bunny") ||
+            poster.includes("blender")
+          ) {
+            if (node.tagName === "VIDEO") {
+              try {
+                node.pause();
+                node.removeAttribute("src");
+                node.load();
+              } catch {}
+            }
+            const wrapper = node.closest("video") || node;
+            if (!wrapper.dataset.replacedBunny) {
+              wrapper.dataset.replacedBunny = "1";
+              const titleEl = document.querySelector(
+                "[class*='modal'] h2, [class*='modal'] h3, [class*='player'] h2, [class*='player'] h3"
+              );
+              const matchTitle = (titleEl?.textContent || "Match Replay").replace(/—.*$/, "").trim();
+              const box = document.createElement("div");
+              box.style.cssText = [
+                "width:100%",
+                "min-height:300px",
+                "display:flex",
+                "flex-direction:column",
+                "align-items:center",
+                "justify-content:center",
+                "gap:12px",
+                "padding:20px",
+                "text-align:center",
+                "background:#090f0d",
+                "border-radius:12px"
+              ].join(";");
+              box.innerHTML = `
+                <div style="font-size:17px;font-weight:800;color:#eef7f2;">${matchTitle}</div>
+                <div style="font-size:13px;color:#9fb3a8;max-width:440px;">
+                  Pas de vidéo enregistrée sur serveur pour ce match. Ouvrez le résumé officiel ou les temps forts :
+                </div>
+                <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(matchTitle + " highlights")}"
+                   target="_blank" rel="noopener noreferrer"
+                   style="padding:10px 18px;border-radius:999px;background:#16a34a;color:#fff;font-weight:800;text-decoration:none;">
+                  ▶ Résumé / Highlights
+                </a>
+              `;
+              wrapper.replaceWith(box);
+            }
+          }
+        });
+
+        // Full-width hero banner & team logos in lobby
+        const hero = Array.from(document.querySelectorAll("section, div")).find((el) => {
+          const t = el.textContent || "";
+          return t.includes("Watch Exclusive in Frame") && el.offsetHeight >= 200 && el.offsetHeight <= 650;
+        });
+
+        if (hero) {
+          hero.classList.add("footime-hero-full");
+          if (hero.parentElement) {
+            hero.parentElement.style.width = "100%";
+            hero.parentElement.style.maxWidth = "100%";
+          }
+          if (!hero.dataset.logosAdded) {
+            hero.dataset.logosAdded = "1";
+            const vsEl = Array.from(hero.querySelectorAll("*")).find(
+              (el) => el.children.length === 0 && /\bvs\b/i.test(el.textContent || "")
+            );
+            if (vsEl && vsEl.parentElement) {
+              const parts = vsEl.textContent.split(/\bvs\b/i);
+              const l1 = findLogo(parts[0]);
+              const l2 = findLogo(parts[1]);
+              if (l1 || l2) {
+                const row = document.createElement("div");
+                row.className = "footime-hero-logos-row";
+                row.innerHTML = `
+                  ${l1 ? `<div class="footime-hero-logo-box"><img src="${l1}" alt="${parts[0].trim()}"></div>` : ""}
+                  <span style="font-weight:900;color:#4ade80;">VS</span>
+                  ${l2 ? `<div class="footime-hero-logo-box"><img src="${l2}" alt="${parts[1].trim()}"></div>` : ""}
+                `;
+                vsEl.parentElement.insertBefore(row, vsEl.nextSibling);
+              }
+            }
+          }
+        }
+      }
+
+      function applyResumesCleanUi() {
+        document.querySelectorAll("button, a, .chip, .s-btn, h2.section-title").forEach((el) => {
+          const txt = (el.textContent || "").trim();
+          if (/replays?\s*&\s*highlights/i.test(txt)) {
+            el.textContent = txt.replace(/replays?\s*&\s*highlights/i, "Résumés & Highlights");
+          } else if (/^all replays$/i.test(txt)) {
+            el.textContent = "All Résumés";
+          } else if (/tunisia replays/i.test(txt)) {
+            el.textContent = "🇹🇳 Tunisia Résumés";
+          } else if (txt === "Replays") {
+            el.textContent = "Résumés";
+          }
+        });
+      }
+
+      function syncResumeInfoInModal(m) {
+        if (!m) return;
+        const body = document.getElementById("mBody");
+        const iframeSrc = body?.querySelector("iframe")?.getAttribute("src") || "";
+        const hasVideo = Boolean(body?.querySelector("iframe, video"));
+
+        if (!hasVideo && body) {
+          const scoreText = m.score ? `FT • ${m.score}` : "Match terminé (FT)";
+          body.innerHTML = `
+            <div style="padding:28px 20px;text-align:center;background:var(--bg-card);border-bottom:1px solid var(--border);">
+              <div class="badge badge-lg" style="margin-bottom:10px;">${esc(m.league || m.category || "Football")}</div>
+              <h3 style="font-size:20px;margin-bottom:8px;">${esc(m.title || "Match")}</h3>
+              <div style="font-size:16px;font-weight:800;color:var(--accent-bright);margin-bottom:10px;">${esc(scoreText)}</div>
+              <div class="sub">Pas de replay vidéo stocké (aucun serveur d'enregistrement). Résultat et résumé disponibles, ou colle un lien externe ci-dessous.</div>
+            </div>
+          `;
+        }
+
+        const ytInp = document.getElementById("ytUrlInput");
+        if (ytInp && !ytInp.value.trim()) {
+          ytInp.placeholder = `Paste external highlight / stream URL for "${m.title || "match"}"...`;
+        }
+
+        if (iframeSrc && typeof showToast === "function") {
+          showToast("✓ Flux chargé dans le lecteur");
+        }
+      }
+
+      if (typeof render === "function") {
+        const _prevResRender = render;
+        render = function () {
+          _prevResRender();
+          applyResumesCleanUi();
+          applyCleanFixes();
+        };
+      }
+
+      if (typeof openMatch === "function") {
+        const _prevResOpenMatch = openMatch;
+        openMatch = function (m) {
+          _prevResOpenMatch(m);
+          syncResumeInfoInModal(m);
+        };
+      }
+
+      const observer = new MutationObserver(() => {
+        applyCleanFixes();
+        applyResumesCleanUi();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        applyCleanFixes();
+        applyResumesCleanUi();
+        observer.observe(document.body, { childList: true, subtree: true });
+      });
+    })();
+  </script>
 </body>
 </html>
