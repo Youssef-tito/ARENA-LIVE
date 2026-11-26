@@ -6857,5 +6857,55 @@
       document.head.appendChild(style);
     })();
   </script>
+  <script>
+    (function () {
+      // 1. Protect mobile & desktop from iframe top-navigation redirects
+      function hardenIframes() {
+        document.querySelectorAll("iframe").forEach((frame) => {
+          const src = (frame.getAttribute("src") || "").toLowerCase();
+          if (!src || src.startsWith("about:")) return;
+          // Allow scripts & same-origin for HLS/embed players, but BLOCK top-level page redirect & popups
+          if (!frame.hasAttribute("sandbox")) {
+            frame.setAttribute(
+              "sandbox",
+              "allow-scripts allow-same-origin allow-forms allow-presentation"
+            );
+          }
+          frame.setAttribute("referrerpolicy", "no-referrer");
+        });
+      }
+
+      const observer = new MutationObserver(hardenIframes);
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["src"]
+      });
+      document.addEventListener("DOMContentLoaded", hardenIframes);
+
+      // 2. Block window.open popups to unknown ad domains
+      const origOpen = window.open;
+      window.open = function (url, target, features) {
+        try {
+          if (!url || typeof url !== "string") return null;
+          const u = new URL(url, window.location.origin);
+          const allowed = [
+            window.location.hostname,
+            "footime.dpdns.org",
+            "youtube.com",
+            "www.youtube.com",
+            "youtu.be"
+          ];
+          if (!allowed.some((h) => u.hostname === h || u.hostname.endsWith("." + h))) {
+            return null;
+          }
+        } catch {
+          return null;
+        }
+        return origOpen.call(window, url, target, features);
+      };
+    })();
+  </script>
 </body>
 </html>
