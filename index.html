@@ -6765,5 +6765,32 @@
       setInterval(enhanceWorldTeamsAndResults, 700);
     })();
   </script>
+  <script>
+    (function () {
+      const originalOpen = window.open;
+      window.open = function (url, target, features) {
+        try {
+          if (!url || typeof url !== "string") return null;
+          const parsed = new URL(url, window.location.origin);
+          const allowedHosts = [
+            window.location.hostname,
+            "footime.dpdns.org",
+            "youtube.com",
+            "www.youtube.com",
+            "youtu.be"
+          ];
+          const isAllowed = allowedHosts.some(
+            (host) => parsed.hostname === host || parsed.hostname.endsWith("." + host)
+          );
+          if (!isAllowed) {
+            return null;
+          }
+        } catch (e) {
+          return null;
+        }
+        return originalOpen.call(window, url, target, features);
+      };
+    })();
+  </script>
 </body>
 </html>
