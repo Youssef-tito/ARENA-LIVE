@@ -5512,5 +5512,29 @@
       };
     })();
   </script>
+  <script>
+    (function () {
+      // Remove sandbox if already added so live streams load properly
+      document.querySelectorAll("iframe[sandbox]").forEach((f) => f.removeAttribute("sandbox"));
+
+      // Block only unwanted ad popups without touching stream iframes
+      const origOpen = window.open;
+      window.open = function (url, target, features) {
+        try {
+          if (!url || typeof url !== "string") return null;
+          const u = new URL(url, window.location.origin);
+          if (u.protocol === "http:" || u.protocol === "https:") {
+            // Allow user-initiated "Open in Tab" button clicks, block silent mobile ad redirects
+            if (!navigator.userActivation || !navigator.userActivation.isActive) {
+              return null;
+            }
+          }
+        } catch {
+          return null;
+        }
+        return origOpen.call(window, url, target, features);
+      };
+    })();
+  </script>
 </body>
 </html>
