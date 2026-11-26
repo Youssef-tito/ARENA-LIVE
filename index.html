@@ -8737,5 +8737,127 @@
       setTimeout(renderCrestsNonDestructive, 300);
     })();
   </script>
+  <style id="footimeFinalRescueStyle">
+  /* 1. Hide broken images & stray monogram/text artifacts inside match cards */
+  #app .grid .card .banner img[src=""],
+  #app .grid .card .banner img:not([src]),
+  #app .grid .card .banner img[alt=""] {
+    display: none !important;
+  }
+
+  /* 2. Clean match card banner layout without overlapping text or broken icons */
+  #app .grid .card .banner {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 16px 20px !important;
+    overflow: hidden !important;
+  }
+
+  #app .grid .card .banner .footime-clean-crest {
+    width: 68px !important;
+    height: 68px !important;
+    max-width: 68px !important;
+    max-height: 68px !important;
+    object-fit: contain !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    padding: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #app .grid .card .banner .footime-clean-vs {
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    background: rgba(5, 9, 8, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    flex-shrink: 0 !important;
+  }
+</style>
+
+<script>
+(function () {
+  function removeLeakedCodeTextNodes() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const toRemove = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const txt = (node.nodeValue || "").trim();
+      if (
+        txt.startsWith("const titleText =") ||
+        txt.startsWith("${esc(m.league") ||
+        txt.startsWith("${badgeA") ||
+        txt.startsWith("${esc(scoreLine)}") ||
+        (txt.includes("function polishLobbyVisuals()") && txt.includes("handleReplayOrMatchModal"))
+      ) {
+        toRemove.push(node);
+      }
+    }
+    toRemove.forEach((n) => n.parentNode && n.parentNode.removeChild(n));
+  }
+
+  function cleanCardVisuals() {
+    removeLeakedCodeTextNodes();
+
+    document.querySelectorAll("img").forEach((img) => {
+      if (!img.dataset.footimeImgBound) {
+        img.dataset.footimeImgBound = "1";
+        img.addEventListener("error", () => {
+          img.style.display = "none";
+          const next = img.nextElementSibling;
+          if (next && next.tagName === "SPAN" && next.textContent.trim().length <= 4) {
+            next.style.display = "none";
+          }
+        }, { once: true });
+      }
+      if (img.complete && img.naturalWidth === 0) {
+        img.style.display = "none";
+      }
+    });
+
+    document.querySelectorAll("#app .grid .card").forEach((card) => {
+      const banner = card.querySelector(".banner");
+      if (!banner) return;
+
+      // Remove stray text nodes directly inside banner that cause text/icon collision
+      [...banner.childNodes].forEach((ch) => {
+        if (ch.nodeType === Node.TEXT_NODE && ch.nodeValue.trim()) {
+          ch.nodeValue = "";
+        }
+      });
+
+      const validImgs = [...banner.querySelectorAll("img")].filter(
+        (im) => im.style.display !== "none" && (!im.complete || im.naturalWidth > 0)
+      );
+
+      validImgs.forEach((im) => {
+        im.classList.add("footime-clean-crest");
+        if (im.nextElementSibling && im.nextElementSibling.tagName === "SPAN" && im.nextElementSibling.textContent.trim().length <= 4) {
+          im.nextElementSibling.style.display = "none";
+        }
+      });
+    });
+  }
+
+  const obs = new MutationObserver(() => {
+    cleanCardVisuals();
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      cleanCardVisuals();
+      obs.observe(document.body, { childList: true, subtree: true });
+    });
+  } else {
+    cleanCardVisuals();
+    obs.observe(document.body, { childList: true, subtree: true });
+  }
+})();
+</script>
 </body>
 </html>
