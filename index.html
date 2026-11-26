@@ -7261,6 +7261,7 @@
     })();
   </script>
  <script>
+   <script>
     (function () {
       const TEAM_LOGOS = {
         "nottingham forest": "https://media.api-sports.io/football/teams/65.png",
@@ -7284,7 +7285,6 @@
       const style = document.createElement("style");
       style.id = "footimeCleanFinalStyle";
       style.textContent = `
-        /* 1. Full width hero banner in lobby */
         .footime-hero-full {
           width: 100% !important;
           max-width: 100% !important;
@@ -7314,18 +7314,10 @@
           height: 100%;
           object-fit: contain;
         }
-
-        /* 2. Keep Live Now match banners properly sized */
-        [class*="live"] img:not(.footime-hero-logo-box img),
-        .match-card img:not(.footime-hero-logo-box img) {
-          max-width: 100%;
-          height: auto;
-        }
       `;
       document.head.appendChild(style);
 
       function applyCleanFixes() {
-        // Block Big Buck Bunny video/source immediately
         document.querySelectorAll("video, source, iframe").forEach((node) => {
           const src = (node.getAttribute("src") || "").toLowerCase();
           const poster = (node.getAttribute("poster") || "").toLowerCase();
@@ -7381,7 +7373,6 @@
           }
         });
 
-        // Fix hero width & add team logos cleanly without shrinking container
         const hero = Array.from(document.querySelectorAll("section, div")).find((el) => {
           const t = el.textContent || "";
           return t.includes("Watch Exclusive in Frame") && el.offsetHeight >= 200 && el.offsetHeight <= 650;
@@ -7418,7 +7409,6 @@
       }
 
       document.addEventListener("DOMContentLoaded", applyCleanFixes);
-      setInterval(applyCleanFixes, 500);
     })();
   </script>
   <script>
@@ -7483,11 +7473,9 @@
       }
 
       document.addEventListener("DOMContentLoaded", applyResumesCleanUi);
-      setTimeout(applyResumesCleanUi, 400);
     })();
   </script>
   <style>
-    /* Clean Match & Résumé Cards + Lobby Visual Polish */
     .card .banner {
       display: flex;
       align-items: center;
@@ -7510,39 +7498,6 @@
       object-fit: cover;
       opacity: 0.42;
       z-index: 0;
-    }
-
-    .banner-crests-duo {
-      position: relative;
-      z-index: 2;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 14px;
-      border-radius: var(--radius-lg);
-      background: rgba(6, 10, 9, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      backdrop-filter: blur(6px);
-    }
-
-    .banner-crests-duo img {
-      width: 42px;
-      height: 42px;
-      max-width: 42px;
-      max-height: 42px;
-      margin: 0;
-      object-fit: contain;
-      background: rgba(255, 255, 255, 0.92);
-      border-radius: 50%;
-      padding: 3px;
-    }
-
-    .banner-crests-duo span {
-      font-family: "Outfit", sans-serif;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--accent-gold-bright);
-      letter-spacing: 0.06em;
     }
 
     .exclusive-lobby-stage {
@@ -7608,13 +7563,6 @@
         /esperance(\s+de\s+tunis)?\s*vs\s*club\s*africain/i
       ];
 
-      function pickBgForKey(key) {
-        const idx = typeof hashStringToIndex === "function"
-          ? hashStringToIndex(key || "footime", SAFE_BG_IMAGES.length)
-          : 0;
-        return SAFE_BG_IMAGES[idx];
-      }
-
       function lookupBadgeUrl(teamName) {
         if (typeof findCachedTeamRecord === "function") {
           const rec = findCachedTeamRecord(teamName);
@@ -7651,20 +7599,94 @@
         if (!app) return;
 
         app.querySelectorAll(".card").forEach(card => {
-          // Remove duplicate stacked FT badges on top of résumé cards
           const topBadges = [...card.parentElement?.children || []].filter(
             el => !el.classList.contains("card") && /^ft\b/i.test((el.textContent || "").trim())
           );
           topBadges.forEach(b => b.remove());
 
-          // Remove duplicate FT pills inside banner if more than one
           const banner = card.querySelector(".banner");
           if (banner) {
             const pills = [...banner.querySelectorAll(".pill")];
             if (pills.length > 1) {
               pills.slice(1).forEach(p => p.remove());
             }
+          }
+        });
+      }
 
+      function polishLobbyVisuals() {
+        const wrapper = document.getElementById("exclusiveLobbyWrapper");
+        if (!wrapper) return;
+
+        const extraPills = [...wrapper.querySelectorAll(".world-team-tag-pill")];
+        if (extraPills.length > 1) {
+          extraPills.slice(1).forEach(el => el.remove());
+        }
+
+        const photo = wrapper.querySelector(".lobby-player-photo");
+        if (photo) {
+          if (!photo.getAttribute("src")) photo.src = SAFE_BG_IMAGES[0];
+          photo.onerror = () => {
+            photo.src = SAFE_BG_IMAGES[1];
+          };
+        }
+      }
+
+      function handleReplayOrMatchModal(m) {
+        if (!m) return;
+        const body = document.getElementById("mBody");
+        if (!body) return;
+
+        const isReplayTab = typeof ST !== "undefined" && ST.tab === "replays";
+        const hasPlayer = Boolean(body.querySelector("iframe, video"));
+
+        if (isReplayTab || !hasPlayer) {
+          const [teamA, teamB] = splitTeams(m.title || "Match");
+          const badgeA = lookupBadgeUrl(teamA);
+          const badgeB = lookupBadgeUrl(teamB);
+          const scoreLine = m.score ? `FT • ${m.score}` : "Résumé & Résultat (FT)";
+
+          body.innerHTML = `
+            <div class="resume-modal-card">
+              <div class="badge badge-lg">${esc(m.league || m.category || "Football")}</div>
+              <div class="resume-modal-crests">
+                ${badgeA ? `<img src="${esc(badgeA)}" alt="${esc(teamA)}" onerror="this.style.display='none'" />` : ""}
+                <strong style="font-size:19px;">${esc(m.title || "Match")}</strong>
+                ${badgeB ? `<img src="${esc(badgeB)}" alt="${esc(teamB)}" onerror="this.style.display='none'" />` : ""}
+              </div>
+              <div class="resume-score-box">${esc(scoreLine)}</div>
+              <div class="sub">Affichage Résumé sans lecture vidéo défaillante. Tu peux aussi coller un lien externe ci-dessous si besoin.</div>
+            </div>
+          `;
+        }
+      }
+
+      if (typeof render === "function") {
+        const _prevPolRender = render;
+        render = function () {
+          purgeExcludedResumes();
+          _prevPolRender();
+          purgeExcludedResumes();
+          polishMatchCardsAndResumes();
+          polishLobbyVisuals();
+        };
+      }
+
+      if (typeof openMatch === "function") {
+        const _prevPolOpenMatch = openMatch;
+        openMatch = function (m) {
+          _prevPolOpenMatch(m);
+          handleReplayOrMatchModal(m);
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        purgeExcludedResumes();
+        polishMatchCardsAndResumes();
+        polishLobbyVisuals();
+      });
+    })();
+  </script>
             const titleText = card.querySelector(".title")?.textContent || "Match";
             const [teamA, teamB] = splitTeams(titleText);
             const badgeA = lookupBadgeUrl(teamA);
