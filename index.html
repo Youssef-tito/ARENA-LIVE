@@ -5765,5 +5765,31 @@
       setTimeout(applyResumesCleanUi, 400);
     })();
   </script>
+  <script>
+    (function () {
+      // 1. Protect mobile & desktop from iframe top-navigation redirects
+      function hardenIframes() {
+        document.querySelectorAll("iframe").forEach((frame) => {
+          const src = (frame.getAttribute("src") || "").toLowerCase();
+          if (!src || src.startsWith("about:")) return;
+          // Allow scripts & same-origin for HLS/embed players, but BLOCK top-level page redirect & popups
+          if (!frame.hasAttribute("sandbox")) {
+            frame.setAttribute(
+              "sandbox",
+              "allow-scripts allow-same-origin allow-forms allow-presentation"
+            );
+          }
+          frame.setAttribute("referrerpolicy", "no-referrer");
+        });
+      }
+
+      const observer = new MutationObserver(hardenIframes);
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["src"]
+      });
+      document.addEventListener("DOMContent
 </body>
 </html>
