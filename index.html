@@ -7820,5 +7820,317 @@
       });
     })();
   </script>
+  <style>
+    /* Reference Match Card Styling: Full-Bleed Dual-Tone Gradient & Crisp Team Crests */
+    #app .grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+      gap: 16px !important;
+    }
+
+    #app .grid .card {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius-lg) !important;
+      overflow: hidden !important;
+    }
+
+    #app .grid .card .banner {
+      position: relative !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      aspect-ratio: 16 / 9 !important;
+      padding: 18px 24px !important;
+      overflow: hidden !important;
+      background: var(--card-grad, linear-gradient(90deg, #1f2937 0%, #0f172a 50%, #7f1d1d 100%)) !important;
+    }
+
+    #app .grid .card .banner > img.bg-art,
+    #app .grid .card .banner > .scrim,
+    #app .grid .card .banner > .banner-crests-duo {
+      display: none !important;
+    }
+
+    .match-vs-stage {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 6px;
+    }
+
+    .match-side-crest {
+      width: 74px;
+      height: 74px;
+      max-width: 74px;
+      max-height: 74px;
+      margin: 0;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
+      transition: transform var(--transition-fast);
+    }
+
+    .card:hover .match-side-crest {
+      transform: scale(1.05);
+    }
+
+    .match-center-emblem {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(6, 10, 9, 0.48);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      font-family: "Outfit", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+      backdrop-filter: blur(4px);
+    }
+
+    #app .grid .card .body {
+      padding: 12px 14px 14px !important;
+      background: var(--bg-card) !important;
+    }
+
+    #app .grid .card .body .lg {
+      font-size: 10.5px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.05em !important;
+      color: var(--accent-bright) !important;
+      margin-bottom: 4px !important;
+    }
+
+    #app .grid .card .body .title {
+      font-size: 14.5px !important;
+      font-weight: 700 !important;
+      color: var(--fg-primary) !important;
+      margin: 0 !important;
+    }
+
+    #app .grid .card .body .sub,
+    #app .grid .card .body .resume-ft-badge,
+    #app .grid .card .body .quality-ribbon-tag {
+      display: none !important;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const TEAM_GRADIENT_PALETTE = [
+        "linear-gradient(90deg, #18181b 0%, #111827 50%, #991b1b 100%)",
+        "linear-gradient(90deg, #0369a1 0%, #0f172a 50%, #b91c1c 100%)",
+        "linear-gradient(90deg, #1d4ed8 0%, #090d16 50%, #b45309 100%)",
+        "linear-gradient(90deg, #991b1b 0%, #141416 50%, #7f1d1d 100%)",
+        "linear-gradient(90deg, #dc2626 0%, #0f172a 50%, #1d4ed8 100%)",
+        "linear-gradient(90deg, #ca8a04 0%, #141413 50%, #1e3a8a 100%)",
+        "linear-gradient(90deg, #047857 0%, #09120f 50%, #b45309 100%)"
+      ];
+
+      const REFERENCE_RESUMES = [
+        {
+          id: "res_nfo_che",
+          title: "Nottingham Forest vs. Chelsea",
+          league: "PREMIER LEAGUE • RÉSUMÉ",
+          category: "Football",
+          score: "1 - 2",
+          status: "ended"
+        },
+        {
+          id: "res_atm_sev",
+          title: "Atletico Madrid vs. Sevilla",
+          league: "LA LIGA • RÉSUMÉ",
+          category: "Football",
+          score: "2 - 0",
+          status: "ended"
+        },
+        {
+          id: "res_int_nap",
+          title: "Inter vs. Napoli",
+          league: "SERIE A • RÉSUMÉ",
+          category: "Football",
+          score: "1 - 1",
+          status: "ended"
+        },
+        {
+          id: "res_ess_css",
+          title: "Etoile du Sahel vs. CS Sfaxien",
+          league: "TUNISIAN LIGUE 1 • RÉSUMÉ",
+          category: "Football",
+          score: "2 - 1",
+          status: "ended"
+        }
+      ];
+
+      function hashKey(str) {
+        const s = String(str || "match");
+        let h = 2166136261;
+        for (let i = 0; i < s.length; i++) {
+          h ^= s.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return Math.abs(h);
+      }
+
+      function pickGradient(title) {
+        return TEAM_GRADIENT_PALETTE[hashKey(title) % TEAM_GRADIENT_PALETTE.length];
+      }
+
+      function splitTeams(title) {
+        const parts = String(title || "Match").split(/\s+(?:vs\.?|v|-)\s+/i);
+        return parts.length >= 2 ? [parts[0].trim(), parts[1].trim()] : [String(title || "Match").trim(), "VS"];
+      }
+
+      function findCrest(teamName) {
+        const clean = String(teamName || "").trim().toLowerCase();
+        if (!clean) return "";
+        if (typeof findCachedTeamRecord === "function") {
+          const rec = findCachedTeamRecord(clean);
+          if (rec && rec.badge) return rec.badge;
+        }
+        if (typeof ST !== "undefined" && Array.isArray(ST.teams)) {
+          const found = ST.teams.find(t => {
+            const n = String(t.name || "").toLowerCase();
+            return n === clean || n.includes(clean) || clean.includes(n);
+          });
+          if (found && found.badge) return found.badge;
+        }
+        return "";
+      }
+
+      function monogramCrestDataUrl(label, bgHex) {
+        const letters = String(label || "FC")
+          .replace(/[^a-zA-Z0-9\s]/g, "")
+          .trim()
+          .split(/\s+/)
+          .map(w => w[0])
+          .join("")
+          .slice(0, 3)
+          .toUpperCase() || "FC";
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="44" fill="${bgHex}" stroke="rgba(255,255,255,0.35)" stroke-width="3"/><text x="48" y="56" text-anchor="middle" fill="#ffffff" font-family="Outfit,sans-serif" font-size="26" font-weight="900">${letters}</text></svg>`;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      }
+
+      function renderReferenceCardsVisuals() {
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        // Remove duplicate stray badges above cards
+        app.querySelectorAll(".grid").forEach(grid => {
+          [...grid.children].forEach(el => {
+            if (!el.classList.contains("card")) el.remove();
+          });
+        });
+
+        app.querySelectorAll(".grid .card").forEach(card => {
+          const banner = card.querySelector(".banner");
+          if (!banner) return;
+
+          const title = card.querySelector(".title")?.textContent || "Match";
+          const [teamA, teamB] = splitTeams(title);
+          const badgeA = findCrest(teamA) || monogramCrestDataUrl(teamA, "#111827");
+          const badgeB = findCrest(teamB) || monogramCrestDataUrl(teamB, "#7f1d1d");
+
+          banner.style.setProperty("--card-grad", pickGradient(title));
+
+          // Keep only the top-left pill (LIVE / FT) and top-right favorite button
+          const pill = banner.querySelector(".pill");
+          const fav = banner.querySelector(".fav");
+
+          let stage = banner.querySelector(".match-vs-stage");
+          if (!stage) {
+            stage = document.createElement("div");
+            stage.className = "match-vs-stage";
+            banner.appendChild(stage);
+          }
+
+          const centerText = pill && /ft\b/i.test(pill.textContent || "")
+            ? (pill.textContent || "").replace(/^ft\s*•?\s*/i, "").trim() || "FT"
+            : "🏆";
+
+          stage.innerHTML = `
+            <img class="match-side-crest" src="${esc(badgeA)}" alt="${esc(teamA)}" onerror="this.src='${esc(monogramCrestDataUrl(teamA, "#111827"))}'" />
+            <span class="match-center-emblem">${esc(centerText)}</span>
+            <img class="match-side-crest" src="${esc(badgeB)}" alt="${esc(teamB)}" onerror="this.src='${esc(monogramCrestDataUrl(teamB, "#7f1d1d"))}'" />
+          `;
+
+          if (pill) banner.appendChild(pill);
+          if (fav) banner.appendChild(fav);
+        });
+      }
+
+      function populateCleanResumesTab() {
+        if (typeof ST === "undefined" || ST.tab !== "replays") return;
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        const q = (ST.q || "").trim().toLowerCase();
+        const items = REFERENCE_RESUMES.filter(m =>
+          !q || `${m.title} ${m.league}`.toLowerCase().includes(q)
+        );
+
+        let grid = app.querySelector(".grid");
+        const heading = [...app.querySelectorAll("h2.section-title")].find(h =>
+          /résumés|replays|highlights/i.test(h.textContent || "")
+        );
+        if (heading) {
+          heading.innerHTML = `<span class="bar"></span> Résumés &amp; Highlights (${items.length})`;
+        }
+        if (!grid && heading) {
+          grid = document.createElement("div");
+          grid.className = "grid";
+          const filterRow = document.getElementById("replaysFilterRow");
+          (filterRow || heading).insertAdjacentElement("afterend", grid);
+        }
+        if (!grid) return;
+
+        if (grid.children.length === 0) {
+          grid.innerHTML = items.map(m => {
+            const isFav = Boolean(ST.favs?.matches?.some(x => x.id === m.id));
+            const enc = encodeURIComponent(JSON.stringify(m));
+            return `
+              <div class="card">
+                <div class="banner" onclick="openMatch(JSON.parse(decodeURIComponent('${enc}')))">
+                  <span class="pill">FT • ${esc(m.score)}</span>
+                  <button class="fav ${isFav ? "on" : ""}" onclick="event.stopPropagation();toggleFav('matches',JSON.parse(decodeURIComponent('${enc}')))" title="Favorite">★</button>
+                </div>
+                <div class="body" onclick="openMatch(JSON.parse(decodeURIComponent('${enc}')))">
+                  <div class="lg">${esc(m.league)}</div>
+                  <div class="title">${esc(m.title)}</div>
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+      }
+
+      if (typeof render === "function") {
+        const _prevRefRender = render;
+        render = function () {
+          _prevRefRender();
+          populateCleanResumesTab();
+          renderReferenceCardsVisuals();
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        populateCleanResumesTab();
+        renderReferenceCardsVisuals();
+      });
+      setTimeout(() => {
+        populateCleanResumesTab();
+        renderReferenceCardsVisuals();
+      }, 450);
+    })();
+  </script>
 </body>
 </html>
