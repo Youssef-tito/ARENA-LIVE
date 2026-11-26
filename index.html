@@ -1,34 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arena Live — Live Sports, Players & TV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#07080b" />
+  <title>Arena Live — بث مباشر للمباريات والقنوات</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <style>
     :root {
-      --bg: #050507;
-      --surface: #101116;
-      --surface-2: #181a22;
-      --text: #f5f7fb;
-      --muted: #9aa1b2;
-      --accent: #7c5cff;
-      --accent-2: #22d3ee;
+      --bg: #07080b;
+      --surface: #0e1016;
+      --surface-2: #151822;
+      --surface-hover: #1c202e;
       --border: rgba(255, 255, 255, 0.08);
-      --radius: 16px;
+      --text: #f4f6fb;
+      --muted: #98a0b3;
+      --accent: #00e676;
+      --accent-soft: rgba(0, 230, 118, 0.14);
+      --live: #ff2a55;
+      --live-soft: rgba(255, 42, 85, 0.16);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --nav-h: 64px;
+      --trans: 0.2s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      outline-color: var(--accent);
     }
 
-    body {
+    html, body {
       background: var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
       min-height: 100vh;
-      line-height: 1.5;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body.compact-cards .grid {
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button, input, select {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
     }
 
     /* Top Bar */
@@ -36,14 +67,15 @@
       position: sticky;
       top: 0;
       z-index: 40;
+      height: var(--nav-h);
+      background: rgba(7, 8, 11, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 14px 24px;
-      background: rgba(5, 5, 7, 0.85);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
+      gap: 14px;
+      padding: 0 clamp(14px, 3vw, 32px);
     }
 
     .brand {
@@ -52,33 +84,42 @@
       gap: 10px;
       font-weight: 800;
       font-size: 1.15rem;
-      letter-spacing: 0.4px;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
     }
 
-    .brand-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      box-shadow: 0 0 14px var(--accent);
+    .brand-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), #00b0ff);
+      color: #050709;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 0.9rem;
     }
 
-    .nav {
+    .nav-tabs {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .nav-tabs::-webkit-scrollbar { display: none; }
 
     .nav-btn {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid transparent;
       padding: 8px 14px;
       border-radius: 999px;
       font-size: 0.9rem;
       font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s ease;
+      color: var(--muted);
+      white-space: nowrap;
+      transition: var(--trans);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .nav-btn:hover {
@@ -87,123 +128,134 @@
     }
 
     .nav-btn.active {
-      color: #fff;
-      background: linear-gradient(135deg, var(--accent), #5b3df5);
-      box-shadow: 0 6px 20px rgba(124, 92, 255, 0.35);
+      color: #050709;
+      background: var(--accent);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 8px var(--live);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
     }
 
     /* Main Container */
     .container {
-      max-width: 1280px;
+      max-width: 1440px;
       margin: 0 auto;
-      padding: 24px;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-      animation: fadeIn 0.25s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      padding: 24px clamp(14px, 3vw, 32px) 64px;
     }
 
     .section-head {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
     .section-title {
+      font-size: 1.3rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 1.25rem;
-      font-weight: 700;
     }
 
-    .accent-bar {
-      width: 4px;
-      height: 22px;
-      border-radius: 99px;
-      background: linear-gradient(180deg, var(--accent), var(--accent-2));
-    }
-
-    /* Hero */
-    .hero {
-      position: relative;
-      border-radius: 24px;
-      overflow: hidden;
-      background: linear-gradient(135deg, #151724 0%, #0b0c12 100%);
-      border: 1px solid var(--border);
-      padding: 36px;
-      margin-bottom: 32px;
-    }
-
-    .hero-badge {
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 999px;
-      background: rgba(34, 211, 238, 0.14);
-      color: var(--accent-2);
-      font-size: 0.8rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-
-    .hero h1 {
-      font-size: clamp(1.7rem, 3.5vw, 2.6rem);
-      margin-bottom: 10px;
-    }
-
-    .hero p {
-      color: var(--muted);
-      max-width: 650px;
-      margin-bottom: 20px;
-    }
-
-    .hero-actions {
+    .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
+      align-items: center;
     }
 
-    .btn {
-      border: none;
-      border-radius: 12px;
-      padding: 10px 18px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s ease;
+    .input, .select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 13px;
+      font-size: 0.9rem;
+      transition: var(--trans);
+    }
+
+    .input:focus, .select:focus {
+      border-color: var(--accent);
+    }
+
+    .select option {
+      background: var(--surface-2);
+      color: var(--text);
     }
 
     .btn-primary {
       background: var(--accent);
-      color: #fff;
+      color: #050709;
+      font-weight: 700;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      transition: var(--trans);
     }
 
     .btn-primary:hover {
-      background: #6a48f7;
+      filter: brightness(1.08);
     }
 
-    .btn-secondary {
-      background: var(--surface-2);
-      color: var(--text);
+    .btn-ghost {
+      background: var(--surface);
       border: 1px solid var(--border);
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: var(--trans);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Chips */
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 18px;
+      scrollbar-width: thin;
+    }
+
+    .chip {
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: var(--trans);
+    }
+
+    .chip.active, .chip:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: var(--accent-soft);
     }
 
     /* Grids & Cards */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 18px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
     }
 
     .card {
@@ -211,454 +263,892 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      transition: var(--trans);
+      text-align: start;
     }
 
     .card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(124, 92, 255, 0.55);
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: var(--surface-2);
     }
 
-    .card-img-wrap {
-      aspect-ratio: 3 / 4;
-      background: var(--surface-2);
+    .thumb-wrap {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #0b0d13;
       overflow: hidden;
     }
 
-    .card-img-wrap img {
+    .thumb-wrap img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
+    .thumb-placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--muted);
+      background: linear-gradient(135deg, #111520, #181d2d);
+    }
+
+    .badge-live {
+      position: absolute;
+      top: 10px;
+      inset-inline-start: 10px;
+      background: var(--live);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-cat {
+      position: absolute;
+      top: 10px;
+      inset-inline-end: 10px;
+      background: rgba(7, 8, 11, 0.78);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
     .card-body {
-      padding: 14px;
+      padding: 13px 14px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
     }
 
     .card-title {
+      font-size: 0.96rem;
       font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 4px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    .card-sub {
+    .card-meta {
+      font-size: 0.8rem;
       color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    .live-pill {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: rgba(239, 68, 68, 0.16);
-      color: #f87171;
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-    }
-
-    .modal-overlay.open {
+      margin-top: auto;
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
     }
 
-    .modal-box {
-      position: relative;
-      width: 100%;
-      max-width: 680px;
-      max-height: 90vh;
-      overflow-y: auto;
+    /* Scoreboard Cards */
+    .scores-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 14px;
+    }
+
+    .score-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 24px;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text);
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-
-    .player-modal-body {
+      border-radius: var(--radius);
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-    }
-
-    .player-modal-top {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 20px;
-      align-items: start;
-    }
-
-    @media (max-width: 600px) {
-      .player-modal-top {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .player-modal-photo img {
-      width: 100%;
-      aspect-ratio: 3 / 4;
-      object-fit: cover;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      display: block;
-    }
-
-    .player-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(124, 92, 255, 0.18);
-      color: #c4b5fd;
-      font-size: 0.78rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .player-modal-name {
-      font-size: 1.45rem;
-      margin-bottom: 8px;
-    }
-
-    .player-modal-bio {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .player-details-box {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-    }
-
-    .player-details-box h4 {
-      margin-bottom: 12px;
-      font-size: 1rem;
-    }
-
-    .player-details-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
 
-    .player-details-grid div {
-      background: var(--surface);
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-
-    .player-details-grid span {
-      display: block;
-      font-size: 0.78rem;
+    .score-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
       color: var(--muted);
     }
 
-    .player-details-grid strong {
-      font-size: 0.95rem;
+    .status-pill {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .status-live {
+      background: var(--live-soft);
+      color: #ff6b88;
+      border: 1px solid rgba(255, 42, 85, 0.35);
+    }
+
+    .status-ft {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+    }
+
+    .status-ns {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .team-name {
+      font-weight: 700;
+      font-size: 0.98rem;
+      line-height: 1.3;
+    }
+
+    .score-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      min-width: 78px;
+    }
+
+    /* Player View */
+    .player-shell {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .player-stage {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      max-height: 72vh;
+      width: 100%;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .player-stage video,
+    .player-stage iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    .player-info {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Settings */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .setting-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .setting-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    @media (max-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .scores-list {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-      <span class="brand-dot"></span>
-      <span>ARENA LIVE</span>
-    </div>
-    <nav class="nav" id="mainNav">
-      <button class="nav-btn active" data-route="home">Home</button>
-      <button class="nav-btn" data-route="sports">Sports</button>
-      <button class="nav-btn" data-route="players">Players</button>
-      <button class="nav-btn" data-route="live">Live TV</button>
+    <a href="#/matches" class="brand" data-route="matches">
+      <span class="brand-badge">AL</span>
+      <span>Arena Live</span>
+    </a>
+
+    <nav class="nav-tabs" aria-label="التنقل الرئيسي">
+      <button class="nav-btn active" data-route="matches">
+        <span class="live-dot"></span>
+        <span data-i18n="nav_matches">المباريات المباشرة</span>
+      </button>
+      <button class="nav-btn" data-route="score">
+        <span data-i18n="nav_score">النتائج (Score)</span>
+      </button>
+      <button class="nav-btn" data-route="channels">
+        <span data-i18n="nav_channels">القنوات</span>
+      </button>
+      <button class="nav-btn" data-route="settings">
+        <span data-i18n="nav_settings">الإعدادات</span>
+      </button>
     </nav>
   </header>
 
-  <main class="container">
-    <!-- HOME PAGE -->
-    <section class="page active" id="page-home">
-      <div class="hero">
-        <span class="hero-badge">LIVE ARENA</span>
-        <h1>Matches, Players & Live Channels</h1>
-        <p>Follow live matches, explore player profiles and photos, and switch to live TV channels in one clean interface.</p>
-        <div class="hero-actions">
-          <button class="btn btn-primary" data-route="sports">Explore Sports</button>
-          <button class="btn btn-secondary" data-route="players">Browse Players</button>
-        </div>
-      </div>
-
-      <div class="section-head">
-        <h2 class="section-title"><span class="accent-bar"></span>Featured Players</h2>
-      </div>
-      <div class="grid" id="homePlayersGrid"></div>
-
-      <div class="section-head">
-        <h2 class="section-title"><span class="accent-bar"></span>Live Sports</h2>
-      </div>
-      <div class="grid" id="homeSportsGrid"></div>
-    </section>
-
-    <!-- SPORTS PAGE -->
-    <section class="page" id="page-sports">
-      <div class="section-head">
-        <h2 class="section-title"><span class="accent-bar"></span>Sports Matches</h2>
-      </div>
-      <div class="grid" id="sportsGrid"></div>
-    </section>
-
-    <!-- PLAYERS PAGE -->
-    <section class="page" id="page-players">
-      <div class="section-head">
-        <h2 class="section-title"><span class="accent-bar"></span>Players</h2>
-      </div>
-      <div class="grid" id="playersGrid"></div>
-    </section>
-
-    <!-- LIVE TV PAGE -->
-    <section class="page" id="page-live">
-      <div class="section-head">
-        <h2 class="section-title"><span class="accent-bar"></span>Live TV Channels</h2>
-      </div>
-      <div class="grid" id="liveGrid"></div>
-    </section>
-  </main>
-
-  <!-- PLAYER DETAIL MODAL -->
-  <div class="modal-overlay" id="playerModal">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-label="Player details">
-      <button class="modal-close" id="closePlayerModal" aria-label="Close">×</button>
-      <div id="playerModalContent"></div>
-    </div>
-  </div>
+  <main id="app" class="container"></main>
 
   <script>
-    const PLAYERS_DATA = [
-      {
-        id: 'p1',
-        name: 'Kylian Mbappé',
-        position: 'Forward',
-        team: 'Real Madrid',
-        nationality: 'France',
-        age: '27',
-        photo: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80',
-        bio: 'Fast and clinical forward known for explosive pace, direct runs, and decisive goals in major competitions.'
+    const CONFIG = {
+      ppvApi: 'https://api.ppv.st/api/streams',
+      iptvChannelsUrl: 'https://iptv-org.github.io/api/channels.json',
+      iptvStreamsUrl: 'https://iptv-org.github.io/api/streams.json',
+      pollIntervalMs: 30000
+    };
+
+    const I18N = {
+      ar: {
+        nav_matches: 'المباريات المباشرة',
+        nav_score: 'النتائج (Score)',
+        nav_channels: 'القنوات',
+        nav_settings: 'الإعدادات',
+        all: 'الكل',
+        live_now: 'مباشر الآن',
+        search_matches: 'ابحث عن مباراة أو فريق...',
+        search_channels: 'ابحث عن قناة تلفزيونية...',
+        refresh: 'تحديث',
+        back: 'رجوع',
+        watch_now: 'مشاهدة البث',
+        no_data: 'لا توجد بيانات متاحة حالياً.',
+        score_title: 'لوحة النتائج المباشرة (Score)',
+        add_match_score: 'إضافة نتيجة مباراة',
+        home_team: 'الفريق الأول',
+        away_team: 'الفريق الثاني',
+        home_score: 'أهداف الأول',
+        away_score: 'أهداف الثاني',
+        status_live: 'مباشر',
+        status_ft: 'انتهت',
+        status_ns: 'لم تبدأ',
+        save_score: 'حفظ النتيجة',
+        settings_title: 'إعدادات Arena Live',
+        lang_label: 'لغة الواجهة (Language)',
+        compact_label: 'شبكة بطاقات مدمجة',
+        compact_desc: 'عرض عدد أكبر من البطاقات في الشاشة الواحدة',
+        poll_label: 'التحديث التلقائي للمباريات والنتائج',
+        poll_desc: 'تحديث حالة البث والنتائج كل 30 ثانية',
+        clear_data: 'مسح البيانات المحفوظة',
+        clear_desc: 'حذف النتائج المضافة محلياً والإعدادات المخزنة'
       },
-      {
-        id: 'p2',
-        name: 'Jude Bellingham',
-        position: 'Midfielder',
-        team: 'Real Madrid',
-        nationality: 'England',
-        age: '23',
-        photo: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=600&q=80',
-        bio: 'Dynamic box-to-box midfielder combining vision, late penalty-box arrivals, and strong ball progression.'
+      fr: {
+        nav_matches: 'Matchs en direct',
+        nav_score: 'Scores',
+        nav_channels: 'Chaînes',
+        nav_settings: 'Paramètres',
+        all: 'Tous',
+        live_now: 'EN DIRECT',
+        search_matches: 'Rechercher un match ou une équipe...',
+        search_channels: 'Rechercher une chaîne TV...',
+        refresh: 'Actualiser',
+        back: 'Retour',
+        watch_now: 'Regarder',
+        no_data: 'Aucune donnée disponible pour le moment.',
+        score_title: 'Tableau des Scores',
+        add_match_score: 'Ajouter un score',
+        home_team: 'Équipe domicile',
+        away_team: 'Équipe extérieure',
+        home_score: 'Score domicile',
+        away_score: 'Score extérieur',
+        status_live: 'EN DIRECT',
+        status_ft: 'TERMINÉ',
+        status_ns: 'À VENIR',
+        save_score: 'Enregistrer',
+        settings_title: 'Paramètres Arena Live',
+        lang_label: 'Langue de l’interface',
+        compact_label: 'Grille compacte',
+        compact_desc: 'Afficher plus de cartes par ligne',
+        poll_label: 'Actualisation automatique',
+        poll_desc: 'Mettre à jour les matchs et scores toutes les 30s',
+        clear_data: 'Effacer les données locales',
+        clear_desc: 'Supprimer les scores ajoutés et préférences'
       },
-      {
-        id: 'p3',
-        name: 'Vinícius Júnior',
-        position: 'Winger',
-        team: 'Real Madrid',
-        nationality: 'Brazil',
-        age: '26',
-        photo: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&w=600&q=80',
-        bio: 'Explosive left winger recognized for one-on-one dribbling, creativity, and big-match performances.'
-      },
-      {
-        id: 'p4',
-        name: 'Erling Haaland',
-        position: 'Striker',
-        team: 'Manchester City',
-        nationality: 'Norway',
-        age: '26',
-        photo: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?auto=format&fit=crop&w=600&q=80',
-        bio: 'High-scoring center forward noted for physical strength, positioning, and sharp finishing.'
+      en: {
+        nav_matches: 'Live Matches',
+        nav_score: 'Score',
+        nav_channels: 'Channels',
+        nav_settings: 'Settings',
+        all: 'All',
+        live_now: 'LIVE',
+        search_matches: 'Search match or team...',
+        search_channels: 'Search TV channel...',
+        refresh: 'Refresh',
+        back: 'Back',
+        watch_now: 'Watch Stream',
+        no_data: 'No data available right now.',
+        score_title: 'Live Scoreboard',
+        add_match_score: 'Add Match Score',
+        home_team: 'Home Team',
+        away_team: 'Away Team',
+        home_score: 'Home Score',
+        away_score: 'Away Score',
+        status_live: 'LIVE',
+        status_ft: 'FT',
+        status_ns: 'UPCOMING',
+        save_score: 'Save Score',
+        settings_title: 'Arena Live Settings',
+        lang_label: 'Interface Language',
+        compact_label: 'Compact Card Grid',
+        compact_desc: 'Show more cards per row across screens',
+        poll_label: 'Auto-Refresh Live Data',
+        poll_desc: 'Poll matches and scores every 30 seconds',
+        clear_data: 'Clear Saved Data',
+        clear_desc: 'Reset custom scores and stored settings'
       }
+    };
+
+    const DEFAULT_SCORES = [
+      { id: 's1', league: 'Champions League', home: 'Real Madrid', away: 'Liverpool', hScore: 2, aScore: 1, status: 'live', minute: '68\'' },
+      { id: 's2', league: 'Premier League', home: 'Arsenal', away: 'Manchester City', hScore: 1, aScore: 1, status: 'live', minute: '54\'' },
+      { id: 's3', league: 'La Liga', home: 'Barcelona', away: 'Atletico Madrid', hScore: 3, aScore: 0, status: 'ft', minute: 'FT' },
+      { id: 's4', league: 'Serie A', home: 'Inter Milan', away: 'Juventus', hScore: 0, aScore: 0, status: 'ns', minute: '21:00' }
     ];
 
-    const SPORTS_DATA = [
-      {
-        id: 'm1',
-        title: 'Champions League Night',
-        meta: 'Football • 21:00 CET',
-        status: 'LIVE',
-        img: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80'
+    const safeStorage = {
+      get(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : fallback;
+        } catch {
+          return fallback;
+        }
       },
-      {
-        id: 'm2',
-        title: 'NBA primetime Clash',
-        meta: 'Basketball • Tonight',
-        status: 'UPCOMING',
-        img: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80'
+      set(key, val) {
+        try {
+          localStorage.setItem(key, JSON.stringify(val));
+        } catch {}
       },
-      {
-        id: 'm3',
-        title: 'Grand Prix Qualifying',
-        meta: 'Motor Sports • Track Live',
-        status: 'LIVE',
-        img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=600&q=80'
-      },
-      {
-        id: 'm4',
-        title: 'ATP Masters Final',
-        meta: 'Tennis • Center Court',
-        status: 'UPCOMING',
-        img: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=600&q=80'
+      remove(key) {
+        try {
+          localStorage.removeItem(key);
+        } catch {}
       }
-    ];
+    };
 
-    const LIVE_CHANNELS = [
-      {
-        id: 'c1',
-        title: 'Arena Sports 1 HD',
-        meta: 'Live Football & Analysis',
-        status: 'ON AIR',
-        img: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=600&q=80'
-      },
-      {
-        id: 'c2',
-        title: 'Arena Court & Hoops',
-        meta: 'Basketball & Tennis 24/7',
-        status: 'ON AIR',
-        img: 'https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&w=600&q=80'
+    const escapeHTML = (str) => String(str ?? '').replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+
+    const state = {
+      route: 'matches',
+      playerItem: null,
+      matches: [],
+      selectedSport: 'All',
+      matchQuery: '',
+      channels: [],
+      channelQuery: '',
+      scores: safeStorage.get('arena_scores', DEFAULT_SCORES),
+      settings: safeStorage.get('arena_settings', {
+        lang: 'ar',
+        compact: false,
+        autoPoll: true
+      }),
+      hls: null,
+      pollTimer: null
+    };
+
+    const t = (key) => (I18N[state.settings.lang] && I18N[state.settings.lang][key]) || I18N.ar[key] || key;
+
+    function applyPreferences() {
+      const lang = state.settings.lang || 'ar';
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.body.classList.toggle('compact-cards', Boolean(state.settings.compact));
+
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        el.textContent = t(el.dataset.i18n);
+      });
+
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.route === state.route);
+      });
+    }
+
+    function cleanupPlayer() {
+      if (state.hls) {
+        state.hls.destroy();
+        state.hls = null;
       }
-    ];
+      const vid = document.getElementById('arena-video');
+      if (vid) {
+        vid.pause();
+        vid.removeAttribute('src');
+        vid.load();
+      }
+    }
 
-    function renderPlayerCard(player) {
+    function setRoute(route, playerItem = null) {
+      cleanupPlayer();
+      state.route = route;
+      state.playerItem = playerItem;
+      applyPreferences();
+      render();
+    }
+
+    async function fetchMatches() {
+      try {
+        const res = await fetch(CONFIG.ppvApi);
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : (data.streams || data.data || []);
+        state.matches = list.map((item, idx) => ({
+          id: item.id || item.slug || `m-${idx}`,
+          title: item.name || item.title || item.match || `Match #${idx + 1}`,
+          category: item.category || item.sport || 'Football',
+          poster: item.poster || item.image || item.thumbnail || '',
+          url: item.stream_url || item.url || item.embed_url || item.iframe || '',
+          isLive: item.live !== false
+        }));
+      } catch {
+        state.matches = [];
+      }
+      if (state.route === 'matches') render();
+    }
+
+    async function fetchChannels() {
+      if (state.channels.length) return;
+      try {
+        const [chRes, stRes] = await Promise.all([
+          fetch(CONFIG.iptvChannelsUrl),
+          fetch(CONFIG.iptvStreamsUrl)
+        ]);
+        const chData = await chRes.json();
+        const stData = await stRes.json();
+
+        const streamByCh = new Map();
+        for (const s of stData) {
+          if (s.channel && s.url && !streamByCh.has(s.channel)) {
+            streamByCh.set(s.channel, s.url);
+          }
+        }
+
+        state.channels = chData
+          .filter((c) => !c.is_nsfw && streamByCh.has(c.id))
+          .slice(0, 180)
+          .map((c) => ({
+            id: c.id,
+            title: c.name,
+            category: c.country || 'TV',
+            poster: c.logo || '',
+            url: streamByCh.get(c.id)
+          }));
+      } catch {
+        state.channels = [];
+      }
+      if (state.route === 'channels') render();
+    }
+
+    function startPolling() {
+      clearInterval(state.pollTimer);
+      if (!state.settings.autoPoll) return;
+      state.pollTimer = setInterval(() => {
+        if (document.hidden) return;
+        if (state.route === 'matches') fetchMatches();
+        if (state.route === 'score') render();
+      }, CONFIG.pollIntervalMs);
+    }
+
+    function renderMatchesView() {
+      const sports = ['All', ...new Set(state.matches.map((m) => m.category).filter(Boolean))];
+      const filtered = state.matches.filter((m) => {
+        const matchesSport = state.selectedSport === 'All' || m.category === state.selectedSport;
+        const matchesSearch = !state.matchQuery || m.title.toLowerCase().includes(state.matchQuery.toLowerCase());
+        return matchesSport && matchesSearch;
+      });
+
       return `
-        <article class="card player-card" data-player-id="${player.id}">
-          <div class="card-img-wrap">
-            <img src="${player.photo}" alt="${player.name}" loading="lazy" />
+        <div class="section-head">
+          <h1 class="section-title">
+            <span class="live-dot"></span>
+            <span>${escapeHTML(t('nav_matches'))}</span>
+          </h1>
+          <div class="toolbar">
+            <input id="match-search" class="input" type="search" value="${escapeHTML(state.matchQuery)}" placeholder="${escapeHTML(t('search_matches'))}" />
+            <button id="refresh-matches" class="btn-ghost">${escapeHTML(t('refresh'))}</button>
           </div>
-          <div class="card-body">
-            <div class="card-title">${player.name}</div>
-            <div class="card-sub">${player.position} • ${player.team}</div>
+        </div>
+
+        <div class="chips">
+          ${sports.map((sp) => `
+            <button class="chip ${state.selectedSport === sp ? 'active' : ''}" data-sport="${escapeHTML(sp)}">
+              ${sp === 'All' ? escapeHTML(t('all')) : escapeHTML(sp)}
+            </button>
+          `).join('')}
+        </div>
+
+        ${filtered.length ? `
+          <div class="grid">
+            ${filtered.map((m, i) => `
+              <button class="card" data-play-index="${i}" data-play-source="matches">
+                <div class="thumb-wrap">
+                  ${m.poster
+                    ? `<img src="${escapeHTML(m.poster)}" alt="${escapeHTML(m.title)}" loading="lazy" />`
+                    : `<div class="thumb-placeholder">⚽</div>`
+                  }
+                  ${m.isLive ? `<span class="badge-live">${escapeHTML(t('live_now'))}</span>` : ''}
+                  <span class="badge-cat">${escapeHTML(m.category)}</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-title">${escapeHTML(m.title)}</div>
+                  <div class="card-meta">
+                    <span>${escapeHTML(t('watch_now'))}</span>
+                    <span>▶</span>
+                  </div>
+                </div>
+              </button>
+            `).join('')}
           </div>
-        </article>
+        ` : `<div class="empty-state">${escapeHTML(t('no_data'))}</div>`}
       `;
     }
 
-    function renderMatchCard(item) {
+    function renderScoreView() {
       return `
-        <article class="card">
-          <div class="card-img-wrap">
-            <img src="${item.img}" alt="${item.title}" loading="lazy" />
+        <div class="section-head">
+          <h1 class="section-title">${escapeHTML(t('score_title'))}</h1>
+        </div>
+
+        <form id="score-form" class="card" style="padding:16px;margin-bottom:20px;gap:12px;">
+          <strong style="font-size:0.95rem;">${escapeHTML(t('add_match_score'))}</strong>
+          <div class="toolbar">
+            <input name="league" class="input" placeholder="البطولة / League" required />
+            <input name="home" class="input" placeholder="${escapeHTML(t('home_team'))}" required />
+            <input name="hScore" class="input" type="number" min="0" style="width:95px;" placeholder="${escapeHTML(t('home_score'))}" required />
+            <input name="aScore" class="input" type="number" min="0" style="width:95px;" placeholder="${escapeHTML(t('away_score'))}" required />
+            <input name="away" class="input" placeholder="${escapeHTML(t('away_team'))}" required />
+            <select name="status" class="select">
+              <option value="live">${escapeHTML(t('status_live'))}</option>
+              <option value="ns">${escapeHTML(t('status_ns'))}</option>
+              <option value="ft">${escapeHTML(t('status_ft'))}</option>
+            </select>
+            <button type="submit" class="btn-primary">${escapeHTML(t('save_score'))}</button>
           </div>
-          <div class="card-body">
-            <div class="card-title">${item.title}</div>
-            <div class="card-sub">${item.meta}</div>
-            <span class="live-pill">${item.status}</span>
-          </div>
-        </article>
+        </form>
+
+        <div class="scores-list">
+          ${state.scores.map((sc) => {
+            const badgeClass = sc.status === 'live' ? 'status-live' : (sc.status === 'ft' ? 'status-ft' : 'status-ns');
+            const badgeText = sc.status === 'live' ? t('status_live') : (sc.status === 'ft' ? t('status_ft') : t('status_ns'));
+            return `
+              <div class="score-card">
+                <div class="score-top">
+                  <span>${escapeHTML(sc.league)}</span>
+                  <span class="status-pill ${badgeClass}">${escapeHTML(badgeText)} • ${escapeHTML(sc.minute || '')}</span>
+                </div>
+                <div class="match-row">
+                  <div class="team-name">${escapeHTML(sc.home)}</div>
+                  <div class="score-box">${Number(sc.hScore)} - ${Number(sc.aScore)}</div>
+                  <div class="team-name">${escapeHTML(sc.away)}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       `;
     }
 
-    function openPlayerModal(playerId) {
-      const player = PLAYERS_DATA.find(p => p.id === playerId);
-      if (!player) return;
+    function renderChannelsView() {
+      const filtered = state.channels.filter((c) =>
+        !state.channelQuery || c.title.toLowerCase().includes(state.channelQuery.toLowerCase())
+      );
 
-      const modal = document.getElementById('playerModal');
-      const content = document.getElementById('playerModalContent');
+      return `
+        <div class="section-head">
+          <h1 class="section-title">${escapeHTML(t('nav_channels'))}</h1>
+          <div class="toolbar">
+            <input id="channel-search" class="input" type="search" value="${escapeHTML(state.channelQuery)}" placeholder="${escapeHTML(t('search_channels'))}" />
+          </div>
+        </div>
 
-      content.innerHTML = `
-        <div class="player-modal-body">
-          <div class="player-modal-top">
-            <div class="player-modal-photo">
-              <img src="${player.photo}" alt="${player.name}" />
-            </div>
+        ${filtered.length ? `
+          <div class="grid">
+            ${filtered.map((ch, i) => `
+              <button class="card" data-play-index="${i}" data-play-source="channels">
+                <div class="thumb-wrap">
+                  ${ch.poster
+                    ? `<img src="${escapeHTML(ch.poster)}" alt="${escapeHTML(ch.title)}" loading="lazy" />`
+                    : `<div class="thumb-placeholder">TV</div>`
+                  }
+                  <span class="badge-cat">${escapeHTML(ch.category)}</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-title">${escapeHTML(ch.title)}</div>
+                  <div class="card-meta">
+                    <span>${escapeHTML(t('watch_now'))}</span>
+                    <span>▶</span>
+                  </div>
+                </div>
+              </button>
+            `).join('')}
+          </div>
+        ` : `<div class="empty-state">${escapeHTML(t('no_data'))}</div>`}
+      `;
+    }
+
+    function renderPlayerView() {
+      const item = state.playerItem;
+      if (!item) return `<div class="empty-state">${escapeHTML(t('no_data'))}</div>`;
+
+      const isM3u8 = typeof item.url === 'string' && item.url.includes('.m3u8');
+
+      return `
+        <div class="player-shell">
+          <div class="player-stage">
+            ${isM3u8
+              ? `<video id="arena-video" controls autoplay playsinline></video>`
+              : `<iframe src="${escapeHTML(item.url)}" allow="autoplay; fullscreen; encrypted-media" allowfullscreen referrerpolicy="no-referrer"></iframe>`
+            }
+          </div>
+          <div class="player-info">
             <div>
-              <span class="player-badge">${player.position}</span>
-              <h3 class="player-modal-name">${player.name}</h3>
-              <p class="player-modal-bio">${player.bio}</p>
+              <h1 style="font-size:1.15rem;font-weight:800;">${escapeHTML(item.title)}</h1>
+              <span style="font-size:0.85rem;color:var(--muted);">${escapeHTML(item.category || '')}</span>
             </div>
-          </div>
-          <div class="player-details-box">
-            <h4>Player Details</h4>
-            <div class="player-details-grid">
-              <div><span>Team</span><strong>${player.team}</strong></div>
-              <div><span>Position</span><strong>${player.position}</strong></div>
-              <div><span>Nationality</span><strong>${player.nationality}</strong></div>
-              <div><span>Age</span><strong>${player.age}</strong></div>
-            </div>
+            <button id="back-btn" class="btn-ghost">← ${escapeHTML(t('back'))}</button>
           </div>
         </div>
       `;
-
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
     }
 
-    function closePlayerModal() {
-      const modal = document.getElementById('playerModal');
-      modal.classList.remove('open');
-      document.body.style.overflow = '';
+    function renderSettingsView() {
+      return `
+        <div class="section-head">
+          <h1 class="section-title">${escapeHTML(t('settings_title'))}</h1>
+        </div>
+        <div class="settings-grid">
+          <div class="setting-card">
+            <label for="lang-select" style="font-weight:700;">${escapeHTML(t('lang_label'))}</label>
+            <select id="lang-select" class="select">
+              <option value="ar" ${state.settings.lang === 'ar' ? 'selected' : ''}>العربية</option>
+              <option value="fr" ${state.settings.lang === 'fr' ? 'selected' : ''}>Français</option>
+              <option value="en" ${state.settings.lang === 'en' ? 'selected' : ''}>English</option>
+            </select>
+          </div>
+
+          <div class="setting-card">
+            <div class="setting-row">
+              <strong>${escapeHTML(t('compact_label'))}</strong>
+              <input id="compact-toggle" type="checkbox" ${state.settings.compact ? 'checked' : ''} />
+            </div>
+            <p class="setting-desc">${escapeHTML(t('compact_desc'))}</p>
+          </div>
+
+          <div class="setting-card">
+            <div class="setting-row">
+              <strong>${escapeHTML(t('poll_label'))}</strong>
+              <input id="poll-toggle" type="checkbox" ${state.settings.autoPoll ? 'checked' : ''} />
+            </div>
+            <p class="setting-desc">${escapeHTML(t('poll_desc'))}</p>
+          </div>
+
+          <div class="setting-card">
+            <strong>${escapeHTML(t('clear_data'))}</strong>
+            <p class="setting-desc">${escapeHTML(t('clear_desc'))}</p>
+            <button id="reset-btn" class="btn-ghost">${escapeHTML(t('clear_data'))}</button>
+          </div>
+        </div>
+      `;
     }
 
-    function showRoute(route) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      const targetPage = document.getElementById('page-' + route);
-      if (targetPage) {
-        targetPage.classList.add('active');
+    function mountHlsIfNeeded() {
+      const item = state.playerItem;
+      const vid = document.getElementById('arena-video');
+      if (!item || !vid || !item.url.includes('.m3u8')) return;
+
+      if (window.Hls && window.Hls.isSupported()) {
+        const hls = new window.Hls({ enableWorker: true });
+        hls.loadSource(item.url);
+        hls.attachMedia(vid);
+        state.hls = hls;
+      } else if (vid.canPlayType('application/vnd.apple.mpegurl')) {
+        vid.src = item.url;
+      }
+    }
+
+    function bindEvents() {
+      const matchSearch = document.getElementById('match-search');
+      if (matchSearch) {
+        matchSearch.addEventListener('input', (e) => {
+          state.matchQuery = e.target.value;
+          render();
+        });
       }
 
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.route === route);
+      const refreshBtn = document.getElementById('refresh-matches');
+      if (refreshBtn) refreshBtn.addEventListener('click', fetchMatches);
+
+      document.querySelectorAll('[data-sport]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.selectedSport = btn.dataset.sport;
+          render();
+        });
       });
+
+      const channelSearch = document.getElementById('channel-search');
+      if (channelSearch) {
+        channelSearch.addEventListener('input', (e) => {
+          state.channelQuery = e.target.value;
+          render();
+        });
+      }
+
+      document.querySelectorAll('[data-play-index]').forEach((card) => {
+        card.addEventListener('click', () => {
+          const idx = Number(card.dataset.playIndex);
+          const src = card.dataset.playSource === 'channels' ? state.channels : state.matches;
+          const target = src[idx];
+          if (target && target.url) setRoute('player', target);
+        });
+      });
+
+      const backBtn = document.getElementById('back-btn');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => setRoute('matches'));
+      }
+
+      const scoreForm = document.getElementById('score-form');
+      if (scoreForm) {
+        scoreForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const fd = new FormData(scoreForm);
+          const entry = {
+            id: `s-${Date.now()}`,
+            league: fd.get('league'),
+            home: fd.get('home'),
+            away: fd.get('away'),
+            hScore: Number(fd.get('hScore') || 0),
+            aScore: Number(fd.get('aScore') || 0),
+            status: fd.get('status') || 'live',
+            minute: fd.get('status') === 'live' ? 'LIVE' : (fd.get('status') === 'ft' ? 'FT' : '--:--')
+          };
+          state.scores = [entry, ...state.scores];
+          safeStorage.set('arena_scores', state.scores);
+          render();
+        });
+      }
+
+      const langSelect = document.getElementById('lang-select');
+      if (langSelect) {
+        langSelect.addEventListener('change', (e) => {
+          state.settings.lang = e.target.value;
+          safeStorage.set('arena_settings', state.settings);
+          applyPreferences();
+          render();
+        });
+      }
+
+      const compactToggle = document.getElementById('compact-toggle');
+      if (compactToggle) {
+        compactToggle.addEventListener('change', (e) => {
+          state.settings.compact = e.target.checked;
+          safeStorage.set('arena_settings', state.settings);
+          applyPreferences();
+        });
+      }
+
+      const pollToggle = document.getElementById('poll-toggle');
+      if (pollToggle) {
+        pollToggle.addEventListener('change', (e) => {
+          state.settings.autoPoll = e.target.checked;
+          safeStorage.set('arena_settings', state.settings);
+          startPolling();
+        });
+      }
+
+      const resetBtn = document.getElementById('reset-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          safeStorage.remove('arena_scores');
+          safeStorage.remove('arena_settings');
+          state.scores = [...DEFAULT_SCORES];
+          state.settings = { lang: 'ar', compact: false, autoPoll: true };
+          applyPreferences();
+          startPolling();
+          render();
+        });
+      }
     }
 
-    function initApp() {
-      document.getElementById('homePlayersGrid').innerHTML = PLAYERS_DATA.map(renderPlayerCard).join('');
-      document.getElementById('playersGrid').innerHTML = PLAYERS_DATA.map(renderPlayerCard).join('');
-      document.getElementById('homeSportsGrid').innerHTML = SPORTS_DATA.map(renderMatchCard).join('');
-      document.getElementById('sportsGrid').innerHTML = SPORTS_DATA.map(renderMatchCard).join('');
-      document.getElementById('liveGrid').innerHTML = LIVE_CHANNELS.map(renderMatchCard).join('');
+    function render() {
+      const app = document.getElementById('app');
+      if (state.route === 'matches') app.innerHTML = renderMatchesView();
+      else if (state.route === 'score') app.innerHTML = renderScoreView();
+      else if (state.route === 'channels') app.innerHTML = renderChannelsView();
+      else if (state.route === 'player') app.innerHTML = renderPlayerView();
+      else if (state.route === 'settings') app.innerHTML = renderSettingsView();
 
-      document.addEventListener('click', (e) => {
-        const routeBtn = e.target.closest('[data-route]');
-        if (routeBtn) {
-          showRoute(routeBtn.dataset.route);
-          return;
-        }
-
-        const playerCard = e.target.closest('.player-card[data-player-id]');
-        if (playerCard) {
-          openPlayerModal(playerCard.dataset.playerId);
-          return;
-        }
-
-        if (e.target.id === 'closePlayerModal' || e.target.id === 'playerModal') {
-          closePlayerModal();
-        }
-      });
+      bindEvents();
+      if (state.route === 'player') mountHlsIfNeeded();
     }
 
-    document.addEventListener('DOMContentLoaded', initApp);
+    document.querySelectorAll('.nav-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const route = btn.dataset.route;
+        setRoute(route);
+        if (route === 'channels') fetchChannels();
+      });
+    });
+
+    document.querySelector('.brand').addEventListener('click', (e) => {
+      e.preventDefault();
+      setRoute('matches');
+    });
+
+    applyPreferences();
+    render();
+    fetchMatches();
+    startPolling();
   </script>
 </body>
 </html>
