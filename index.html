@@ -6386,5 +6386,44 @@
     }
   })();
 </script>
+              <script>
+  (function () {
+    const originalOpen = window.open;
+    window.open = function (url, target, features) {
+      if (!url || typeof url !== "string") return null;
+      const lower = url.toLowerCase();
+      if (lower.includes("affid") || lower.includes("sub1") || lower.includes("candy.ai")) {
+        return null;
+      }
+      return originalOpen.call(window, url, target || "_blank", features);
+    };
+
+    function hardenIframes() {
+      document.querySelectorAll("iframe").forEach((frame) => {
+        const src = (frame.getAttribute("src") || "").toLowerCase();
+        if (!src || src.startsWith("about:")) return;
+        frame.setAttribute(
+          "sandbox",
+          "allow-scripts allow-same-origin allow-forms allow-presentation"
+        );
+        frame.setAttribute("referrerpolicy", "no-referrer");
+      });
+    }
+
+    const observer = new MutationObserver(hardenIframes);
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src"]
+    });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", hardenIframes);
+    } else {
+      hardenIframes();
+    }
+  })();
+</script>
 </body>
 </html>
