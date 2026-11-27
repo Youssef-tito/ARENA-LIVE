@@ -6350,6 +6350,41 @@
     }
   })();
 </script>
-</body>
+<script>
+  (function () {
+    function hardenIframes() {
+      document.querySelectorAll("iframe").forEach((frame) => {
+        const src = (frame.getAttribute("src") || "").toLowerCase();
+        if (!src || src.startsWith("about:")) return;
+        frame.setAttribute(
+          "sandbox",
+          "allow-scripts allow-same-origin allow-forms allow-presentation"
+        );
+        frame.setAttribute("referrerpolicy", "no-referrer");
+      });
+
+      document.querySelectorAll('a[target="_blank"]').forEach((link) => {
+        const rel = (link.getAttribute("rel") || "").toLowerCase();
+        if (!rel.includes("noopener")) {
+          link.setAttribute("rel", (rel + " noopener noreferrer").trim());
+        }
+      });
+    }
+
+    const observer = new MutationObserver(hardenIframes);
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src", "href", "target"]
+    });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", hardenIframes);
+    } else {
+      hardenIframes();
+    }
+  })();
+</script>
 </body>
 </html>
