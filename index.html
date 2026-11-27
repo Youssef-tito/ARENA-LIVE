@@ -6025,5 +6025,298 @@
   }
 }
 </style>
+  <style>
+/* =========================================================
+   REPLAYS & RÉSUMÉS — CLUB LOGOS STRIP + MOBILE PERFECTION
+   ========================================================= */
+.replay-clubs-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 10px 2px;
+  margin: 12px 0 18px;
+}
+
+.replay-clubs-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.replay-club-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: #101614;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e8eef2;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.replay-club-chip:hover {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: #15201c;
+}
+
+.replay-club-chip.active {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #06110a;
+  border-color: transparent;
+}
+
+.replay-club-chip img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+/* شريط الجمعيات داخل كل بطاقة مباراة */
+.match-teams-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.match-team-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f3f6f8;
+}
+
+.match-team-badge img {
+  width: 26px !important;
+  height: 26px !important;
+  max-width: 26px !important;
+  max-height: 26px !important;
+  object-fit: contain !important;
+  background: #ffffff !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.match-team-badge span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-vs-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.14);
+  padding: 2px 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+/* تنسيق مثالي للتليفون (Mobile Responsive) */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .container,
+  main,
+  section {
+    max-width: 100% !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* أشرطة الفلاتر والبطولات تنزلق أفقياً بدل أن تكسر العرض */
+  .filters-row,
+  .filter-pills,
+  .leagues-bar,
+  .stats-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 8px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .filters-row::-webkit-scrollbar,
+  .filter-pills::-webkit-scrollbar,
+  .leagues-bar::-webkit-scrollbar,
+  .stats-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filters-row > *,
+  .filter-pills > *,
+  .leagues-bar > *,
+  .stats-row > * {
+    flex: 0 0 auto !important;
+  }
+
+  /* شبكة الريبلايز عمود واحد واضح ومريح على الموبايل */
+  .replays-grid,
+  .highlights-grid,
+  .matches-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .replay-clubs-strip {
+    margin: 10px 0 14px;
+    gap: 8px;
+  }
+
+  .replay-club-chip {
+    padding: 6px 11px;
+    font-size: 0.8rem;
+  }
+}
+</style>
+
+<script>
+(function () {
+  const TEAM_LOGOS = {
+    'arsenal': 'https://r2.thesportsdb.com/images/media/badge/uytwpt1448813275.png',
+    'liverpool': 'https://r2.thesportsdb.com/images/media/badge/pogbyg1547294771.png',
+    'real madrid': 'https://r2.thesportsdb.com/images/media/badge/vwvwrw1473502969.png',
+    'barcelona': 'https://r2.thesportsdb.com/images/media/badge/wq9f6b1548085156.png',
+    'esperance': 'https://r2.thesportsdb.com/images/media/badge/1v82331554815562.png',
+    'club africain': 'https://r2.thesportsdb.com/images/media/badge/7u46561554815488.png'
+  };
+
+  function getTeamBadgeUrl(name = '') {
+    const clean = name.toLowerCase();
+    for (const key of Object.keys(TEAM_LOGOS)) {
+      if (clean.includes(key)) return TEAM_LOGOS[key];
+    }
+    return '';
+  }
+
+  function parseTeamsFromTitle(text = '') {
+    const parts = text.split(/\s+vs\s+/i);
+    if (parts.length < 2) return null;
+    const home = parts[0].replace(/^.*?—\s*/, '').trim();
+    const away = parts[1].split('—')[0].split('-')[0].trim();
+    return { home, away };
+  }
+
+  function enhanceReplaySection() {
+    const heading = Array.from(document.querySelectorAll('h1, h2, h3, div, span'))
+      .find(el => /résumés\s*&\s*highlights/i.test(el.textContent || '') && el.children.length === 0);
+
+    const anchorParent = heading ? (heading.closest('section, div') || heading.parentElement) : document.body;
+    if (!anchorParent) return;
+
+    // 1. إضافة شريط لوغوات الجمعيات في أعلى قسم الريبلايز
+    if (!document.getElementById('replayClubsStrip')) {
+      const strip = document.createElement('div');
+      strip.id = 'replayClubsStrip';
+      strip.className = 'replay-clubs-strip';
+
+      const clubs = [
+        { label: 'All Clubs', query: '', logo: '' },
+        { label: 'Arsenal', query: 'arsenal', logo: TEAM_LOGOS.arsenal },
+        { label: 'Liverpool', query: 'liverpool', logo: TEAM_LOGOS.liverpool },
+        { label: 'Real Madrid', query: 'real madrid', logo: TEAM_LOGOS['real madrid'] },
+        { label: 'Barcelona', query: 'barcelona', logo: TEAM_LOGOS.barcelona },
+        { label: 'Espérance ST', query: 'esperance', logo: TEAM_LOGOS.esperance },
+        { label: 'Club Africain', query: 'club africain', logo: TEAM_LOGOS['club africain'] }
+      ];
+
+      strip.innerHTML = clubs.map((c, idx) => `
+        <button type="button" class="replay-club-chip ${idx === 0 ? 'active' : ''}" data-club-query="${c.query}">
+          ${c.logo ? `<img src="${c.logo}" alt="${c.label}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span>${c.label}</span>
+        </button>
+      `).join('');
+
+      strip.addEventListener('click', (e) => {
+        const chip = e.target.closest('.replay-club-chip');
+        if (!chip) return;
+        strip.querySelectorAll('.replay-club-chip').forEach(b => b.classList.remove('active'));
+        chip.classList.add('active');
+
+        const q = (chip.dataset.clubQuery || '').toLowerCase();
+        const cards = document.querySelectorAll('[data-replay-card="1"], .replay-card, .highlight-card, article');
+        cards.forEach(card => {
+          const txt = (card.textContent || '').toLowerCase();
+          if (!txt.includes('vs') && !txt.includes('replay') && !txt.includes('highlights')) return;
+          card.style.display = (!q || txt.includes(q)) ? '' : 'none';
+        });
+      });
+
+      if (heading && heading.parentElement) {
+        heading.parentElement.insertAdjacentElement('afterend', strip);
+      } else {
+        anchorParent.prepend(strip);
+      }
+    }
+
+    // 2. إضافة شريط لوغوات الجمعيات داخل كل بطاقة مباراة
+    const candidates = Array.from(document.querySelectorAll('div, article')).filter(el => {
+      const t = el.textContent || '';
+      return /\bvs\b/i.test(t) && /replay|highlights/i.test(t) && el.querySelectorAll('div, article').length < 8;
+    });
+
+    candidates.forEach(card => {
+      if (card.querySelector('.match-teams-bar')) return;
+      card.setAttribute('data-replay-card', '1');
+      const parsed = parseTeamsFromTitle(card.textContent || '');
+      if (!parsed) return;
+
+      const homeLogo = getTeamBadgeUrl(parsed.home);
+      const awayLogo = getTeamBadgeUrl(parsed.away);
+
+      const bar = document.createElement('div');
+      bar.className = 'match-teams-bar';
+      bar.innerHTML = `
+        <div class="match-team-badge">
+          ${homeLogo ? `<img src="${homeLogo}" alt="${parsed.home}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span>${parsed.home}</span>
+        </div>
+        <span class="match-vs-pill">VS</span>
+        <div class="match-team-badge">
+          ${awayLogo ? `<img src="${awayLogo}" alt="${parsed.away}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <span>${parsed.away}</span>
+        </div>
+      `;
+
+      card.prepend(bar);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    enhanceReplaySection();
+    const obs = new MutationObserver(() => enhanceReplaySection());
+    obs.observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
 </body>
 </html>
