@@ -6686,5 +6686,260 @@
     }
   })();
 </script>
+  <style id="footime-master-fix-css">
+  /* 1. توحيد حجم صور القنوات في Chaînes TV */
+  #channelsView img,
+  #tvChannelsView img,
+  [data-view="channels"] img,
+  .channels-container img,
+  .channel-item img,
+  .channel-card img {
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+    max-height: 68px !important;
+    object-fit: contain !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    margin: 0 auto 10px auto !important;
+    display: block !important;
+  }
+
+  /* 2. ضبط صور الكروت في الماتشات والـ Replays */
+  .match-card img,
+  .replay-card img,
+  [class*="match-card"] img,
+  [class*="replay-card"] img {
+    max-width: 100% !important;
+    object-fit: contain !important;
+  }
+
+  /* 3. تنسيق شبكة القنوات */
+  .footime-clean-channels-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .footime-clean-channel-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 14px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    text-align: center !important;
+    overflow: hidden !important;
+    min-height: 155px !important;
+    box-sizing: border-box !important;
+  }
+
+  .footime-clean-channel-card img {
+    width: 64px !important;
+    height: 64px !important;
+    max-width: 64px !important;
+    max-height: 64px !important;
+    object-fit: contain !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    margin: 0 auto 8px auto !important;
+    display: block !important;
+  }
+
+  @media (max-width: 640px) {
+    .footime-clean-channels-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+    }
+
+    .footime-clean-channel-card {
+      min-height: 140px !important;
+      padding: 10px 8px !important;
+    }
+
+    .footime-clean-channel-card img {
+      width: 52px !important;
+      height: 52px !important;
+      max-width: 52px !important;
+      max-height: 52px !important;
+    }
+  }
+</style>
+
+<script id="footime-master-fix-js">
+  (function () {
+    const TODAY_TIME = "28 nov., 17:00";
+
+    // 1. منع نوافذ الإعلانات المعروفة عبر window.open
+    const blockedKeywords = [
+      "candy.ai",
+      "candynetwork",
+      "affid=",
+      "sub1=",
+      "sub2=",
+      "popads",
+      "popcash",
+      "adsterra",
+      "hilltopads",
+      "tsyndicate"
+    ];
+
+    function isAdUrl(url) {
+      if (!url) return false;
+      const lower = String(url).toLowerCase();
+      return blockedKeywords.some((k) => lower.includes(k));
+    }
+
+    const nativeOpen = window.open;
+    window.open = function (url, target, features) {
+      if (isAdUrl(url)) {
+        return null;
+      }
+      return nativeOpen.call(this, url, target || "_blank", features);
+    };
+
+    // 2. اعتراض الروابط الإعلانية عند النقر
+    document.addEventListener(
+      "click",
+      function (event) {
+        const link = event.target.closest("a[href]");
+        if (!link) return;
+        const href = link.getAttribute("href") || "";
+        if (isAdUrl(href)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+      true
+    );
+
+    // 3. إصلاح شبكة القنوات، تنظيف Replays الوهمية، وتصحيح ماتش الترجي اليوم
+    function applyFootimeFixes() {
+      // أ) ترتيب القنوات وتصغير لوغواتها
+      document.querySelectorAll("img").forEach((img) => {
+        const textContext = (img.closest("div, article, li, section")?.innerText || "").toLowerCase();
+        const isChannelImg =
+          textContext.includes("111 tv") ||
+          textContext.includes("123tv") ||
+          textContext.includes("12tv") ||
+          textContext.includes("13 cultura") ||
+          textContext.includes("13e") ||
+          textContext.includes("13 festival") ||
+          textContext.includes("13 humor") ||
+          textContext.includes("general") ||
+          textContext.includes("kids") ||
+          textContext.includes("culture");
+
+        if (isChannelImg) {
+          img.style.setProperty("width", "64px", "important");
+          img.style.setProperty("height", "64px", "important");
+          img.style.setProperty("max-width", "64px", "important");
+          img.style.setProperty("max-height", "64px", "important");
+          img.style.setProperty("object-fit", "contain", "important");
+          img.style.setProperty("background", "rgba(255,255,255,0.08)", "important");
+          img.style.setProperty("border-radius", "12px", "important");
+          img.style.setProperty("padding", "8px", "important");
+          img.style.setProperty("margin", "0 auto 8px auto", "important");
+          img.style.setProperty("display", "block", "important");
+
+          const card = img.closest("div, article, li");
+          if (card && card.parentElement && !card.parentElement.classList.contains("footime-clean-channels-grid")) {
+            card.parentElement.classList.add("footime-clean-channels-grid");
+          }
+          if (card) {
+            card.classList.add("footime-clean-channel-card");
+          }
+        }
+      });
+
+      // ب) إزالة الماتشات الوهمية القديمة من Replays & Highlights و Upcoming
+      const staleTitles = [
+        "arsenal vs liverpool",
+        "real madrid vs barcelona",
+        "esperance de tunis vs club africain",
+        "derby highlights"
+      ];
+
+      document.querySelectorAll("div, article, li, section").forEach((el) => {
+        if (el.children.length > 8) return;
+        const txt = (el.innerText || "").toLowerCase();
+        const hasStale = staleTitles.some((t) => txt.includes(t));
+        const isCardLike =
+          el.className &&
+          (String(el.className).includes("card") ||
+            String(el.className).includes("match") ||
+            String(el.className).includes("replay") ||
+            String(el.className).includes("item"));
+
+        if (hasStale && isCardLike && txt.length < 280) {
+          el.remove();
+        }
+      });
+
+      // ج) إزالة أي مشغل يعرض Big Buck Bunny
+      document.querySelectorAll("iframe, video, div").forEach((node) => {
+        const txt = (node.innerText || "").toLowerCase();
+        const src = (node.getAttribute && node.getAttribute("src") || "").toLowerCase();
+        if (txt.includes("big buck bunny") || src.includes("big_buck_bunny") || src.includes("bbb")) {
+          if (node.tagName === "IFRAME" || node.tagName === "VIDEO") {
+            node.remove();
+          }
+        }
+      });
+
+      // د) تأمين الـ iframes
+      document.querySelectorAll("iframe").forEach((frame) => {
+        const src = (frame.getAttribute("src") || "").toLowerCase();
+        if (!src || src.startsWith("about:")) return;
+        frame.setAttribute(
+          "sandbox",
+          "allow-scripts allow-same-origin allow-forms allow-presentation"
+        );
+        frame.setAttribute("referrerpolicy", "no-referrer");
+      });
+
+      // هـ) إضافة / تحديث ماتش الترجي اليوم (ES Tunis vs Wiliete - 17:00) في Upcoming إذا لم يكن موجوداً
+      const bodyText = (document.body.innerText || "").toLowerCase();
+      if (!bodyText.includes("es tunis vs wiliete") && !bodyText.includes("wiliete")) {
+        const upcomingHeading = Array.from(document.querySelectorAll("h1, h2, h3, h4, div, span")).find(
+          (el) => (el.textContent || "").trim().toLowerCase().startsWith("upcoming")
+        );
+        if (upcomingHeading && upcomingHeading.parentElement) {
+          const matchBox = document.createElement("div");
+          matchBox.id = "es-tunis-today-match";
+          matchBox.style.cssText =
+            "margin:12px 0;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#f3f6f8;display:flex;flex-direction:column;gap:6px;";
+          matchBox.innerHTML = `
+            <div style="font-size:12px;opacity:0.8;">${TODAY_TIME} • CAF CHAMPIONS LEAGUE</div>
+            <div style="font-size:17px;font-weight:700;">ES Tunis vs Wiliete</div>
+            <div style="font-size:13px;color:#22c55e;">Today • 17:00</div>
+          `;
+          upcomingHeading.parentElement.appendChild(matchBox);
+        }
+      }
+    }
+
+    const observer = new MutationObserver(applyFootimeFixes);
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src", "href"]
+    });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", applyFootimeFixes);
+    } else {
+      applyFootimeFixes();
+    }
+  })();
+</script>
 </body>
 </html>
