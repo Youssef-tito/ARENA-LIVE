@@ -6528,5 +6528,219 @@
       setInterval(guardModalInsideSite, 500);
     })();
   </script>
+  <!-- =====================================================
+     FOOTIME PRO — SECURITY SANDBOX
+     Anti-Popup / Anti-Redirect / Anti-Tracking
+===================================================== -->
+
+<script>
+(() => {
+  "use strict";
+
+  const FOOTIME_SECURITY = {
+    enabled: true,
+
+    // منع النوافذ المنبثقة
+    blockPopups: true,
+
+    // منع التحويلات غير المرغوبة
+    blockRedirects: true,
+
+    // منع tracking المعروف
+    blockTracking: true,
+
+    // منع الإطارات الخارجية غير المصرح بها
+    protectFrames: true,
+
+    // مصادر مسموح بها
+    allowedDomains: [
+      location.hostname,
+      "api-football.com",
+      "api-sports.io",
+      "thesportsdb.com",
+      "iptv-org.github.io",
+      "youtube.com",
+      "www.youtube.com",
+      "youtube-nocookie.com",
+      "www.youtube-nocookie.com"
+    ]
+  };
+
+  if (!FOOTIME_SECURITY.enabled) return;
+
+  const log = (...args) => {
+    console.warn("[FOOTIME SECURITY]", ...args);
+  };
+
+  // 1. منع Popups غير المطلوبة
+  if (FOOTIME_SECURITY.blockPopups) {
+    const originalOpen = window.open;
+
+    window.open = function(url, target, features) {
+      const userAction = navigator.userActivation?.isActive;
+
+      if (!userAction) {
+        log("Blocked popup:", url);
+        return null;
+      }
+
+      return originalOpen.call(this, url, target, features);
+    };
+  }
+
+  // 2. فحص الروابط
+  function isAllowedURL(value) {
+    try {
+      const url = new URL(value, location.href);
+
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        return false;
+      }
+
+      const host = url.hostname.toLowerCase();
+
+      return FOOTIME_SECURITY.allowedDomains.some(domain =>
+        host === domain || host.endsWith("." + domain)
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  // 3. حماية الروابط الخارجية
+  document.addEventListener("click", event => {
+    const link = event.target.closest("a");
+
+    if (!link) return;
+
+    const href = link.getAttribute("href");
+
+    if (!href) return;
+
+    if (
+      href.startsWith("#") ||
+      href.startsWith("mailto:") ||
+      href.startsWith("tel:")
+    ) return;
+
+    if (!isAllowedURL(href)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      log("Blocked external link:", href);
+    }
+  }, true);
+
+  // 4. منع Tracking pixels
+  if (FOOTIME_SECURITY.blockTracking) {
+    const originalImageSrc =
+      Object.getOwnPropertyDescriptor(
+        HTMLImageElement.prototype,
+        "src"
+      );
+
+    if (originalImageSrc?.set) {
+      Object.defineProperty(HTMLImageElement.prototype, "src", {
+        configurable: true,
+
+        get: originalImageSrc.get,
+
+        set(value) {
+          const url = String(value);
+
+          if (
+            /doubleclick\.net|googlesyndication\.com|google-analytics\.com|facebook\.net\/tr|pixel\./i.test(url)
+          ) {
+            log("Blocked tracking image:", url);
+            return;
+          }
+
+          originalImageSrc.set.call(this, value);
+        }
+      });
+    }
+  }
+
+  // 5. منع فتح الروابط في Tabs جديدة دون تفاعل
+  document.addEventListener("click", event => {
+    const link = event.target.closest("a[target='_blank']");
+
+    if (!link) return;
+
+    if (!navigator.userActivation?.isActive) {
+      event.preventDefault();
+      log("Blocked automatic new tab");
+    }
+  }, true);
+
+  // 6. حماية iframe
+  if (FOOTIME_SECURITY.protectFrames) {
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (!(node instanceof HTMLIFrameElement)) continue;
+
+          const src = node.getAttribute("src");
+
+          if (!src || !isAllowedURL(src)) {
+            node.remove();
+            log("Blocked unauthorized iframe:", src);
+            continue;
+          }
+
+          node.setAttribute(
+            "sandbox",
+            "allow-scripts allow-same-origin allow-presentation"
+          );
+
+          node.setAttribute("referrerpolicy", "no-referrer");
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  // 7. حماية من scripts التي تحاول تحويل الصفحة
+  if (FOOTIME_SECURITY.blockRedirects) {
+    const originalAssign = Location.prototype.assign;
+    const originalReplace = Location.prototype.replace;
+
+    Location.prototype.assign = function(url) {
+      if (!isAllowedURL(url)) {
+        log("Blocked redirect:", url);
+        return;
+      }
+
+      return originalAssign.call(this, url);
+    };
+
+    Location.prototype.replace = function(url) {
+      if (!isAllowedURL(url)) {
+        log("Blocked redirect:", url);
+        return;
+      }
+
+      return originalReplace.call(this, url);
+    };
+  }
+
+  // 8. حماية من النقرات التلقائية
+  document.addEventListener("click", event => {
+    if (!navigator.userActivation?.isActive) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
+  console.info(
+    "%cFOOTIME PRO SECURITY ACTIVE",
+    "color:#10b981;font-weight:bold;font-size:14px"
+  );
+
+})();
+</script>
 </body>
 </html>
