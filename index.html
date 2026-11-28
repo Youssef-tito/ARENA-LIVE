@@ -6742,5 +6742,84 @@
 
 })();
 </script>
+  <script>
+  (function () {
+    const blockedDomains = [
+      "candy.ai",
+      "candynetwork",
+      "popads",
+      "popcash",
+      "adsterra",
+      "hilltopads",
+      "tsyndicate",
+      "affid=",
+      "sub1=",
+      "sub2="
+    ];
+
+    function isBlockedUrl(url) {
+      if (!url) return false;
+      const val = String(url).toLowerCase();
+      return blockedDomains.some((item) => val.includes(item));
+    }
+
+    // 1. Protect mobile & desktop from iframe top-navigation redirects
+    function hardenIframes() {
+      document.querySelectorAll("iframe").forEach((frame) => {
+        const src = (frame.getAttribute("src") || "").trim();
+        const lowerSrc = src.toLowerCase();
+
+        if (isBlockedUrl(lowerSrc)) {
+          frame.setAttribute("src", "about:blank");
+          return;
+        }
+
+        if (!lowerSrc || lowerSrc.startsWith("about:")) return;
+
+        // Allow scripts & same-origin for HLS/embed players, but BLOCK top-level page redirect & popups
+        if (!frame.hasAttribute("sandbox")) {
+          frame.setAttribute(
+            "sandbox",
+            "allow-scripts allow-same-origin allow-forms allow-presentation"
+          );
+        }
+        frame.setAttribute("referrerpolicy", "no-referrer");
+      });
+    }
+
+    const observer = new MutationObserver(hardenIframes);
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src"]
+    });
+
+    document.addEventListener("DOMContentLoaded", hardenIframes);
+    window.addEventListener("load", hardenIframes);
+    hardenIframes();
+
+    // 2. Block unwanted popup windows & ad redirects
+    const origOpen = window.open;
+    window.open = function (url, target, features) {
+      if (isBlockedUrl(url)) return null;
+      return origOpen.call(this, url, target || "_blank", features);
+    };
+
+    document.addEventListener(
+      "click",
+      function (e) {
+        const anchor = e.target.closest("a[href]");
+        if (!anchor) return;
+        const href = anchor.getAttribute("href") || "";
+        if (isBlockedUrl(href)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true
+    );
+  })();
+</script>
 </body>
 </html>
