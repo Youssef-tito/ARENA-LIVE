@@ -913,7 +913,7 @@
     const PPV_API = "https://api.ppv.st/api/streams";
     const IPTV_API = "https://iptv-org.github.io/api";
     const SDB_API = "https://www.thesportsdb.com/api/v1/json/3";
-  const DEFAULT_EMBED_FRAME = "";
+    const DEFAULT_EMBED_FRAME = "https://www.youtube.com/embed/aqz-KE-bpKQ?autoplay=1";
 
     const DEFAULT_PREFS = {
       theme: "dark",
@@ -1063,490 +1063,384 @@
 
     applyThemeAndLang();
   </script>
- <script>
-  const ALIASES = {
-    taraji: ["esperance", "es tunis", "taraji", "est"],
-    esperance: ["esperance", "es tunis", "taraji", "est"],
-    lifri9i: ["club africain", "africain", "ca"],
-    africain: ["club africain", "africain", "ca"],
-    etoile: ["etoile", "sahel", "ess"],
-    sfaxien: ["sfaxien", "cs sfaxien", "css"],
-    monastir: ["monastir", "us monastir", "usmo"],
-    bizerte: ["bizerte", "ca bizertin", "cab"]
-  };
-
-  const SPORTS = [
-    { id: "Football", label: "Football" },
-    { id: "tunisia", label: "🇹🇳 Tunisian League", tn: 1 },
-    { id: "all", label: "All Sports" },
-    { id: "Basketball", label: "Basketball" },
-    { id: "Combat Sports", label: "Combat Sports" },
-    { id: "American Football", label: "American Football" },
-    { id: "Tennis", label: "Tennis" },
-    { id: "Cricket", label: "Cricket" },
-    { id: "Motorsport", label: "Motorsport" }
-  ];
-
-  const WORLD_LEAGUES = [
-    { id: "all", label: "All Loaded" },
-    { id: "tunisia", label: "🇹🇳 Tunisia", tn: 1 },
-    { id: "English Premier League", label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League" },
-    { id: "Spanish La Liga", label: "🇪🇸 La Liga" },
-    { id: "Italian Serie A", label: "🇮🇹 Serie A" },
-    { id: "German Bundesliga", label: "🇩🇪 Bundesliga" },
-    { id: "French Ligue 1", label: "🇫🇷 Ligue 1" }
-  ];
-
-  const EMBED_FALLBACK = typeof DEFAULT_EMBED_FRAME === "string" ? DEFAULT_EMBED_FRAME : "";
-
-  const FALLBACK_TUNISIA = [
-    {
-      id: "tn_f1",
-      title: "Esperance de Tunis vs Club Africain",
-      league: "Tunisian Ligue 1",
-      category: "Football",
-      starts_at: Math.floor(Date.now() / 1000) + 3600,
-      score: "",
-      iframe: EMBED_FALLBACK
-    },
-    {
-      id: "tn_f2",
-      title: "Etoile du Sahel vs CS Sfaxien",
-      league: "Tunisian Ligue 1",
-      category: "Football",
-      starts_at: Math.floor(Date.now() / 1000) + 7200,
-      score: "",
-      iframe: EMBED_FALLBACK
-    },
-    {
-      id: "tn_r1",
-      title: "US Monastir vs CA Bizertin",
-      league: "Tunisian Ligue 1 • Replay",
-      category: "Football",
-      starts_at: Math.floor(Date.now() / 1000) - 86400,
-      ends_at: Math.floor(Date.now() / 1000) - 79200,
-      score: "2 - 1",
-      iframe: EMBED_FALLBACK
-    },
-    {
-      id: "tn_r2",
-      title: "Club Africain vs Etoile du Sahel",
-      league: "Tunisian Ligue 1 • Highlights",
-      category: "Football",
-      starts_at: Math.floor(Date.now() / 1000) - 172800,
-      ends_at: Math.floor(Date.now() / 1000) - 165600,
-      score: "1 - 1",
-      iframe: EMBED_FALLBACK
-    }
-  ];
-
-  const FALLBACK_REPLAYS = [
-    {
-      id: "rep_1",
-      title: "Arsenal vs Liverpool — Full Highlights",
-      league: "Premier League • Replay",
-      category: "Football",
-      starts_at: Math.floor(Date.now() / 1000) - 90000,
-      ends_at: Math.floor(Date.now() / 1000) - 82800,
-      score: "2 - 2",
-      iframe: EMBED_FALLBACK
-    },
-    {
-      id: "rep_2",
-      title: "Real Madrid vs Barcelona — Match Replay",
-      league: "La Liga • Replay",
-      category: "Football",
-      starts_at: Math.floor(Date.now() / 1000) - 176400,
-      ends_at: Math.floor(Date.now() / 1000) - 169200,
-      score: "3 - 1",
-      iframe: EMBED_FALLBACK
-    },
-    {
-      id: "rep_3",
-      title: "Esperance de Tunis vs Club Africain — Derby Highlights",
-      league: "Tunisian Ligue 1 • Highlights",
-      category: "Football",
-      starts_at: Math.floor(Date.now() / 1000) - 259200,
-      ends_at: Math.floor(Date.now() / 1000) - 252000,
-      score: "2 - 0",
-      iframe: EMBED_FALLBACK
-    }
-  ];
-
-  window.ST = window.ST || {};
-  ST.q = ST.q || "";
-  ST.matches = Array.isArray(ST.matches) ? ST.matches : [];
-  ST.prefs = ST.prefs || { autoplay: false };
-  ST.teamLeague = "all";
-  ST.tnMatches = [];
-  ST.replays = [];
-  ST.teams = [];
-
-  const MATCH_REGISTRY = new Map();
-
-  function safeEsc(str) {
-    if (typeof esc === "function") return esc(String(str ?? ""));
-    return String(str ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
-  function safeDestroyHls() {
-    if (typeof destroyHls === "function") destroyHls();
-  }
-
-  function registerMatchItem(item) {
-    const key = String(item.id || item.title || Math.random());
-    const normalized = { ...item, id: key };
-    MATCH_REGISTRY.set(key, normalized);
-    return key;
-  }
-
-  function openMatchById(id) {
-    const matchObj = MATCH_REGISTRY.get(String(id));
-    if (matchObj && typeof openMatch === "function") {
-      openMatch(matchObj);
-    }
-  }
-
-  function toEmbedUrl(raw) {
-    const u = (raw || "").trim();
-    if (!u) return "";
-    const m1 = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
-    if (m1) {
-      const autoplayFlag = ST.prefs && ST.prefs.autoplay ? 1 : 0;
-      return `https://www.youtube.com/embed/${m1[1]}?autoplay=${autoplayFlag}`;
-    }
-    return u;
-  }
-
-  function hasSearchTerm(hay, term) {
-    const clean = term.trim().toLowerCase();
-    if (!clean) return false;
-    const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (/^[a-z0-9]{1,3}$/i.test(clean)) {
-      return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(hay);
-    }
-    return hay.includes(clean);
-  }
-
-  function matchQ(item) {
-    const q = (ST.q || "").trim().toLowerCase();
-    if (!q) return true;
-    const hay = `${item.title || ""} ${item.name || ""} ${item.league || ""} ${item.strLeague || ""} ${item.category || ""}`.toLowerCase();
-    const terms = [q, ...(ALIASES[q] || [])];
-    return terms.some(t => hasSearchTerm(hay, t));
-  }
-
-  function statusOf(s, now = Date.now()) {
-    if (s.always_live) return "live";
-    const st = (s.starts_at || 0) * 1000;
-    const en = (s.ends_at || 0) * 1000;
-    if (!st) return "live";
-    if (now < st) return "upcoming";
-    if (en && now > en) return "ended";
-    return "live";
-  }
-
-  function mapEventToMatch(ev, prefix = "ev", fallbackLeague = "Football") {
-    const ts = ev.strTimestamp
-      ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000)
-      : Math.floor((Date.now() - 86400000) / 1000);
-    const hasScore = ev.intHomeScore != null && ev.intAwayScore != null;
-    const rawId = ev.idEvent || `${ev.strEvent || "match"}_${ts}`;
-    return {
-      id: `${prefix}_${rawId}`,
-      title: ev.strEvent || "Match",
-      league: ev.strLeague || fallbackLeague,
-      category: "Football",
-      poster: ev.strThumb || "",
-      starts_at: ts,
-      ends_at: ts + 7200,
-      score: hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : "FT",
-      videoUrl: ev.strVideo || "",
-      iframe: toEmbedUrl(ev.strVideo) || EMBED_FALLBACK
+  <script>
+    const ALIASES = {
+      taraji: ["esperance", "es tunis", "taraji", "est"],
+      esperance: ["esperance", "es tunis", "taraji", "est"],
+      lifri9i: ["club africain", "africain", "ca"],
+      africain: ["club africain", "africain", "ca"],
+      etoile: ["etoile", "sahel", "ess"],
+      sfaxien: ["sfaxien", "cs sfaxien", "css"],
+      monastir: ["monastir", "us monastir", "usmo"],
+      bizerte: ["bizerte", "ca bizertin", "cab"]
     };
-  }
 
-  async function fetchJsonSafe(url) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) return {};
-      return await res.json();
-    } catch {
-      return {};
-    }
-  }
-
-  async function loadMatches(force = false) {
-    if (!force && ST.matches.length) {
-      if (typeof render === "function") render();
-      return;
-    }
-    const appEl = document.getElementById("app");
-    if (appEl) appEl.innerHTML = `<div class="empty">Loading matches...</div>`;
-
-    try {
-      const res = await fetch(PPV_API);
-      if (!res.ok) throw new Error("Network response not ok");
-      const data = await res.json();
-      const out = [];
-      for (const cat of (data.streams || [])) {
-        for (const s of (cat.streams || [])) {
-          out.push({
-            ...s,
-            id: s.id || s.name,
-            title: s.name || "Match",
-            league: s.tag || cat.category || "Sports",
-            category: cat.category || s.category_name || "Sports"
-          });
-        }
-      }
-      ST.matches = out;
-      if (typeof render === "function") render();
-    } catch {
-      if (appEl) {
-        appEl.innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
-      }
-    }
-  }
-
-  async function loadTunisia(force = false) {
-    if (!force && ST.tnMatches.length) {
-      if (typeof render === "function") render();
-      return;
-    }
-    const teams = ["Esperance", "Club Africain", "Etoile du Sahel", "CS Sfaxien", "US Monastir"];
-    const map = new Map();
-
-    const leagueCalls = await Promise.all([
-      fetchJsonSafe(`${SDB_API}/eventsnextleague.php?id=4445`),
-      fetchJsonSafe(`${SDB_API}/eventspastleague.php?id=4445`)
-    ]);
-
-    for (const ev of [...(leagueCalls[0].events || []), ...(leagueCalls[1].events || [])]) {
-      if (ev?.idEvent && !map.has(ev.idEvent)) {
-        map.set(ev.idEvent, mapEventToMatch(ev, "tn", "Tunisian Ligue 1"));
-      }
-    }
-
-    await Promise.all(
-      teams.map(async (t) => {
-        const td = await fetchJsonSafe(`${SDB_API}/searchteams.php?t=${encodeURIComponent(t)}`);
-        const idTeam = td?.teams?.[0]?.idTeam;
-        if (!idTeam) return;
-
-        const [nx, ls] = await Promise.all([
-          fetchJsonSafe(`${SDB_API}/eventsnext.php?id=${idTeam}`),
-          fetchJsonSafe(`${SDB_API}/eventslast.php?id=${idTeam}`)
-        ]);
-
-        for (const ev of [...(nx.events || []), ...(ls.results || [])]) {
-          if (ev?.idEvent && !map.has(ev.idEvent)) {
-            map.set(ev.idEvent, mapEventToMatch(ev, "tn", `${t} • Tunisia`));
-          }
-        }
-      })
-    );
-
-    ST.tnMatches = map.size ? [...map.values()] : FALLBACK_TUNISIA;
-    if (typeof render === "function") render();
-  }
-
-  async function loadReplays(force = false) {
-    if (!force && ST.replays.length) {
-      if (typeof render === "function") render();
-      return;
-    }
-    const map = new Map();
-    const leagueIds = ["4445", "4328", "4335", "4332", "4331", "4334"];
-
-    const leagueResults = await Promise.all(
-      leagueIds.map((id) => fetchJsonSafe(`${SDB_API}/eventspastleague.php?id=${id}`))
-    );
-
-    for (const d of leagueResults) {
-      for (const ev of (d.events || [])) {
-        if (!ev?.idEvent) continue;
-        const key = `ev_${ev.idEvent}`;
-        if (!map.has(key)) {
-          map.set(key, mapEventToMatch(ev, "rep", ev.strLeague || "Match Replay"));
-        }
-      }
-    }
-
-    const endedFromFeed = [...ST.matches, ...ST.tnMatches].filter(
-      (m) => statusOf(m) === "ended" || Boolean(m.videoUrl)
-    );
-
-    for (const m of endedFromFeed) {
-      const key = String(m.id ?? m.title);
-      if (!map.has(key)) {
-        map.set(key, {
-          ...m,
-          starts_at: m.starts_at || Math.floor((Date.now() - 86400000) / 1000),
-          ends_at: m.ends_at || Math.floor((Date.now() - 79200000) / 1000),
-          iframe: m.iframe || toEmbedUrl(m.videoUrl) || EMBED_FALLBACK
-        });
-      }
-    }
-
-    ST.replays = map.size ? [...map.values()] : FALLBACK_REPLAYS;
-    if (typeof render === "function") render();
-  }
-
-  async function loadTeams(force = false) {
-    if (!force && ST.teams.length) {
-      if (typeof render === "function") render();
-      return;
-    }
-    const appEl = document.getElementById("app");
-    if (appEl) appEl.innerHTML = `<div class="empty">Loading world teams...</div>`;
-
-    const leagues = [
-      "English Premier League",
-      "Spanish La Liga",
-      "Italian Serie A",
-      "German Bundesliga",
-      "French Ligue 1",
-      "Tunisian Ligue 1"
+    const SPORTS = [
+      { id: "Football", label: "Football" },
+      { id: "tunisia", label: "🇹🇳 Tunisian League", tn: 1 },
+      { id: "all", label: "All Sports" },
+      { id: "Basketball", label: "Basketball" },
+      { id: "Combat Sports", label: "Combat Sports" },
+      { id: "American Football", label: "American Football" },
+      { id: "Tennis", label: "Tennis" },
+      { id: "Cricket", label: "Cricket" },
+      { id: "Motorsport", label: "Motorsport" }
     ];
 
-    const results = await Promise.all(
-      leagues.map(async (lg) => ({
-        lg,
-        data: await fetchJsonSafe(`${SDB_API}/search_all_teams.php?l=${encodeURIComponent(lg)}`)
-      }))
-    );
+    const WORLD_LEAGUES = [
+      { id: "all", label: "All Loaded" },
+      { id: "tunisia", label: "🇹🇳 Tunisia", tn: 1 },
+      { id: "English Premier League", label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League" },
+      { id: "Spanish La Liga", label: "🇪🇸 La Liga" },
+      { id: "Italian Serie A", label: "🇮🇹 Serie A" },
+      { id: "German Bundesliga", label: "🇩🇪 Bundesliga" },
+      { id: "French Ligue 1", label: "🇫🇷 Ligue 1" }
+    ];
 
-    const map = new Map();
-    for (const { lg, data } of results) {
-      for (const tm of (data.teams || [])) {
-        if (!tm.idTeam || map.has(tm.idTeam)) continue;
-        map.set(tm.idTeam, {
-          id: tm.idTeam,
-          name: tm.strTeam,
-          league: lg.includes("Tunisian") ? "tunisia" : lg,
-          leagueLabel: tm.strLeague || lg,
-          badge: tm.strBadge || "",
-          country: tm.strCountry || ""
-        });
+    const FALLBACK_TUNISIA = [
+      {
+        id: "tn_f1",
+        title: "Esperance de Tunis vs Club Africain",
+        league: "Tunisian Ligue 1",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) + 3600,
+        score: "",
+        iframe: DEFAULT_EMBED_FRAME
+      },
+      {
+        id: "tn_f2",
+        title: "Etoile du Sahel vs CS Sfaxien",
+        league: "Tunisian Ligue 1",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) + 7200,
+        score: "",
+        iframe: DEFAULT_EMBED_FRAME
+      },
+      {
+        id: "tn_r1",
+        title: "US Monastir vs CA Bizertin",
+        league: "Tunisian Ligue 1 • Replay",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 86400,
+        ends_at: Math.floor(Date.now() / 1000) - 79200,
+        score: "2 - 1",
+        iframe: DEFAULT_EMBED_FRAME
+      },
+      {
+        id: "tn_r2",
+        title: "Club Africain vs Etoile du Sahel",
+        league: "Tunisian Ligue 1 • Highlights",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 172800,
+        ends_at: Math.floor(Date.now() / 1000) - 165600,
+        score: "1 - 1",
+        iframe: DEFAULT_EMBED_FRAME
       }
+    ];
+
+    const FALLBACK_REPLAYS = [
+      {
+        id: "rep_1",
+        title: "Arsenal vs Liverpool — Full Highlights",
+        league: "Premier League • Replay",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 90000,
+        ends_at: Math.floor(Date.now() / 1000) - 82800,
+        score: "2 - 2",
+        iframe: DEFAULT_EMBED_FRAME
+      },
+      {
+        id: "rep_2",
+        title: "Real Madrid vs Barcelona — Match Replay",
+        league: "La Liga • Replay",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 176400,
+        ends_at: Math.floor(Date.now() / 1000) - 169200,
+        score: "3 - 1",
+        iframe: DEFAULT_EMBED_FRAME
+      },
+      {
+        id: "rep_3",
+        title: "Esperance de Tunis vs Club Africain — Derby Highlights",
+        league: "Tunisian Ligue 1 • Highlights",
+        category: "Football",
+        starts_at: Math.floor(Date.now() / 1000) - 259200,
+        ends_at: Math.floor(Date.now() / 1000) - 252000,
+        score: "2 - 0",
+        iframe: DEFAULT_EMBED_FRAME
+      }
+    ];
+
+    ST.teamLeague = "all";
+    ST.tnMatches = [];
+    ST.replays = [];
+    ST.teams = [];
+
+    function toEmbedUrl(raw) {
+      const u = (raw || "").trim();
+      if (!u) return "";
+      const m1 = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
+      if (m1) return `https://www.youtube.com/embed/${m1[1]}?autoplay=${ST.prefs.autoplay ? 1 : 0}`;
+      return u;
     }
 
-    ST.teams = [...map.values()];
-    if (typeof render === "function") render();
-  }
-
-  async function searchAnyTeam(query) {
-    const q = (query || "").trim();
-    if (!q) return;
-
-    const d = await fetchJsonSafe(`${SDB_API}/searchteams.php?t=${encodeURIComponent(q)}`);
-    const found = (d.teams || []).filter((tm) => {
-      const sport = (tm.strSport || "Soccer").toLowerCase();
-      return tm.idTeam && (sport.includes("soccer") || sport.includes("football"));
-    });
-
-    const map = new Map(ST.teams.map((t) => [t.id, t]));
-    for (const tm of found) {
-      if (!map.has(tm.idTeam)) {
-        map.set(tm.idTeam, {
-          id: tm.idTeam,
-          name: tm.strTeam,
-          league: (tm.strLeague || "").toLowerCase().includes("tunisia") ? "tunisia" : (tm.strLeague || "all"),
-          leagueLabel: tm.strLeague || "World Team",
-          badge: tm.strBadge || "",
-          country: tm.strCountry || ""
-        });
-      }
+    function matchQ(item) {
+      const q = ST.q.trim().toLowerCase();
+      if (!q) return true;
+      const hay = `${item.title || ""} ${item.name || ""} ${item.league || ""} ${item.strLeague || ""} ${item.category || ""}`.toLowerCase();
+      return [q, ...(ALIASES[q] || [])].some(t => hay.includes(t));
     }
 
-    ST.teams = [...map.values()];
-    if (typeof render === "function") render();
-  }
+    function statusOf(s, now = Date.now()) {
+      if (s.always_live) return "live";
+      const st = (s.starts_at || 0) * 1000;
+      const en = (s.ends_at || 0) * 1000;
+      if (!st) return "live";
+      if (now < st) return "upcoming";
+      if (en && now > en) return "ended";
+      return "live";
+    }
 
-  async function openTeamDetails(tm) {
-    const body = document.getElementById("mBody");
-    const bar = document.getElementById("mBar");
-    const ytRow = document.getElementById("mYt");
-    const modal = document.getElementById("modal");
-    const titleEl = document.getElementById("mTitle");
-
-    if (!body || !modal) return;
-
-    if (bar) bar.style.display = "none";
-    if (ytRow) ytRow.style.display = "flex";
-    if (titleEl) titleEl.textContent = `${tm.name} (${tm.leagueLabel})`;
-
-    const ytInput = document.getElementById("ytUrlInput");
-    const ytBtn = document.getElementById("ytPlayBtn");
-    if (ytInput) ytInput.value = "";
-    if (ytBtn) {
-      ytBtn.onclick = () => {
-        const emb = toEmbedUrl(ytInput ? ytInput.value : "");
-        if (emb) {
-          body.innerHTML = `<div class="stage"><iframe src="${safeEsc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
-        }
+    function mapEventToMatch(ev, prefix = "ev", fallbackLeague = "Football") {
+      const ts = ev.strTimestamp
+        ? Math.floor(new Date(ev.strTimestamp).getTime() / 1000)
+        : Math.floor((Date.now() - 86400000) / 1000);
+      const hasScore = ev.intHomeScore != null && ev.intAwayScore != null;
+      return {
+        id: `${prefix}_${ev.idEvent}`,
+        title: ev.strEvent || "Match",
+        league: ev.strLeague || fallbackLeague,
+        category: "Football",
+        poster: ev.strThumb || "",
+        starts_at: ts,
+        ends_at: ts + 7200,
+        score: hasScore ? `${ev.intHomeScore} - ${ev.intAwayScore}` : "FT",
+        videoUrl: ev.strVideo || "",
+        iframe: toEmbedUrl(ev.strVideo) || DEFAULT_EMBED_FRAME
       };
     }
 
-    safeDestroyHls();
-    modal.classList.add("open");
-    body.innerHTML = `<div class="stage"><iframe src="${safeEsc(EMBED_FALLBACK)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div><div style="padding:18px;"><div class="empty">Loading ${safeEsc(tm.name)} fixtures &amp; replays...</div></div>`;
+    async function loadMatches(force = false) {
+      if (!force && ST.matches.length) {
+        render();
+        return;
+      }
+      document.getElementById("app").innerHTML = `<div class="empty">Loading matches...</div>`;
+      try {
+        const data = await (await fetch(PPV_API)).json();
+        const out = [];
+        for (const cat of (data.streams || [])) {
+          for (const s of (cat.streams || [])) {
+            out.push({
+              ...s,
+              id: s.id || s.name,
+              title: s.name || "Match",
+              league: s.tag || cat.category || "Sports",
+              category: cat.category || s.category_name || "Sports"
+            });
+          }
+        }
+        ST.matches = out;
+        render();
+      } catch {
+        document.getElementById("app").innerHTML = `<div class="empty">Failed to load matches. <button class="btn-primary" onclick="loadMatches(true)">Retry</button></div>`;
+      }
+    }
 
-    const liveMatches = ST.matches.filter((m) => (m.title || "").toLowerCase().includes((tm.name || "").toLowerCase()));
-    const [nx, ls] = await Promise.all([
-      fetchJsonSafe(`${SDB_API}/eventsnext.php?id=${tm.id}`),
-      fetchJsonSafe(`${SDB_API}/eventslast.php?id=${tm.id}`)
-    ]);
+    async function loadTunisia(force = false) {
+      if (!force && ST.tnMatches.length) {
+        render();
+        return;
+      }
+      const teams = ["Esperance", "Club Africain", "Etoile du Sahel", "CS Sfaxien", "US Monastir"];
+      const map = new Map();
 
-    const upcoming = nx.events || [];
-    const past = ls.results || [];
+      try {
+        const leagueCalls = await Promise.all([
+          fetch(`${SDB_API}/eventsnextleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+          fetch(`${SDB_API}/eventspastleague.php?id=4445`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        ]);
+        for (const ev of [...(leagueCalls[0].events || []), ...(leagueCalls[1].events || [])]) {
+          if (ev?.idEvent && !map.has(ev.idEvent)) {
+            map.set(ev.idEvent, mapEventToMatch(ev, "tn", "Tunisian Ligue 1"));
+          }
+        }
 
-    const renderEvRow = (ev, isPast) => {
-      const title = ev.strEvent || "Match";
-      const score = (ev.intHomeScore != null && ev.intAwayScore != null) ? ` (${ev.intHomeScore}-${ev.intAwayScore})` : "";
-      const regId = registerMatchItem({
-        id: "ev_" + ev.idEvent,
-        title: title + score,
-        league: ev.strLeague || tm.leagueLabel,
-        iframe: toEmbedUrl(ev.strVideo) || EMBED_FALLBACK
-      });
+        for (const t of teams) {
+          try {
+            const td = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(t)}`)).json();
+            const idTeam = td?.teams?.[0]?.idTeam;
+            if (!idTeam) continue;
+            const [nx, ls] = await Promise.all([
+              fetch(`${SDB_API}/eventsnext.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+              fetch(`${SDB_API}/eventslast.php?id=${idTeam}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+            ]);
+            for (const ev of [...(nx.events || []), ...(ls.results || [])]) {
+              if (ev?.idEvent && !map.has(ev.idEvent)) {
+                map.set(ev.idEvent, mapEventToMatch(ev, "tn", `${t} • Tunisia`));
+              }
+            }
+          } catch {}
+        }
+      } catch {}
 
-      return `<div class="t-row">
-        <div>
-          <strong>${safeEsc(title)}${safeEsc(score)}</strong>
-          <div class="sub">${safeEsc(ev.dateEvent || "")} • ${safeEsc(ev.strLeague || tm.leagueLabel)}</div>
-        </div>
-        <button class="s-btn active" onclick="openMatchById('${safeEsc(regId)}')">${isPast ? "Play Replay ▶" : "Play in Frame ▶"}</button>
+      ST.tnMatches = map.size ? [...map.values()] : FALLBACK_TUNISIA;
+      render();
+    }
+
+    async function loadReplays(force = false) {
+      if (!force && ST.replays.length) {
+        render();
+        return;
+      }
+      const map = new Map();
+      const leagueIds = ["4445", "4328", "4335", "4332", "4331", "4334"];
+
+      for (const id of leagueIds) {
+        try {
+          const d = await (await fetch(`${SDB_API}/eventspastleague.php?id=${id}`)).json();
+          for (const ev of (d.events || [])) {
+            if (ev?.idEvent && !map.has(ev.idEvent)) {
+              map.set(ev.idEvent, mapEventToMatch(ev, "rep", ev.strLeague || "Match Replay"));
+            }
+          }
+        } catch {}
+      }
+
+      const endedFromFeed = [...ST.matches, ...ST.tnMatches].filter(m => statusOf(m) === "ended" || m.videoUrl || m.score);
+      for (const m of endedFromFeed) {
+        const k = String(m.id ?? m.title);
+        if (!map.has(k)) {
+          map.set(k, {
+            ...m,
+            starts_at: m.starts_at || Math.floor((Date.now() - 86400000) / 1000),
+            ends_at: m.ends_at || Math.floor((Date.now() - 79200000) / 1000),
+            iframe: m.iframe || toEmbedUrl(m.videoUrl) || DEFAULT_EMBED_FRAME
+          });
+        }
+      }
+
+      ST.replays = map.size ? [...map.values()] : FALLBACK_REPLAYS;
+      render();
+    }
+
+    async function loadTeams(force = false) {
+      if (!force && ST.teams.length) {
+        render();
+        return;
+      }
+      document.getElementById("app").innerHTML = `<div class="empty">Loading world teams...</div>`;
+      const leagues = [
+        "English Premier League", "Spanish La Liga", "Italian Serie A",
+        "German Bundesliga", "French Ligue 1", "Tunisian Ligue 1"
+      ];
+      const map = new Map();
+      for (const lg of leagues) {
+        try {
+          const d = await (await fetch(`${SDB_API}/search_all_teams.php?l=${encodeURIComponent(lg)}`)).json();
+          for (const tm of (d.teams || [])) {
+            if (!tm.idTeam || map.has(tm.idTeam)) continue;
+            map.set(tm.idTeam, {
+              id: tm.idTeam,
+              name: tm.strTeam,
+              league: lg.includes("Tunisian") ? "tunisia" : lg,
+              leagueLabel: tm.strLeague || lg,
+              badge: tm.strBadge || "",
+              country: tm.strCountry || ""
+            });
+          }
+        } catch {}
+      }
+      ST.teams = [...map.values()];
+      render();
+    }
+
+    async function searchAnyTeam(query) {
+      const q = (query || "").trim();
+      if (!q) return;
+      try {
+        const d = await (await fetch(`${SDB_API}/searchteams.php?t=${encodeURIComponent(q)}`)).json();
+        const found = (d.teams || []).filter(tm => tm.idTeam && (tm.strSport || "Soccer").toLowerCase().includes("soccer"));
+        const map = new Map(ST.teams.map(t => [t.id, t]));
+        for (const tm of found) {
+          if (!map.has(tm.idTeam)) {
+            map.set(tm.idTeam, {
+              id: tm.idTeam,
+              name: tm.strTeam,
+              league: (tm.strLeague || "").toLowerCase().includes("tunisia") ? "tunisia" : (tm.strLeague || "all"),
+              leagueLabel: tm.strLeague || "World Team",
+              badge: tm.strBadge || "",
+              country: tm.strCountry || ""
+            });
+          }
+        }
+        ST.teams = [...map.values()];
+        render();
+      } catch {}
+    }
+
+    async function openTeamDetails(tm) {
+      const body = document.getElementById("mBody");
+      const bar = document.getElementById("mBar");
+      const ytRow = document.getElementById("mYt");
+      bar.style.display = "none";
+      ytRow.style.display = "flex";
+      document.getElementById("mTitle").textContent = `${tm.name} (${tm.leagueLabel})`;
+      document.getElementById("ytUrlInput").value = "";
+      document.getElementById("ytPlayBtn").onclick = () => {
+        const emb = toEmbedUrl(document.getElementById("ytUrlInput").value);
+        if (emb) {
+          body.innerHTML = `<div class="stage"><iframe src="${esc(emb)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>`;
+        }
+      };
+
+      destroyHls();
+      document.getElementById("modal").classList.add("open");
+      body.innerHTML = `<div class="stage"><iframe src="${esc(DEFAULT_EMBED_FRAME)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div><div style="padding:18px;"><div class="empty">Loading ${esc(tm.name)} fixtures &amp; replays...</div></div>`;
+
+      const liveMatches = ST.matches.filter(m => (m.title || "").toLowerCase().includes(tm.name.toLowerCase()));
+      const [nx, ls] = await Promise.all([
+        fetch(`${SDB_API}/eventsnext.php?id=${tm.id}`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+        fetch(`${SDB_API}/eventslast.php?id=${tm.id}`).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+      ]);
+      const upcoming = nx.events || [];
+      const past = ls.results || [];
+
+      const renderEvRow = (ev, isPast) => {
+        const title = ev.strEvent || "Match";
+        const score = (ev.intHomeScore != null && ev.intAwayScore != null) ? ` (${ev.intHomeScore}-${ev.intAwayScore})` : "";
+        const itemObj = {
+          id: "ev_" + ev.idEvent,
+          title: title + score,
+          league: ev.strLeague || tm.leagueLabel,
+          iframe: toEmbedUrl(ev.strVideo) || DEFAULT_EMBED_FRAME
+        };
+        const enc = encodeURIComponent(JSON.stringify(itemObj));
+        return `<div class="t-row">
+          <div>
+            <strong>${esc(title)}${esc(score)}</strong>
+            <div class="sub">${esc(ev.dateEvent || "")} • ${esc(ev.strLeague || tm.leagueLabel)}</div>
+          </div>
+          <button class="s-btn active" onclick='openMatch(JSON.parse(decodeURIComponent("${enc}")))'>${isPast ? "Play Replay ▶" : "Play in Frame ▶"}</button>
+        </div>`;
+      };
+
+      body.innerHTML = `<div class="stage"><iframe src="${esc(DEFAULT_EMBED_FRAME)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>
+      <div style="padding:18px;">
+        <h3 style="margin-bottom:10px;">Live Stream Matches (${liveMatches.length})</h3>
+        ${liveMatches.length
+          ? liveMatches.map(m => `<div class="t-row"><div><strong>${esc(m.title)}</strong><div class="sub">${esc(m.league)}</div></div><button class="s-btn active" onclick='openMatch(${JSON.stringify(m).replace(/'/g, "&#39;")})'>Watch Live ▶</button></div>`).join("")
+          : `<div class="sub" style="margin-bottom:14px;">No active stream in live feed for ${esc(tm.name)} right now.</div>`}
+
+        <h3 style="margin:14px 0 10px;">Upcoming (${upcoming.length})</h3>
+        ${upcoming.length ? upcoming.slice(0, 8).map(e => renderEvRow(e, false)).join("") : `<div class="sub" style="margin-bottom:14px;">No upcoming fixtures listed.</div>`}
+
+        <h3 style="margin:14px 0 10px;">Recent Matches / Replays (${past.length})</h3>
+        ${past.length ? past.slice(0, 8).map(e => renderEvRow(e, true)).join("") : `<div class="sub">No recent matches listed.</div>`}
       </div>`;
-    };
-
-    const liveHtml = liveMatches.length
-      ? liveMatches.map((m) => {
-          const regId = registerMatchItem(m);
-          return `<div class="t-row"><div><strong>${safeEsc(m.title)}</strong><div class="sub">${safeEsc(m.league)}</div></div><button class="s-btn active" onclick="openMatchById('${safeEsc(regId)}')">Watch Live ▶</button></div>`;
-        }).join("")
-      : `<div class="sub" style="margin-bottom:14px;">No active stream in live feed for ${safeEsc(tm.name)} right now.</div>`;
-
-    body.innerHTML = `<div class="stage"><iframe src="${safeEsc(EMBED_FALLBACK)}" allowfullscreen webkitallowfullscreen allow="autoplay; fullscreen *"></iframe></div>
-    <div style="padding:18px;">
-      <h3 style="margin-bottom:10px;">Live Stream Matches (${liveMatches.length})</h3>
-      ${liveHtml}
-
-      <h3 style="margin:14px 0 10px;">Upcoming (${upcoming.length})</h3>
-      ${upcoming.length ? upcoming.slice(0, 8).map((e) => renderEvRow(e, false)).join("") : `<div class="sub" style="margin-bottom:14px;">No upcoming fixtures listed.</div>`}
-
-      <h3 style="margin:14px 0 10px;">Recent Matches / Replays (${past.length})</h3>
-      ${past.length ? past.slice(0, 8).map((e) => renderEvRow(e, true)).join("") : `<div class="sub">No recent matches listed.</div>`}
-    </div>`;
-  }
-</script>
-<script>
+    }
+  </script>
+  <script>
     function saveFavs() {
       localStorage.setItem("footime_favs", JSON.stringify(ST.favs));
       const el = document.getElementById("favCount");
@@ -5462,966 +5356,1333 @@
       });
     })();
   </script>
+  <style>
+    /* Replay Date Query Helper & Demo Source Alert */
+    .replay-date-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 9px 16px;
+      background: var(--bg-elevated, #121a17);
+      border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+      font-size: 12px;
+    }
+
+    .replay-date-query-code {
+      font-family: monospace;
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--fg-primary, #f8fafc);
+    }
+  </style>
+
   <script>
     (function () {
-      // 1. Protect mobile & desktop from iframe top-navigation redirects
-      function hardenIframes() {
-        document.querySelectorAll("iframe").forEach((frame) => {
-          const src = (frame.getAttribute("src") || "").toLowerCase();
-          if (!src || src.startsWith("about:")) return;
-          // Allow scripts & same-origin for HLS/embed players, but BLOCK top-level page redirect & popups
-          if (!frame.hasAttribute("sandbox")) {
-            frame.setAttribute(
-              "sandbox",
-              "allow-scripts allow-same-origin allow-forms allow-presentation"
-            );
-          }
-          frame.setAttribute("referrerpolicy", "no-referrer");
-        });
+      function formatMatchDateStamp(matchObj) {
+        const ts = Number(matchObj?.starts_at || matchObj?.timestamp || 0);
+        const d = ts > 0 ? new Date(ts * 1000) : new Date();
+        if (Number.isNaN(d.getTime())) {
+          return new Date().toISOString().slice(0, 10);
+        }
+        return d.toISOString().slice(0, 10);
       }
 
-      const observer = new MutationObserver(hardenIframes);
-      observer.observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["src"]
-      });
-      document.addEventListener("DOMContentLoaded", hardenIframes);
-
-      // 2. Block window.open popups to unknown ad domains
-      const origOpen = window.open;
-      window.open = function (url, target, features) {
-        try {
-          if (!url || typeof url !== "string") return null;
-          const u = new URL(url, window.location.origin);
-          const allowed = [
-            window.location.hostname,
-            "footime.dpdns.org",
-            "youtube.com",
-            "www.youtube.com",
-            "youtu.be"
-          ];
-          if (!allowed.some((h) => u.hostname === h || u.hostname.endsWith("." + h))) {
-            return null;
-          }
-        } catch {
-          return null;
-        }
-        return origOpen.call(window, url, target, features);
-      };
-    })();
-  </script>
-  <script>
-    (function () {
-      // Remove sandbox if already added so live streams load properly
-      document.querySelectorAll("iframe[sandbox]").forEach((f) => f.removeAttribute("sandbox"));
-
-      // Block only unwanted ad popups without touching stream iframes
-      const origOpen = window.open;
-      window.open = function (url, target, features) {
-        try {
-          if (!url || typeof url !== "string") return null;
-          const u = new URL(url, window.location.origin);
-          if (u.protocol === "http:" || u.protocol === "https:") {
-            // Allow user-initiated "Open in Tab" button clicks, block silent mobile ad redirects
-            if (!navigator.userActivation || !navigator.userActivation.isActive) {
-              return null;
-            }
-          }
-        } catch {
-          return null;
-        }
-        return origOpen.call(window, url, target, features);
-      };
-    })();
-  </script>
- 
-      function getTeamLogo(name) {
-        const clean = String(name || "").toLowerCase().trim();
-        for (const key of Object.keys(TEAM_LOGOS)) {
-          if (clean.includes(key)) return TEAM_LOGOS[key];
-        }
-        return "";
+      function buildDatedReplayQuery(matchObj) {
+        const rawTitle = String(matchObj?.title || "Football Match")
+          .replace(/\b(live|stream|highlights|replay|full match)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        const dateStr = formatMatchDateStamp(matchObj);
+        return `${rawTitle} ${dateStr} highlights replay`.trim();
       }
 
-      // 1. Style improvements for Hero Banner & clean Replay cards
-      const style = document.createElement("style");
-      style.textContent = `
-        .footime-hero-logos {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          margin: 14px 0;
-        }
-        .footime-hero-team-badge {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 6px;
-          padding: 10px 14px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          backdrop-filter: blur(6px);
-        }
-        .footime-hero-team-badge img {
-          width: 54px !important;
-          height: 54px !important;
-          max-width: 54px !important;
-          max-height: 54px !important;
-          object-fit: contain !important;
-        }
-        .footime-hero-vs {
-          font-weight: 900;
-          font-size: 16px;
-          color: var(--accent-bright, #22c55e);
-          padding: 6px 10px;
-          border-radius: 999px;
-          background: rgba(34, 197, 94, 0.15);
-        }
-      `;
-      document.head.appendChild(style);
-
-      function fixLobbyHeroAndReplays() {
-        // A. Block Big Buck Bunny demo video inside modal iframe/video
-        document.querySelectorAll("iframe, video, source").forEach((el) => {
-          const src = (el.getAttribute("src") || "").toLowerCase();
-          if (
-            src.includes("big-buck-bunny") ||
-            src.includes("big_buck_bunny") ||
-            src.includes("aqz-kei-keg") ||
-            src.includes("blender") ||
-            src.includes("commondatastorage")
-          ) {
-            const modalTitle =
-              document.querySelector("[class*='modal'] h2, [class*='modal'] h3, [class*='player'] h2, [class*='player'] h3")?.textContent ||
-              "Match Highlights";
-            const query = encodeURIComponent(modalTitle.replace(/—.*$/, "").trim() + " highlights");
-            const fallbackBox = document.createElement("div");
-            fallbackBox.style.cssText = [
-              "width:100%",
-              "min-height:320px",
-              "display:flex",
-              "flex-direction:column",
-              "align-items:center",
-              "justify-content:center",
-              "gap:14px",
-              "padding:24px",
-              "text-align:center",
-              "background:radial-gradient(circle at center, rgba(34,197,94,0.14), #080d0b 75%)",
-              "border-radius:14px"
-            ].join(";");
-            fallbackBox.innerHTML = `
-              <div style="font-size:18px;font-weight:800;color:#eef7f2;">🎬 ${modalTitle}</div>
-              <div style="font-size:13px;color:#9fb3a8;max-width:440px;">
-                Aucun enregistrement serveur direct disponible pour ce match. Vous pouvez voir le résumé officiel ou les temps forts :
-              </div>
-              <a href="https://www.youtube.com/results?search_query=${query}" target="_blank" rel="noopener noreferrer"
-                 style="padding:10px 18px;border-radius:999px;background:#16a34a;color:#fff;font-weight:800;text-decoration:none;">
-                ▶ Voir Résumé & Highlights sur YouTube
-              </a>
-            `;
-            el.replaceWith(fallbackBox);
-          }
-        });
-
-        // B. Remove duplicate FT badges inside cards (keep only 1 clean badge)
-        document.querySelectorAll(".match-card, .card, [class*='replay'], [class*='match']").forEach((card) => {
-          const customBadges = card.querySelectorAll(".footime-score-tag, .footime-result-badge");
-          if (customBadges.length > 1) {
-            customBadges.forEach((b, idx) => {
-              if (idx > 0) b.remove();
-            });
-          }
-        });
-
-        // C. Decorate the big Lobby Hero Banner with team logos & stadium gradient
-        const heroCandidates = Array.from(document.querySelectorAll("section, div")).filter((el) => {
-          const txt = el.textContent || "";
-          return (
-            txt.includes("Watch Exclusive in Frame") &&
-            el.offsetHeight >= 220 &&
-            el.offsetHeight <= 620
-          );
-        });
-
-        const hero = heroCandidates[heroCandidates.length - 1];
-        if (hero && !hero.dataset.footimeHeroEnhanced) {
-          hero.dataset.footimeHeroEnhanced = "1";
-          hero.style.background =
-            "radial-gradient(circle at 75% 35%, rgba(22, 163, 74, 0.24), transparent 55%), linear-gradient(135deg, #0b1411 0%, #070b09 100%)";
-
-          const vsLine = Array.from(hero.querySelectorAll("*")).find((el) =>
-            /vs/i.test(el.textContent || "") && el.children.length === 0
-          );
-          if (vsLine) {
-            const parts = vsLine.textContent.split(/vs/i);
-            const homeName = (parts[0] || "").trim();
-            const awayName = (parts[1] || "").trim();
-            const homeLogo = getTeamLogo(homeName);
-            const awayLogo = getTeamLogo(awayName);
-
-            if (homeLogo || awayLogo) {
-              const logosRow = document.createElement("div");
-              logosRow.className = "footime-hero-logos";
-              logosRow.innerHTML = `
-                ${homeLogo ? `<div class="footime-hero-team-badge"><img src="${homeLogo}" alt="${homeName}"></div>` : ""}
-                <span class="footime-hero-vs">VS</span>
-                ${awayLogo ? `<div class="footime-hero-team-badge"><img src="${awayLogo}" alt="${awayName}"></div>` : ""}
-              `;
-              vsLine.parentElement.insertBefore(logosRow, vsLine.nextSibling);
-            }
-          }
-        }
+      function isDemoPlaceholderFrame() {
+        const iframe = document.querySelector("#mBody iframe");
+        const video = document.querySelector("#mBody video");
+        const src = (iframe?.getAttribute("src") || video?.currentSrc || "").toLowerCase();
+        const bodyText = (document.getElementById("mBody")?.textContent || "").toLowerCase();
+        return /big buck bunny|blender|sample|demo|test.*video|commondatastorage/.test(src) ||
+               /big buck bunny|blender foundation/.test(bodyText);
       }
 
-      document.addEventListener("DOMContentLoaded", fixLobbyHeroAndReplays);
-      setInterval(fixLobbyHeroAndReplays, 600);
-    })();
-  </script>
-  <script>
-    (function () {
-      function applyResumesCleanUi() {
-        document.querySelectorAll("button, a, .chip, .s-btn, h2.section-title").forEach(el => {
-          const txt = (el.textContent || "").trim();
-          if (/replays?\s*&\s*highlights/i.test(txt)) {
-            el.textContent = txt.replace(/replays?\s*&\s*highlights/i, "Résumés & Highlights");
-          } else if (/^all replays$/i.test(txt)) {
-            el.textContent = "All Résumés";
-          } else if (/tunisia replays/i.test(txt)) {
-            el.textContent = "🇹🇳 Tunisia Résumés";
-          } else if (txt === "Replays") {
-            el.textContent = "Résumés";
+      function injectReplayDateBar(matchObj) {
+        const bar = document.getElementById("mBar");
+        if (!bar || !matchObj) return;
+        document.getElementById("replayDateHelperBar")?.remove();
+
+        const dateStr = formatMatchDateStamp(matchObj);
+        const queryStr = buildDatedReplayQuery(matchObj);
+        const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(queryStr)}`;
+        const isDemo = isDemoPlaceholderFrame();
+
+        const helper = document.createElement("div");
+        helper.id = "replayDateHelperBar";
+        helper.className = "replay-date-bar";
+        helper.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>${isDemo ? "⚠️ Vidéo démo détectée — recherche datée :" : "📅 Replay avec date exacte :"}</span>
+            <span class="replay-date-query-code">${queryStr.replace(/</g, "&lt;")}</span>
+            <span style="opacity:0.7;">(${dateStr})</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <button type="button" class="s-btn" id="copyDatedQueryBtn">📋 Copier recherche datée</button>
+            <a class="s-btn active" href="${ytSearchUrl}" target="_blank" rel="noopener noreferrer">▶ YouTube (${dateStr})</a>
+          </div>
+        `;
+
+        bar.insertAdjacentElement("afterend", helper);
+
+        document.getElementById("copyDatedQueryBtn")?.addEventListener("click", () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(queryStr).catch(() => {});
+          }
+          const ytInp = document.getElementById("ytUrlInput");
+          if (ytInp) ytInp.value = ytSearchUrl;
+          if (typeof showToast === "function") {
+            showToast(`✓ Recherche avec date (${dateStr}) copiée`);
           }
         });
-      }
-
-      function syncResumeInfoInModal(m) {
-        if (!m) return;
-        const body = document.getElementById("mBody");
-        const iframeSrc = body?.querySelector("iframe")?.getAttribute("src") || "";
-        const hasVideo = Boolean(body?.querySelector("iframe, video"));
-
-        if (!hasVideo && body) {
-          const scoreText = m.score ? `FT • ${m.score}` : "Match terminé (FT)";
-          body.innerHTML = `
-            <div style="padding:28px 20px;text-align:center;background:var(--bg-card);border-bottom:1px solid var(--border);">
-              <div class="badge badge-lg" style="margin-bottom:10px;">${esc(m.league || m.category || "Football")}</div>
-              <h3 style="font-size:20px;margin-bottom:8px;">${esc(m.title || "Match")}</h3>
-              <div style="font-size:16px;font-weight:800;color:var(--accent-bright);margin-bottom:10px;">${esc(scoreText)}</div>
-              <div class="sub">Pas de replay vidéo stocké (aucun serveur d'enregistrement). Résultat et résumé disponibles, ou colle un lien externe ci-dessous.</div>
-            </div>
-          `;
-        }
-
-        const ytInp = document.getElementById("ytUrlInput");
-        if (ytInp && !ytInp.value.trim()) {
-          ytInp.placeholder = `Paste external highlight / stream URL for "${m.title || "match"}"...`;
-        }
-
-        if (iframeSrc && typeof showToast === "function") {
-          showToast("✓ Flux chargé dans le lecteur");
-        }
-      }
-
-      if (typeof render === "function") {
-        const _prevResRender = render;
-        render = function () {
-          _prevResRender();
-          applyResumesCleanUi();
-        };
       }
 
       if (typeof openMatch === "function") {
-        const _prevResOpenMatch = openMatch;
+        const _prevOpenMatchDated = openMatch;
         openMatch = function (m) {
-          _prevResOpenMatch(m);
-          syncResumeInfoInModal(m);
+          _prevOpenMatchDated(m);
+          setTimeout(() => injectReplayDateBar(m), 120);
         };
       }
 
-      document.addEventListener("DOMContentLoaded", applyResumesCleanUi);
-      setTimeout(applyResumesCleanUi, 400);
+      if (typeof closeModal === "function") {
+        const _prevCloseModalDated = closeModal;
+        closeModal = function () {
+          document.getElementById("replayDateHelperBar")?.remove();
+          _prevCloseModalDated();
+        };
+      }
     })();
   </script>
+  <style id="tvGridHardLockStyle">
+    /* Part A: Hard Lock on TV Cards & Channel Logos */
+    [data-tab-view="channels"] .grid,
+    [data-tab-view="channels"] .tv-grid,
+    [data-tab-view="channels"] .channels-grid,
+    #app .tv-grid,
+    #app .channels-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)) !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+      width: 100% !important;
+    }
+
+    #app .card,
+    #app .tv-card,
+    #app .channel-card {
+      position: relative !important;
+      overflow: hidden !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    #app .card img,
+    #app .tv-card img,
+    #app .channel-card img {
+      display: block !important;
+      width: auto !important;
+      height: auto !important;
+      max-width: 100% !important;
+      max-height: 76px !important;
+      min-height: 0 !important;
+      object-fit: contain !important;
+      margin: 0 auto 10px !important;
+      border-radius: 8px !important;
+      pointer-events: none;
+    }
+
+    #app .card img[src=""],
+    #app .card img:not([src]) {
+      display: none !important;
+    }
+
+    .tv-logo-frame-box {
+      width: 100%;
+      height: 88px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(128, 128, 128, 0.16);
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .tv-logo-frame-box img {
+      margin: 0 !important;
+      max-width: 100% !important;
+      max-height: 68px !important;
+      width: auto !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+  </style>
+
   <script>
     (function () {
-      // 1. Protect mobile & desktop from iframe top-navigation redirects
-      function hardenIframes() {
-        document.querySelectorAll("iframe").forEach((frame) => {
-          const src = (frame.getAttribute("src") || "").toLowerCase();
-          if (!src || src.startsWith("about:")) return;
-          // Allow scripts & same-origin for HLS/embed players, but BLOCK top-level page redirect & popups
-          if (!frame.hasAttribute("sandbox")) {
-            frame.setAttribute(
-              "sandbox",
-              "allow-scripts allow-same-origin allow-forms allow-presentation"
-            );
+      const TV_BLOCK_LIST = ["5max"];
+
+      function isChannelTabActive() {
+        if (typeof ST !== "undefined" && ST.tab === "channels") return true;
+        const activeBtn = document.querySelector('#navPills .nav-btn.active[data-tab="channels"]');
+        return Boolean(activeBtn);
+      }
+
+      function normalizeChannelCardsLogos() {
+        if (!isChannelTabActive()) return;
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        const cards = app.querySelectorAll(".card, .tv-card, .channel-card");
+        cards.forEach(card => {
+          const textLower = (card.textContent || "").toLowerCase();
+          if (TV_BLOCK_LIST.some(bad => textLower.includes(bad))) {
+            card.remove();
+            return;
           }
-          frame.setAttribute("referrerpolicy", "no-referrer");
+
+          card.style.overflow = "hidden";
+          card.style.position = "relative";
+          card.style.maxWidth = "100%";
+
+          const imgs = [...card.querySelectorAll("img")];
+          imgs.forEach(img => {
+            img.style.maxWidth = "100%";
+            img.style.maxHeight = "70px";
+            img.style.width = "auto";
+            img.style.height = "auto";
+            img.style.objectFit = "contain";
+
+            img.onerror = function () {
+              this.style.display = "none";
+            };
+
+            if (!img.parentElement?.classList.contains("tv-logo-frame-box")) {
+              const wrap = document.createElement("div");
+              wrap.className = "tv-logo-frame-box";
+              img.parentNode.insertBefore(wrap, img);
+              wrap.appendChild(img);
+            }
+          });
         });
       }
 
-      const observer = new MutationObserver(hardenIframes);
-      observer.observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["src"]
+      const tvObserver = new MutationObserver(() => {
+        normalizeChannelCardsLogos();
       });
-  });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // تقدر تزيد هنا أي كود تشغيل بعد تحميل الصفحة بأمان
-  });
-  document.addEventListener("DOMContentLoaded", () => {
-    // تقدر تزيد هنا أي كود تشغيل بعد تحميل الصفحة بأمان
-  });
-</script>
+      document.addEventListener("DOMContentLoaded", () => {
+        normalizeChannelCardsLogos();
+        const target = document.getElementById("app") || document.body;
+        tvObserver.observe(target, { childList: true, subtree: true });
+      });
 
-<style>
-  .channels-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-    gap: 14px;
-    align-items: stretch;
-  }
+      setInterval(normalizeChannelCardsLogos, 900);
+    })();
+  </script>
+  <style>
+    /* Part B: Channel Quick Controls & Hidden Channels Manager */
+    .tv-smart-console {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 14px;
+      margin: 0 0 14px;
+      border-radius: 12px;
+      background: var(--bg-card, rgba(255, 255, 255, 0.04));
+      border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
+      font-size: 12.5px;
+    }
 
-  @media (max-width: 600px) {
-    .channels-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .tv-console-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .tv-quick-filter-inp {
+      background: var(--bg-input, rgba(0, 0, 0, 0.25));
+      border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: inherit;
+      min-width: 170px;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const HIDDEN_CHANNELS_KEY = "footime_hidden_channels_v2";
+      const DEFAULT_HIDDEN = ["5max"];
+
+      function loadHiddenChannelsSet() {
+        try {
+          const arr = JSON.parse(localStorage.getItem(HIDDEN_CHANNELS_KEY) || "[]");
+          return new Set([
+            ...DEFAULT_HIDDEN,
+            ...(Array.isArray(arr) ? arr.map(s => String(s).toLowerCase().trim()).filter(Boolean) : [])
+          ]);
+        } catch {
+          return new Set(DEFAULT_HIDDEN);
+        }
+      }
+
+      function saveHiddenChannelsSet(setObj) {
+        try {
+          localStorage.setItem(HIDDEN_CHANNELS_KEY, JSON.stringify([...setObj]));
+        } catch {}
+      }
+
+      function applyHiddenChannelsFilter() {
+        const hiddenSet = loadHiddenChannelsSet();
+        if (typeof ST !== "undefined" && Array.isArray(ST.channels)) {
+          ST.channels = ST.channels.filter(ch => {
+            const nm = String(ch?.name || ch?.title || "").toLowerCase().trim();
+            return ![...hiddenSet].some(h => nm === h || nm.includes(h));
+          });
+        }
+
+        const app = document.getElementById("app");
+        if (!app) return;
+        app.querySelectorAll(".card, .tv-card, .channel-card").forEach(card => {
+          const txt = (card.textContent || "").toLowerCase();
+          const shouldHide = [...hiddenSet].some(h => txt.includes(h));
+          if (shouldHide) card.remove();
+        });
+      }
+
+      function filterCardsByKeyword(kw) {
+        const q = String(kw || "").trim().toLowerCase();
+        const app = document.getElementById("app");
+        if (!app) return;
+        app.querySelectorAll(".card, .tv-card, .channel-card").forEach(card => {
+          if (!q) {
+            card.style.display = "";
+            return;
+          }
+          const txt = (card.textContent || "").toLowerCase();
+          card.style.display = txt.includes(q) ? "" : "none";
+        });
+      }
+
+      function injectSmartChannelsConsole() {
+        const isTvTab = (typeof ST !== "undefined" && ST.tab === "channels") ||
+          Boolean(document.querySelector('#navPills .nav-btn.active[data-tab="channels"]'));
+        if (!isTvTab) return;
+
+        const app = document.getElementById("app");
+        if (!app || document.getElementById("tvSmartConsoleBar")) return;
+
+        const hiddenCount = loadHiddenChannelsSet().size;
+        const bar = document.createElement("div");
+        bar.id = "tvSmartConsoleBar";
+        bar.className = "tv-smart-console";
+        bar.innerHTML = `
+          <div class="tv-console-group">
+            <strong>⚡ Contrôle Chaînes</strong>
+            <span class="chip">Masquées : <strong>${hiddenCount}</strong></span>
+            <input type="text" id="tvLocalQuickSearch" class="tv-quick-filter-inp" placeholder="Filtrer chaîne / pays..." />
+          </div>
+          <div class="tv-console-group">
+            <button type="button" class="s-btn" id="tvFilterSportBtn">⚽ Sport</button>
+            <button type="button" class="s-btn" id="tvFilterNewsBtn">📰 News</button>
+            <button type="button" class="s-btn" id="tvFilterTnBtn">🇹🇳 Tunisie</button>
+            <button type="button" class="s-btn" id="tvHideChannelPromptBtn">🚫 Masquer nom</button>
+            <button type="button" class="s-btn" id="tvResetHiddenBtn">↺ Réinitialiser masquées</button>
+          </div>
+        `;
+
+        const topAnchor = document.getElementById("channelsMetaBar") || app.firstElementChild;
+        if (topAnchor) topAnchor.insertAdjacentElement("beforebegin", bar);
+        else app.prepend(bar);
+
+        const qInp = document.getElementById("tvLocalQuickSearch");
+        qInp?.addEventListener("input", () => filterCardsByKeyword(qInp.value));
+
+        document.getElementById("tvFilterSportBtn")?.addEventListener("click", () => {
+          if (qInp) qInp.value = "sport";
+          filterCardsByKeyword("sport");
+        });
+
+        document.getElementById("tvFilterNewsBtn")?.addEventListener("click", () => {
+          if (qInp) qInp.value = "news";
+          filterCardsByKeyword("news");
+        });
+
+        document.getElementById("tvFilterTnBtn")?.addEventListener("click", () => {
+          if (qInp) qInp.value = "tunisia";
+          filterCardsByKeyword("tunisia");
+        });
+
+        document.getElementById("tvHideChannelPromptBtn")?.addEventListener("click", () => {
+          const targetName = prompt("Entre le nom de la chaîne à masquer (ex: 10 bold) :");
+          if (!targetName || !targetName.trim()) return;
+          const s = loadHiddenChannelsSet();
+          s.add(targetName.trim().toLowerCase());
+          saveHiddenChannelsSet(s);
+          applyHiddenChannelsFilter();
+          document.getElementById("tvSmartConsoleBar")?.remove();
+          injectSmartChannelsConsole();
+          if (typeof showToast === "function") showToast(`✓ Chaîne "${targetName.trim()}" masquée`);
+        });
+
+        document.getElementById("tvResetHiddenBtn")?.addEventListener("click", () => {
+          saveHiddenChannelsSet(new Set(DEFAULT_HIDDEN));
+          applyHiddenChannelsFilter();
+          document.getElementById("tvSmartConsoleBar")?.remove();
+          injectSmartChannelsConsole();
+          if (typeof showToast === "function") showToast("✓ Liste des chaînes masquées réinitialisée");
+        });
+      }
+
+      if (typeof render === "function") {
+        const _prevPartBRender = render;
+        render = function () {
+          applyHiddenChannelsFilter();
+          _prevPartBRender();
+          applyHiddenChannelsFilter();
+          injectSmartChannelsConsole();
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        applyHiddenChannelsFilter();
+        injectSmartChannelsConsole();
+      });
+
+      setInterval(() => {
+        applyHiddenChannelsFilter();
+        injectSmartChannelsConsole();
+      }, 1200);
+    })();
+  </script>
+  <style id="blockDemoBunnyStyle">
+    .demo-blocked-card {
+      padding: 24px 20px;
+      text-align: center;
+      background: var(--bg-card, #111815);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 14px;
+      margin: 12px;
+    }
+
+    .demo-blocked-card h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: var(--fg-primary, #ffffff);
+    }
+
+    .demo-blocked-card p {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--fg-secondary, #cbd5e1);
+      line-height: 1.5;
+    }
+
+    .demo-blocked-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
       gap: 10px;
     }
-  }
-</style>
-  /* آخر الـ style: ترتيب خانات القنوات وتوحيد حجم اللوغو */
-  .channels-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-    gap: 14px;
-    align-items: stretch;
-  }
+  </style>
 
-  @media (max-width: 600px) {
-    .channels-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-  }
-
-  .channel-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: #101216;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 12px;
-    min-width: 0;
-    overflow: hidden;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-  }
-
-  .channel-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(34, 197, 94, 0.45);
-  }
-
-  .channel-logo-box {
-    width: 100%;
-    height: 96px;
-    border-radius: 12px;
-    background: #090b0d;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
-  }
-
-  .channel-logo-box img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: block;
-  }
-
-  .channel-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  }
-
-  .channel-name {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #f4f6f8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .channel-meta {
-    font-size: 0.78rem;
-    color: #9aa3ad;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-</style>
-
-<script>
-  // ... كودك القديم ...
-
-  // آخر الـ script: دالة عرض القنوات بشكل منتظم
-  function escapeChannelText(str = '') {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function renderChannelsList(channels, containerId = 'liveTvContent') {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    if (!Array.isArray(channels) || channels.length === 0) {
-      container.innerHTML = `<div class="empty-state"><p>Aucune chaîne trouvée.</p></div>`;
-      return;
-    }
-
-    const cardsHtml = channels.map((ch) => {
-      const name = escapeChannelText(ch.name || ch.title || 'Chaîne TV');
-      const country = ch.country ? escapeChannelText(ch.country) : '';
-      const category = ch.category ? escapeChannelText(ch.category) : '';
-      const meta = [country, category].filter(Boolean).join(' • ') || 'Live TV';
-      const logo = ch.logo || ch.image || '';
-
-      return `
-        <article class="channel-card" data-channel-id="${escapeChannelText(ch.id || name)}">
-          <div class="channel-logo-box">
-            ${
-              logo
-                ? `<img src="${escapeChannelText(logo)}" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.parentElement.innerHTML='<span>${name}</span>';" />`
-                : `<span>${name}</span>`
-            }
-          </div>
-          <div class="channel-info">
-            <div class="channel-name" title="${name}">${name}</div>
-            <div class="channel-meta" title="${meta}">${meta}</div>
-          </div>
-        </article>
-      `;
-    }).join('');
-
-    container.innerHTML = `<div class="channels-grid">${cardsHtml}</div>`;
-  }
-</script>
-  <style>
-/* =========================================================
-   ARENA LIVE — UNIFORM CHANNELS GRID & RESPONSIVE FIX
-   ========================================================= */
-#liveTvContent,
-#liveTvContent > div,
-.live-grid,
-.channels-grid,
-[id*="channel" i],
-[class*="channel-grid" i],
-[class*="tv-grid" i] {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
-  gap: 14px !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-#liveTvContent > div > div,
-#liveTvContent > div > article,
-.live-grid > *,
-.channels-grid > *,
-.channel-card,
-[class*="channel-item" i],
-[class*="tv-card" i] {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  background: #111615 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 14px !important;
-  padding: 12px !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  position: relative !important;
-  box-sizing: border-box !important;
-}
-
-#liveTvContent img,
-.live-grid img,
-.channels-grid img,
-.channel-card img,
-.ch-logo img,
-.channel-logo-box img {
-  width: 100% !important;
-  height: 85px !important;
-  max-width: 100% !important;
-  max-height: 85px !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  background: #0a0d0c !important;
-  border-radius: 10px !important;
-  padding: 8px !important;
-  margin-bottom: 8px !important;
-  display: block !important;
-  box-sizing: border-box !important;
-}
-
-#liveTvContent h3,
-#liveTvContent h4,
-#liveTvContent p,
-#liveTvContent span,
-.channel-card * {
-  max-width: 100% !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-@media (max-width: 768px) {
-  #liveTvContent,
-  #liveTvContent > div,
-  .live-grid,
-  .channels-grid,
-  [id*="channel" i],
-  [class*="channel-grid" i],
-  [class*="tv-grid" i] {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
-    padding: 0 8px !important;
-  }
-
-  #liveTvContent img,
-  .live-grid img,
-  .channels-grid img,
-  .channel-card img,
-  .ch-logo img,
-  .channel-logo-box img {
-    height: 70px !important;
-    max-height: 70px !important;
-  }
-
-  header,
-  nav,
-  .topbar,
-  .top-nav {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-}
-</style>
-  <style>
-/* =========================================================
-   REPLAYS & RÉSUMÉS — CLUB LOGOS STRIP + MOBILE PERFECTION
-   ========================================================= */
-.replay-clubs-strip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 10px 2px;
-  margin: 12px 0 18px;
-}
-
-.replay-clubs-strip::-webkit-scrollbar {
-  display: none;
-}
-
-.replay-club-chip {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 13px;
-  border-radius: 999px;
-  background: #101614;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #e8eef2;
-  font-size: 0.84rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.replay-club-chip:hover {
-  border-color: rgba(34, 197, 94, 0.5);
-  background: #15201c;
-}
-
-.replay-club-chip.active {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
-  color: #06110a;
-  border-color: transparent;
-}
-
-.replay-club-chip img {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-  border-radius: 50%;
-  background: #ffffff;
-  padding: 2px;
-  flex-shrink: 0;
-}
-
-/* شريط الجمعيات داخل كل بطاقة مباراة */
-.match-teams-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 8px 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.match-team-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #f3f6f8;
-}
-
-.match-team-badge img {
-  width: 26px !important;
-  height: 26px !important;
-  max-width: 26px !important;
-  max-height: 26px !important;
-  object-fit: contain !important;
-  background: #ffffff !important;
-  border-radius: 50% !important;
-  padding: 2px !important;
-  margin: 0 !important;
-  flex-shrink: 0 !important;
-}
-
-.match-team-badge span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.match-vs-pill {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.14);
-  padding: 2px 7px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-/* تنسيق مثالي للتليفون (Mobile Responsive) */
-@media (max-width: 768px) {
-  body {
-    overflow-x: hidden;
-  }
-
-  .container,
-  main,
-  section {
-    max-width: 100% !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* أشرطة الفلاتر والبطولات تنزلق أفقياً بدل أن تكسر العرض */
-  .filters-row,
-  .filter-pills,
-  .leagues-bar,
-  .stats-row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    gap: 8px !important;
-    padding-bottom: 6px !important;
-  }
-
-  .filters-row::-webkit-scrollbar,
-  .filter-pills::-webkit-scrollbar,
-  .leagues-bar::-webkit-scrollbar,
-  .stats-row::-webkit-scrollbar {
-    display: none;
-  }
-
-  .filters-row > *,
-  .filter-pills > *,
-  .leagues-bar > *,
-  .stats-row > * {
-    flex: 0 0 auto !important;
-  }
-
-  /* شبكة الريبلايز عمود واحد واضح ومريح على الموبايل */
-  .replays-grid,
-  .highlights-grid,
-  .matches-grid {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 14px !important;
-    width: 100% !important;
-  }
-
-  .replay-clubs-strip {
-    margin: 10px 0 14px;
-    gap: 8px;
-  }
-
-  .replay-club-chip {
-    padding: 6px 11px;
-    font-size: 0.8rem;
-  }
-}
-</style>
-
-<script>
-(function () {
-  const TEAM_LOGOS = {
-    'arsenal': 'https://r2.thesportsdb.com/images/media/badge/uytwpt1448813275.png',
-    'liverpool': 'https://r2.thesportsdb.com/images/media/badge/pogbyg1547294771.png',
-    'real madrid': 'https://r2.thesportsdb.com/images/media/badge/vwvwrw1473502969.png',
-    'barcelona': 'https://r2.thesportsdb.com/images/media/badge/wq9f6b1548085156.png',
-    'esperance': 'https://r2.thesportsdb.com/images/media/badge/1v82331554815562.png',
-    'club africain': 'https://r2.thesportsdb.com/images/media/badge/7u46561554815488.png'
-  };
-
-  function getTeamBadgeUrl(name = '') {
-    const clean = name.toLowerCase();
-    for (const key of Object.keys(TEAM_LOGOS)) {
-      if (clean.includes(key)) return TEAM_LOGOS[key];
-    }
-    return '';
-  }
-
-  function parseTeamsFromTitle(text = '') {
-    const parts = text.split(/\s+vs\s+/i);
-    if (parts.length < 2) return null;
-    const home = parts[0].replace(/^.*?—\s*/, '').trim();
-    const away = parts[1].split('—')[0].split('-')[0].trim();
-    return { home, away };
-  }
-
-  function enhanceReplaySection() {
-    const heading = Array.from(document.querySelectorAll('h1, h2, h3, div, span'))
-      .find(el => /résumés\s*&\s*highlights/i.test(el.textContent || '') && el.children.length === 0);
-
-    const anchorParent = heading ? (heading.closest('section, div') || heading.parentElement) : document.body;
-    if (!anchorParent) return;
-
-    // 1. إضافة شريط لوغوات الجمعيات في أعلى قسم الريبلايز
-    if (!document.getElementById('replayClubsStrip')) {
-      const strip = document.createElement('div');
-      strip.id = 'replayClubsStrip';
-      strip.className = 'replay-clubs-strip';
-
-      const clubs = [
-        { label: 'All Clubs', query: '', logo: '' },
-        { label: 'Arsenal', query: 'arsenal', logo: TEAM_LOGOS.arsenal },
-        { label: 'Liverpool', query: 'liverpool', logo: TEAM_LOGOS.liverpool },
-        { label: 'Real Madrid', query: 'real madrid', logo: TEAM_LOGOS['real madrid'] },
-        { label: 'Barcelona', query: 'barcelona', logo: TEAM_LOGOS.barcelona },
-        { label: 'Espérance ST', query: 'esperance', logo: TEAM_LOGOS.esperance },
-        { label: 'Club Africain', query: 'club africain', logo: TEAM_LOGOS['club africain'] }
+  <script>
+    (function () {
+      const DEMO_PATTERNS = [
+        "big buck bunny",
+        "big_buck_bunny",
+        "blender",
+        "gtv-videos-bucket/sample",
+        "commondatastorage.googleapis.com"
       ];
 
-      strip.innerHTML = clubs.map((c, idx) => `
-        <button type="button" class="replay-club-chip ${idx === 0 ? 'active' : ''}" data-club-query="${c.query}">
-          ${c.logo ? `<img src="${c.logo}" alt="${c.label}" loading="lazy" onerror="this.style.display='none'">` : ''}
-          <span>${c.label}</span>
-        </button>
-      `).join('');
+      function looksLikeDemoMedia(el) {
+        if (!el) return false;
+        const src = String(el.getAttribute("src") || el.currentSrc || "").toLowerCase();
+        const title = String(el.getAttribute("title") || "").toLowerCase();
+        const outer = String(el.outerHTML || "").toLowerCase();
+        return DEMO_PATTERNS.some(p => src.includes(p) || title.includes(p) || outer.includes(p));
+      }
 
-      strip.addEventListener('click', (e) => {
-        const chip = e.target.closest('.replay-club-chip');
-        if (!chip) return;
-        strip.querySelectorAll('.replay-club-chip').forEach(b => b.classList.remove('active'));
-        chip.classList.add('active');
+      function getCurrentModalMatchTitle() {
+        const headTitle = document.querySelector("#modal .m-head h3, #modal .m-head h2, #modal .m-head")?.textContent || "";
+        const cleaned = headTitle
+          .replace(/Theater|URL Bar|×/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        return cleaned || "Football Match";
+      }
 
-        const q = (chip.dataset.clubQuery || '').toLowerCase();
-        const cards = document.querySelectorAll('[data-replay-card="1"], .replay-card, .highlight-card, article');
-        cards.forEach(card => {
-          const txt = (card.textContent || '').toLowerCase();
-          if (!txt.includes('vs') && !txt.includes('replay') && !txt.includes('highlights')) return;
-          card.style.display = (!q || txt.includes(q)) ? '' : 'none';
+      function sanitizePlayerAgainstDemoVideos() {
+        const mBody = document.getElementById("mBody");
+        if (!mBody) return;
+
+        const mediaNodes = [...mBody.querySelectorAll("iframe, video, source")];
+        const hitDemo = mediaNodes.some(node => looksLikeDemoMedia(node)) ||
+          DEMO_PATTERNS.some(p => (mBody.textContent || "").toLowerCase().includes(p));
+
+        if (!hitDemo) return;
+
+        mediaNodes.forEach(node => {
+          if (looksLikeDemoMedia(node)) {
+            if (node.tagName === "IFRAME" || node.tagName === "VIDEO") {
+              node.setAttribute("src", "");
+              node.removeAttribute("src");
+            }
+            node.remove();
+          }
         });
+
+        if (mBody.querySelector(".demo-blocked-card")) return;
+
+        const matchTitle = getCurrentModalMatchTitle();
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const searchQuery = `${matchTitle} ${todayStr} highlights replay`.trim();
+        const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
+
+        const box = document.createElement("div");
+        box.className = "demo-blocked-card";
+        box.innerHTML = `
+          <h4>⚠️ تم حجب فيديو تجريبي (Demo) تلقائياً</h4>
+          <p>
+            المصدر الافتراضي كان فيديو تجريبي لا يخص المباراة: <strong>${matchTitle.replace(/</g, "&lt;")}</strong>.<br>
+            يمكنك فتح بحث يوتيوب بتاريخ اليوم أو لصق رابط إعادة حقيقي في شريط الروابط.
+          </p>
+          <div class="demo-blocked-actions">
+            <a class="s-btn active" href="${ytUrl}" target="_blank" rel="noopener noreferrer">▶ بحث عن الإعادة (${todayStr})</a>
+            <button type="button" class="s-btn" id="focusCustomUrlFromDemoBtn">🔗 لصق رابط إعادة مخصص</button>
+          </div>
+        `;
+
+        mBody.prepend(box);
+
+        document.getElementById("focusCustomUrlFromDemoBtn")?.addEventListener("click", () => {
+          const ytRow = document.getElementById("mYt");
+          if (ytRow) ytRow.style.display = "flex";
+          const inp = document.getElementById("ytUrlInput");
+          if (inp) inp.focus();
+        });
+      }
+
+      const demoObserver = new MutationObserver(() => {
+        sanitizePlayerAgainstDemoVideos();
       });
 
-      if (heading && heading.parentElement) {
-        heading.parentElement.insertAdjacentElement('afterend', strip);
-      } else {
-        anchorParent.prepend(strip);
-      }
+      document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("modal") || document.body;
+        demoObserver.observe(modal, { childList: true, subtree: true, attributes: true });
+      });
+
+      setInterval(sanitizePlayerAgainstDemoVideos, 600);
+    })();
+  </script>
+  <style id="autoMatchSearchOnDemoStyle">
+    .match-search-swap-box {
+      padding: 20px;
+      background: var(--bg-card, #111815);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 14px;
+      margin: 12px;
+      text-align: center;
     }
 
-    // 2. إضافة شريط لوغوات الجمعيات داخل كل بطاقة مباراة
-    const candidates = Array.from(document.querySelectorAll('div, article')).filter(el => {
-      const t = el.textContent || '';
-      return /\bvs\b/i.test(t) && /replay|highlights/i.test(t) && el.querySelectorAll('div, article').length < 8;
-    });
+    .match-search-swap-box h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: var(--fg-primary, #ffffff);
+    }
 
-    candidates.forEach(card => {
-      if (card.querySelector('.match-teams-bar')) return;
-      card.setAttribute('data-replay-card', '1');
-      const parsed = parseTeamsFromTitle(card.textContent || '');
-      if (!parsed) return;
+    .match-search-swap-box p {
+      margin: 0 0 14px;
+      font-size: 12.5px;
+      color: var(--fg-secondary, #cbd5e1);
+    }
 
-      const homeLogo = getTeamBadgeUrl(parsed.home);
-      const awayLogo = getTeamBadgeUrl(parsed.away);
+    .match-search-swap-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
 
-      const bar = document.createElement('div');
-      bar.className = 'match-teams-bar';
-      bar.innerHTML = `
-        <div class="match-team-badge">
-          ${homeLogo ? `<img src="${homeLogo}" alt="${parsed.home}" loading="lazy" onerror="this.style.display='none'">` : ''}
-          <span>${parsed.home}</span>
-        </div>
-        <span class="match-vs-pill">VS</span>
-        <div class="match-team-badge">
-          ${awayLogo ? `<img src="${awayLogo}" alt="${parsed.away}" loading="lazy" onerror="this.style.display='none'">` : ''}
-          <span>${parsed.away}</span>
-        </div>
-      `;
+  <script>
+    (function () {
+      const BUNNY_KEYS = [
+        "big buck bunny",
+        "big_buck_bunny",
+        "blender",
+        "gtv-videos-bucket",
+        "commondatastorage.googleapis.com"
+      ];
 
-      card.prepend(bar);
-    });
+      function hasBunnyContent(el) {
+        if (!el) return false;
+        const s = String(el.getAttribute("src") || el.currentSrc || "").toLowerCase();
+        const t = String(el.getAttribute("title") || "").toLowerCase();
+        const h = String(el.outerHTML || "").toLowerCase();
+        return BUNNY_KEYS.some(k => s.includes(k) || t.includes(k) || h.includes(k));
+      }
+
+      function getCleanMatchTitleForSearch() {
+        const raw = document.querySelector("#modal .m-head h3, #modal .m-head h2, #modal .m-head")?.textContent || "";
+        const cleaned = raw
+          .replace(/Theater|URL Bar|×/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        return cleaned || "Football Match";
+      }
+
+      function swapBunnyForMatchSearch() {
+        const mBody = document.getElementById("mBody");
+        if (!mBody) return;
+
+        const nodes = [...mBody.querySelectorAll("iframe, video, source")];
+        const foundBunny = nodes.some(n => hasBunnyContent(n)) ||
+          BUNNY_KEYS.some(k => (mBody.textContent || "").toLowerCase().includes(k));
+
+        if (!foundBunny) return;
+
+        nodes.forEach(n => {
+          if (hasBunnyContent(n)) {
+            if (n.tagName === "IFRAME" || n.tagName === "VIDEO") {
+              n.setAttribute("src", "");
+              n.removeAttribute("src");
+            }
+            n.remove();
+          }
+        });
+
+        if (mBody.querySelector(".match-search-swap-box")) return;
+
+        const matchTitle = getCleanMatchTitleForSearch();
+        const dateTag = new Date().toISOString().slice(0, 10);
+        const query = `${matchTitle} ${dateTag} highlights replay`.trim();
+        const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+
+        const ytInp = document.getElementById("ytUrlInput");
+        if (ytInp) {
+          ytInp.value = query;
+          ytInp.placeholder = query;
+        }
+
+        const swapBox = document.createElement("div");
+        swapBox.className = "match-search-swap-box";
+        swapBox.innerHTML = `
+          <h4>🔎 تم تحويل المشغل للبحث عن المباراة: ${matchTitle.replace(/</g, "&lt;")}</h4>
+          <p>
+            تم إبعاد الفيديو التجريبي تلقائياً. عبارة البحث الجاهزة بالتاريخ:
+            <strong>${query.replace(/</g, "&lt;")}</strong>
+          </p>
+          <div class="match-search-swap-actions">
+            <a class="s-btn active" href="${ytSearchUrl}" target="_blank" rel="noopener noreferrer">▶ بحث مباشر في YouTube</a>
+            <button type="button" class="s-btn" id="copyMatchSearchQueryBtn">📋 نسخ عبارة البحث</button>
+          </div>
+        `;
+
+        mBody.prepend(swapBox);
+
+        document.getElementById("copyMatchSearchQueryBtn")?.addEventListener("click", () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(query).catch(() => {});
+          }
+          if (typeof showToast === "function") {
+            showToast("✓ تم نسخ عبارة البحث الخاصة بالمباراة");
+          }
+        });
+      }
+
+      const bunnySwapObserver = new MutationObserver(() => {
+        swapBunnyForMatchSearch();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const root = document.getElementById("modal") || document.body;
+        bunnySwapObserver.observe(root, { childList: true, subtree: true, attributes: true });
+      });
+
+      setInterval(swapBunnyForMatchSearch, 500);
+    })();
+  </script>
+<style id="inSiteReplayPlayerStyle">
+    .insite-replay-box {
+      margin: 12px;
+      padding: 18px;
+      border-radius: 14px;
+      background: var(--bg-card, #111815);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--fg-primary, #f8fafc);
+    }
+
+    .insite-replay-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .insite-replay-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .insite-replay-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.16);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .insite-query-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      margin: 10px 0 12px;
+      font-size: 12px;
+    }
+
+    .insite-query-line code {
+      font-family: monospace;
+      color: #f8fafc;
+    }
+
+    .insite-input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .insite-url-input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--bg-input, #0b110f);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-size: 12.5px;
+      color: var(--fg-primary, #ffffff);
+      outline: none;
+    }
+
+    .insite-url-input:focus {
+      border-color: #10b981;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const BLOCKED_DEMO_TERMS = [
+        "big buck bunny",
+        "big_buck_bunny",
+        "blender",
+        "commondatastorage.googleapis.com/gtv-videos-bucket",
+        "gtv-videos-bucket/sample"
+      ];
+      const SAVED_REPLAYS_KEY = "footime_insite_match_replays_v1";
+
+      function isDemoNode(el) {
+        if (!el) return false;
+        const src = String(el.getAttribute("src") || el.currentSrc || "").toLowerCase();
+        const title = String(el.getAttribute("title") || "").toLowerCase();
+        const html = String(el.outerHTML || "").toLowerCase();
+        return BLOCKED_DEMO_TERMS.some(t => src.includes(t) || title.includes(t) || html.includes(t));
+      }
+
+      function getMatchHeadingTitle() {
+        const raw = document.querySelector("#modal .m-head h3, #modal .m-head h2, #modal .m-head")?.textContent || "";
+        const cleaned = raw
+          .replace(/Theater|URL Bar|×/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        return cleaned || "Football Match";
+      }
+
+      function getDatedMatchQuery(matchTitle) {
+        const clean = String(matchTitle || "Football Match")
+          .replace(/\b(live|stream|full highlights|highlights|replay)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        const d = new Date().toISOString().slice(0, 10);
+        return `${clean} ${d} highlights replay`.trim();
+      }
+
+      function toEmbeddableInSiteUrl(rawUrl) {
+        const u = String(rawUrl || "").trim();
+        if (!u) return "";
+        const ytWatch = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
+        if (ytWatch && ytWatch[1]) {
+          return `https://www.youtube.com/embed/${ytWatch[1]}?autoplay=1&rel=0`;
+        }
+        return u;
+      }
+
+      function readSavedReplaysMap() {
+        try {
+          return JSON.parse(localStorage.getItem(SAVED_REPLAYS_KEY) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function writeSavedReplaysMap(mapObj) {
+        try {
+          localStorage.setItem(SAVED_REPLAYS_KEY, JSON.stringify(mapObj));
+        } catch {}
+      }
+
+      function playMediaInsideModalStage(mBody, rawUrl, matchTitle) {
+        const embedUrl = toEmbeddableInSiteUrl(rawUrl);
+        if (!embedUrl || !mBody) return;
+
+        const map = readSavedReplaysMap();
+        map[matchTitle] = rawUrl;
+        writeSavedReplaysMap(map);
+
+        mBody.querySelectorAll(".insite-replay-box").forEach(el => el.remove());
+
+        const isVideoFile = /\.(mp4|webm|m3u8)(\?|$)/i.test(embedUrl);
+        const stage = document.createElement("div");
+        stage.className = "stage";
+        stage.style.aspectRatio = "16 / 9";
+
+        if (isVideoFile) {
+          stage.innerHTML = `<video src="${embedUrl.replace(/"/g, "&quot;")}" controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;"></video>`;
+        } else {
+          stage.innerHTML = `<iframe src="${embedUrl.replace(/"/g, "&quot;")}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:0;"></iframe>`;
+        }
+
+        mBody.innerHTML = "";
+        mBody.appendChild(stage);
+        if (typeof showToast === "function") {
+          showToast("✓ يتم التشغيل داخل الموقع");
+        }
+      }
+
+      function mountInSiteReplayController(mBody) {
+        if (!mBody || mBody.querySelector(".insite-replay-box")) return;
+
+        const matchTitle = getMatchHeadingTitle();
+        const datedQuery = getDatedMatchQuery(matchTitle);
+        const savedMap = readSavedReplaysMap();
+        const savedUrl = savedMap[matchTitle] || "";
+
+        const box = document.createElement("div");
+        box.className = "insite-replay-box";
+        box.innerHTML = `
+          <div class="insite-replay-top">
+            <h4 class="insite-replay-title">🎬 مشغل الإعادة داخل الموقع — ${matchTitle.replace(/</g, "&lt;")}</h4>
+            <span class="insite-replay-pill">In-Site Only • No Demo</span>
+          </div>
+          <div style="font-size:12.5px;opacity:0.88;">
+            تم حجب الفيديو التجريبي تلقائياً بدون إخراجك من الموقع. استعمل عبارة البحث بالتاريخ أدناه والصق رابط المباراة أو الإعادة لتشغيلها مباشرة هنا:
+          </div>
+          <div class="insite-query-line">
+            <code id="insiteDatedQueryText">${datedQuery.replace(/</g, "&lt;")}</code>
+            <button type="button" class="s-btn" id="insiteCopyQueryBtn">📋 نسخ البحث بالتاريخ</button>
+          </div>
+          <div class="insite-input-row">
+            <input type="url" id="insiteReplayLinkInput" class="insite-url-input" placeholder="الصق رابط الإعادة أو البث (YouTube / Embed / MP4 / M3U8)..." value="${savedUrl.replace(/"/g, "&quot;")}" />
+            <button type="button" class="s-btn active" id="insitePlayHereBtn">▶ تشغيل هنا في الموقع</button>
+          </div>
+        `;
+
+        mBody.prepend(box);
+
+        box.querySelector("#insiteCopyQueryBtn")?.addEventListener("click", () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(datedQuery).catch(() => {});
+          }
+          if (typeof showToast === "function") {
+            showToast("✓ تم نسخ العبارة بالتاريخ");
+          }
+        });
+
+        box.querySelector("#insitePlayHereBtn")?.addEventListener("click", () => {
+          const val = box.querySelector("#insiteReplayLinkInput")?.value || "";
+          if (!val.trim()) {
+            if (typeof showToast === "function") showToast("✕ الصق رابطاً أولاً لتشغيله في الموقع");
+            return;
+          }
+          playMediaInsideModalStage(mBody, val.trim(), matchTitle);
+        });
+      }
+
+      function guardModalInsideSite() {
+        const mBody = document.getElementById("mBody");
+        if (!mBody) return;
+
+        const nodes = [...mBody.querySelectorAll("iframe, video, source")];
+        const hitDemo = nodes.some(n => isDemoNode(n)) ||
+          BLOCKED_DEMO_TERMS.some(t => (mBody.textContent || "").toLowerCase().includes(t));
+
+        if (!hitDemo) return;
+
+        nodes.forEach(n => {
+          if (isDemoNode(n)) {
+            if (n.tagName === "IFRAME" || n.tagName === "VIDEO") {
+              n.setAttribute("src", "");
+              n.removeAttribute("src");
+            }
+            n.remove();
+          }
+        });
+
+        mountInSiteReplayController(mBody);
+      }
+
+      const inSiteObserver = new MutationObserver(() => {
+        guardModalInsideSite();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const root = document.getElementById("modal") || document.body;
+        inSiteObserver.observe(root, { childList: true, subtree: true, attributes: true });
+      });
+
+      setInterval(guardModalInsideSite, 500);
+    })();
+  </script>
+<style id="inSiteReplayPlayerStyle">
+    .insite-replay-box {
+      margin: 12px;
+      padding: 18px;
+      border-radius: 14px;
+      background: var(--bg-card, #111815);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--fg-primary, #f8fafc);
+    }
+
+    .insite-replay-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .insite-replay-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .insite-replay-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.16);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .insite-query-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      margin: 10px 0 12px;
+      font-size: 12px;
+    }
+
+    .insite-query-line code {
+      font-family: monospace;
+      color: #f8fafc;
+    }
+
+    .insite-input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .insite-url-input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--bg-input, #0b110f);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-size: 12.5px;
+      color: var(--fg-primary, #ffffff);
+      outline: none;
+    }
+
+    .insite-url-input:focus {
+      border-color: #10b981;
+    }
+  </style>
+
+  <script>
+    (function () {
+      const BLOCKED_DEMO_TERMS = [
+        "big buck bunny",
+        "big_buck_bunny",
+        "blender",
+        "commondatastorage.googleapis.com/gtv-videos-bucket",
+        "gtv-videos-bucket/sample"
+      ];
+      const SAVED_REPLAYS_KEY = "footime_insite_match_replays_v1";
+
+      function isDemoNode(el) {
+        if (!el) return false;
+        const src = String(el.getAttribute("src") || el.currentSrc || "").toLowerCase();
+        const title = String(el.getAttribute("title") || "").toLowerCase();
+        const html = String(el.outerHTML || "").toLowerCase();
+        return BLOCKED_DEMO_TERMS.some(t => src.includes(t) || title.includes(t) || html.includes(t));
+      }
+
+      function getMatchHeadingTitle() {
+        const raw = document.querySelector("#modal .m-head h3, #modal .m-head h2, #modal .m-head")?.textContent || "";
+        const cleaned = raw
+          .replace(/Theater|URL Bar|×/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        return cleaned || "Football Match";
+      }
+
+      function getDatedMatchQuery(matchTitle) {
+        const clean = String(matchTitle || "Football Match")
+          .replace(/\b(live|stream|full highlights|highlights|replay)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        const d = new Date().toISOString().slice(0, 10);
+        return `${clean} ${d} highlights replay`.trim();
+      }
+
+      function toEmbeddableInSiteUrl(rawUrl) {
+        const u = String(rawUrl || "").trim();
+        if (!u) return "";
+        const ytWatch = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
+        if (ytWatch && ytWatch[1]) {
+          return `https://www.youtube.com/embed/${ytWatch[1]}?autoplay=1&rel=0`;
+        }
+        return u;
+      }
+
+      function readSavedReplaysMap() {
+        try {
+          return JSON.parse(localStorage.getItem(SAVED_REPLAYS_KEY) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function writeSavedReplaysMap(mapObj) {
+        try {
+          localStorage.setItem(SAVED_REPLAYS_KEY, JSON.stringify(mapObj));
+        } catch {}
+      }
+
+      function playMediaInsideModalStage(mBody, rawUrl, matchTitle) {
+        const embedUrl = toEmbeddableInSiteUrl(rawUrl);
+        if (!embedUrl || !mBody) return;
+
+        const map = readSavedReplaysMap();
+        map[matchTitle] = rawUrl;
+        writeSavedReplaysMap(map);
+
+        mBody.querySelectorAll(".insite-replay-box").forEach(el => el.remove());
+
+        const isVideoFile = /\.(mp4|webm|m3u8)(\?|$)/i.test(embedUrl);
+        const stage = document.createElement("div");
+        stage.className = "stage";
+        stage.style.aspectRatio = "16 / 9";
+
+        if (isVideoFile) {
+          stage.innerHTML = `<video src="${embedUrl.replace(/"/g, "&quot;")}" controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;"></video>`;
+        } else {
+          stage.innerHTML = `<iframe src="${embedUrl.replace(/"/g, "&quot;")}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:0;"></iframe>`;
+        }
+
+        mBody.innerHTML = "";
+        mBody.appendChild(stage);
+        if (typeof showToast === "function") {
+          showToast("✓ يتم التشغيل داخل الموقع");
+        }
+      }
+
+      function mountInSiteReplayController(mBody) {
+        if (!mBody || mBody.querySelector(".insite-replay-box")) return;
+
+        const matchTitle = getMatchHeadingTitle();
+        const datedQuery = getDatedMatchQuery(matchTitle);
+        const savedMap = readSavedReplaysMap();
+        const savedUrl = savedMap[matchTitle] || "";
+
+        const box = document.createElement("div");
+        box.className = "insite-replay-box";
+        box.innerHTML = `
+          <div class="insite-replay-top">
+            <h4 class="insite-replay-title">🎬 مشغل الإعادة داخل الموقع — ${matchTitle.replace(/</g, "&lt;")}</h4>
+            <span class="insite-replay-pill">In-Site Only • No Demo</span>
+          </div>
+          <div style="font-size:12.5px;opacity:0.88;">
+            تم حجب الفيديو التجريبي تلقائياً بدون إخراجك من الموقع. استعمل عبارة البحث بالتاريخ أدناه والصق رابط المباراة أو الإعادة لتشغيلها مباشرة هنا:
+          </div>
+          <div class="insite-query-line">
+            <code id="insiteDatedQueryText">${datedQuery.replace(/</g, "&lt;")}</code>
+            <button type="button" class="s-btn" id="insiteCopyQueryBtn">📋 نسخ البحث بالتاريخ</button>
+          </div>
+          <div class="insite-input-row">
+            <input type="url" id="insiteReplayLinkInput" class="insite-url-input" placeholder="الصق رابط الإعادة أو البث (YouTube / Embed / MP4 / M3U8)..." value="${savedUrl.replace(/"/g, "&quot;")}" />
+            <button type="button" class="s-btn active" id="insitePlayHereBtn">▶ تشغيل هنا في الموقع</button>
+          </div>
+        `;
+
+        mBody.prepend(box);
+
+        box.querySelector("#insiteCopyQueryBtn")?.addEventListener("click", () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(datedQuery).catch(() => {});
+          }
+          if (typeof showToast === "function") {
+            showToast("✓ تم نسخ العبارة بالتاريخ");
+          }
+        });
+
+        box.querySelector("#insitePlayHereBtn")?.addEventListener("click", () => {
+          const val = box.querySelector("#insiteReplayLinkInput")?.value || "";
+          if (!val.trim()) {
+            if (typeof showToast === "function") showToast("✕ الصق رابطاً أولاً لتشغيله في الموقع");
+            return;
+          }
+          playMediaInsideModalStage(mBody, val.trim(), matchTitle);
+        });
+      }
+
+      function guardModalInsideSite() {
+        const mBody = document.getElementById("mBody");
+        if (!mBody) return;
+
+        const nodes = [...mBody.querySelectorAll("iframe, video, source")];
+        const hitDemo = nodes.some(n => isDemoNode(n)) ||
+          BLOCKED_DEMO_TERMS.some(t => (mBody.textContent || "").toLowerCase().includes(t));
+
+        if (!hitDemo) return;
+
+        nodes.forEach(n => {
+          if (isDemoNode(n)) {
+            if (n.tagName === "IFRAME" || n.tagName === "VIDEO") {
+              n.setAttribute("src", "");
+              n.removeAttribute("src");
+            }
+            n.remove();
+          }
+        });
+
+        mountInSiteReplayController(mBody);
+      }
+
+      const inSiteObserver = new MutationObserver(() => {
+        guardModalInsideSite();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const root = document.getElementById("modal") || document.body;
+        inSiteObserver.observe(root, { childList: true, subtree: true, attributes: true });
+      });
+
+      setInterval(guardModalInsideSite, 500);
+    })();
+  </script>
+  <style id="arena-pro-fix-style">
+  /* 1. صور الماتشات والكروت: عرض كامل من غير قصّ عشوائي أو انكماش غريب */
+  .match-card img,
+  .replay-card img,
+  [class*="match"] img,
+  [class*="replay"] img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 190px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: 12px !important;
+    display: block !important;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    enhanceReplaySection();
-    const obs = new MutationObserver(() => enhanceReplaySection());
-    obs.observe(document.body, { childList: true, subtree: true });
-  });
-})();
-</script>
-<script>
+  /* 2. شبكة القنوات وتوحيد حجم اللوغوات في Chaînes TV */
+  .channels-grid,
+  .tv-grid,
+  [class*="channels"] [class*="grid"],
+  [class*="channel-list"] {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  .channel-card,
+  .tv-card,
+  [class*="channel"] img,
+  [class*="tv"] img {
+    max-width: 100% !important;
+  }
+
+  [class*="channel"] img,
+  [class*="tv"] img {
+    width: 72px !important;
+    height: 72px !important;
+    max-width: 72px !important;
+    max-height: 72px !important;
+    object-fit: contain !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    padding: 8px !important;
+    border-radius: 12px !important;
+    margin: 0 auto 8px auto !important;
+    display: block !important;
+  }
+
+  /* 3. تحسين حاوية المشغل لتفادي التداخل والانحراف */
+  iframe,
+  video {
+    max-width: 100% !important;
+  }
+
+  @media (max-width: 640px) {
+    .match-card img,
+    .replay-card img,
+    [class*="match"] img,
+    [class*="replay"] img {
+      height: 160px !important;
+    }
+
+    .channels-grid,
+    .tv-grid,
+    [class*="channels"] [class*="grid"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+    }
+
+    [class*="channel"] img,
+    [class*="tv"] img {
+      width: 56px !important;
+      height: 56px !important;
+      max-width: 56px !important;
+      max-height: 56px !important;
+    }
+  }
+</style>
+
+<script id="arena-pro-fix-script">
   (function () {
-    function hardenIframes() {
-      document.querySelectorAll("iframe").forEach((frame) => {
-        const src = (frame.getAttribute("src") || "").toLowerCase();
-        if (!src || src.startsWith("about:")) return;
-        if (!frame.hasAttribute("sandbox")) {
-          frame.setAttribute(
-            "sandbox",
-            "allow-scripts allow-same-origin allow-forms allow-presentation"
-          );
-        }
-        frame.setAttribute("referrerpolicy", "no-referrer");
-      });
+    // 1. منع فتح نوافذ الإعلانات المعروفة عبر window.open
+    const blockedDomains = [
+      "candy.ai",
+      "candynetwork",
+      "affid=",
+      "sub1=",
+      "popads",
+      "popcash",
+      "hilltopads",
+      "adsterra",
+      "tsyndicate"
+    ];
+
+    function isAdUrl(url) {
+      if (!url) return false;
+      const val = String(url).toLowerCase();
+      return blockedDomains.some((item) => val.includes(item));
     }
 
-    const observer = new MutationObserver(hardenIframes);
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["src"]
-    });
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", hardenIframes);
-    } else {
-      hardenIframes();
-    }
-  })();
-</script>
-<script>
-  (function () {
-    function hardenIframes() {
-      document.querySelectorAll("iframe").forEach((frame) => {
-        const src = (frame.getAttribute("src") || "").toLowerCase();
-        if (!src || src.startsWith("about:")) return;
-        frame.setAttribute(
-          "sandbox",
-          "allow-scripts allow-same-origin allow-forms allow-presentation"
-        );
-        frame.setAttribute("referrerpolicy", "no-referrer");
-      });
-
-      document.querySelectorAll('a[target="_blank"]').forEach((link) => {
-        const rel = (link.getAttribute("rel") || "").toLowerCase();
-        if (!rel.includes("noopener")) {
-          link.setAttribute("rel", (rel + " noopener noreferrer").trim());
-        }
-      });
-    }
-
-    const observer = new MutationObserver(hardenIframes);
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["src", "href", "target"]
-    });
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", hardenIframes);
-    } else {
-      hardenIframes();
-    }
-  })();
-</script>
-              <script>
-  (function () {
-    const originalOpen = window.open;
+    const nativeOpen = window.open;
     window.open = function (url, target, features) {
-      if (!url || typeof url !== "string") return null;
-      const lower = url.toLowerCase();
-      if (lower.includes("affid") || lower.includes("sub1") || lower.includes("candy.ai")) {
+      if (isAdUrl(url)) {
         return null;
       }
-      return originalOpen.call(window, url, target || "_blank", features);
+      return nativeOpen.call(this, url, target || "_blank", features);
     };
 
-    function hardenIframes() {
+    // 2. معالجة روابط يوتيوب في Replays لتفادي Error 153 عند حظر التضمين الخارجي
+    function fixYoutubeEmbeds() {
       document.querySelectorAll("iframe").forEach((frame) => {
-        const src = (frame.getAttribute("src") || "").toLowerCase();
+        const src = (frame.getAttribute("src") || "").trim();
         if (!src || src.startsWith("about:")) return;
+
+        // تأمين الـ iframe ضد التحويل والـ popups
         frame.setAttribute(
           "sandbox",
           "allow-scripts allow-same-origin allow-forms allow-presentation"
         );
         frame.setAttribute("referrerpolicy", "no-referrer");
+
+        // إذا كان رابط يوتيوب عادي أو watch?v= حوّلو إلى /embed/
+        const watchMatch = src.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{6,})/);
+        if (watchMatch && watchMatch[1]) {
+          frame.setAttribute("src", "https://www.youtube.com/embed/" + watchMatch[1]);
+        }
       });
     }
 
-    const observer = new MutationObserver(hardenIframes);
+    // 3. اعتراض الروابط الخارجية التي تفتح في تبويب جديد إذا كانت مشبوهة
+    document.addEventListener(
+      "click",
+      function (event) {
+        const link = event.target.closest("a[href]");
+        if (!link) return;
+        const href = link.getAttribute("href") || "";
+        if (isAdUrl(href)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+      true
+    );
+
+    const observer = new MutationObserver(fixYoutubeEmbeds);
     observer.observe(document.documentElement, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ["src"]
+      attributeFilter: ["src", "href"]
     });
 
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", hardenIframes);
+      document.addEventListener("DOMContentLoaded", fixYoutubeEmbeds);
     } else {
-      hardenIframes();
+      fixYoutubeEmbeds();
     }
   })();
 </script>
